@@ -10,7 +10,7 @@ export default function useRecentClients(limit = 5) {
 
   const columns = [
     { Header: "Client", accessor: "name" },
-    { Header: "Project", accessor: "project" },
+    { Header: "Client ID", accessor: "clientId" },
     { Header: "Email", accessor: "email" },
     { Header: "Status", accessor: "status" },
   ];
@@ -52,7 +52,8 @@ export default function useRecentClients(limit = 5) {
         return {
           name: <MDTypography variant="caption">{c.name}</MDTypography>,
 
-          project: <MDTypography variant="caption">{c.project}</MDTypography>,
+
+          clientId: <MDTypography variant="caption">{c.clientId}</MDTypography>,
 
           email: <MDTypography variant="caption">{c.email}</MDTypography>,
 

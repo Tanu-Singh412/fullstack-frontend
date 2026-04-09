@@ -44,6 +44,8 @@ function AddProject() {
 
   const [clients, setClients] = useState([]);
 
+  const [dwgFile, setDwgFile] = useState(null);
+
   useEffect(() => {
     fetch("http://localhost:5000/api/clients")
       .then((res) => res.json())
@@ -135,12 +137,23 @@ function AddProject() {
     });
 
     // images
-    images.forEach((img) => {
-      if (img.file) {
-        formData.append("images", img.file);
-      }
-    });
+  // ✅ Send existing image URLs
+const existingImages = images
+  .filter((img) => !img.file) // old images
+  .map((img) => img.url);
 
+formData.append("existingImages", JSON.stringify(existingImages));
+
+// ✅ Send new files
+images.forEach((img) => {
+  if (img.file) {
+    formData.append("images", img.file);
+  }
+});
+
+    if (dwgFile) {
+  formData.append("dwgFile", dwgFile);
+}
     if (editData?._id) {
       await fetch("http://localhost:5000/api/projects/" + editData._id, {
         method: "PUT",
@@ -276,11 +289,12 @@ function AddProject() {
                   {/* Upload */}
 
                   <Grid item xs={12}>
-                    <Button variant="contained" component="label">
+                    <Button variant="contained" component="label" sx={{color: "#fff"}}>
                       Upload Images
                       <input hidden multiple type="file" onChange={handleImageUpload} />
                     </Button>
                   </Grid>
+<Grid item xs={12}>
 
                   <div style={styles.uploadWrapper}>
                     <label style={styles.uploadLabel}>
@@ -289,23 +303,16 @@ function AddProject() {
                         type="file"
                         accept=".dwg,.dxf"
                         style={styles.hiddenInput}
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const url = URL.createObjectURL(file);
-
-                            setSelectedProject((prev) => ({
-                              ...prev,
-                              dwgFile: {
-                                name: file.name,
-                                url: url,
-                              },
-                            }));
-                          }
-                        }}
+                       onChange={(e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setDwgFile(file); // ✅ store actual file
+  }
+}}
                       />
                     </label>
                   </div>
+                  </Grid>
                   {/* Preview */}
 
                   <Grid item xs={12}>

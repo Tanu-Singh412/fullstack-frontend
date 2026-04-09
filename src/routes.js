@@ -4,7 +4,8 @@ import ProjectTables from "layouts/projectTables";
 import Projects from "layouts/project";
 import Add_clients from "layouts/Client/add_client";
 import Billing from "layouts/billing";
-
+import Vendor from "layouts/vendor";
+import AddVendor from "layouts/vendor/add-vendor";
 import SignIn from "layouts/authentication/sign-in";
 
 import Icon from "@mui/material/Icon";
@@ -71,6 +72,21 @@ const routes = [
     route: "/billing",
     component: <Billing />,
   },
+  {
+    type: "collapse",
+    name: "Vendor",
+    key: "Vendor",
+    icon: <Icon fontSize="small">receipt_long</Icon>,
+    route: "/vendor",
+    component: <Vendor />,
+  },
+  {
+  type: "route", // 👈 IMPORTANT (not collapse)
+  name: "Add Vendor",
+  key: "add-vendor",
+  route: "/add-vendor",
+  component: <AddVendor />,
+},
 ];
 
 export default routes;

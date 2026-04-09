@@ -24,10 +24,10 @@ function AddClient() {
     phone: "",
     email: "",
     address: "",
-    project: "",
-    totalAmount: "",
-    advance: "",
-    balance: "",
+    // project: "",
+    // totalAmount: "",
+    // advance: "",
+    // balance: "",
   });
 
   // Handle input change + auto balance
@@ -164,7 +164,7 @@ function AddClient() {
                     />
                   </Grid> */}
 
-                  <Grid item xs={12} md={6}>
+                  {/* <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Total Amount"
@@ -194,7 +194,7 @@ function AddClient() {
                       value={form.balance}
                       InputProps={{ readOnly: true }}
                     />
-                  </Grid>
+                  </Grid> */}
 
                   <Grid item xs={12}>
                     <Button variant="contained" color="info" onClick={handleSubmit}>

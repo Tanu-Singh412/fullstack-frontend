@@ -38,6 +38,8 @@ import SidenavCollapse from "examples/Sidenav/SidenavCollapse";
 // Custom styles for the Sidenav
 import SidenavRoot from "examples/Sidenav/SidenavRoot";
 import sidenavLogoLabel from "examples/Sidenav/styles/sidenav";
+import { useNavigate } from "react-router-dom";
+import { logout } from "layouts/authentication/sign-in/auth"; // adjust path
 
 // Material Dashboard 2 React context
 import {
@@ -52,6 +54,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = controller;
   const location = useLocation();
   const collapseName = location.pathname.replace("/", "");
+const navigate = useNavigate();
 
   let textColor = "white";
 
@@ -179,19 +182,19 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         }
       />
       <List>{renderRoutes}</List>
-      <MDBox p={2} mt="auto">
-        <MDButton
-          component="a"
-          href="https://www.creative-tim.com/product/material-dashboard-pro-react"
-          target="_blank"
-          rel="noreferrer"
-          variant="gradient"
-          color={sidenavColor}
-          fullWidth
-        >
-          upgrade to pro
-        </MDButton>
-      </MDBox>
+    <MDBox p={2} mt="auto">
+  <MDButton
+    variant="gradient"
+    color="error"
+    fullWidth
+    onClick={() => {
+      logout();
+      navigate("/authentication/sign-in"); // redirect to login page
+    }}
+  >
+    Logout
+  </MDButton>
+</MDBox>
     </SidenavRoot>
   );
 }

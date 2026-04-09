@@ -16,21 +16,25 @@ import DialogContent from "@mui/material/DialogContent";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
+
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import Button from "@mui/material/Button";
+import DialogActions from "@mui/material/DialogActions";
 export default function clientTableData() {
   const navigate = useNavigate();
 
   const [rows, setRows] = useState([]);
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
-
+const [deleteId, setDeleteId] = useState(null);
   const columns = [
     { Header: "S.No.", accessor: "serial" },
     { Header: "", accessor: "expand" },
     { Header: "Client", accessor: "client" },
     { Header: "Client ID", accessor: "clientId" },
-    { Header: "Payment", accessor: "total" },
-    { Header: "Paid", accessor: "advance" },
-    { Header: "Balance", accessor: "balance" },
+    // { Header: "Payment", accessor: "total" },
+    // { Header: "Paid", accessor: "advance" },
+    // { Header: "Balance", accessor: "balance" },
     { Header: "Date", accessor: "date" },
     { Header: "Status", accessor: "status" },
     { Header: "Actions", accessor: "actions" },
@@ -123,11 +127,11 @@ export default function clientTableData() {
 
           clientId: <MDTypography variant="caption">{c.clientId || c._id}</MDTypography>,
 
-          total: <MDTypography variant="caption">{c.totalAmount}</MDTypography>,
+          // total: <MDTypography variant="caption">{c.totalAmount}</MDTypography>,
 
-          advance: <MDTypography variant="caption">{c.advance}</MDTypography>,
+          // advance: <MDTypography variant="caption">{c.advance}</MDTypography>,
 
-          balance: <MDTypography variant="caption">{balance}</MDTypography>,
+          // balance: <MDTypography variant="caption">{balance}</MDTypography>,
 
           date: <MDTypography variant="caption">{date}</MDTypography>,
 
@@ -156,7 +160,7 @@ export default function clientTableData() {
                 <EditIcon />
               </IconButton>
 
-              <IconButton color="error" onClick={() => deleteClient(c._id)}>
+              <IconButton color="error" onClick={() => setDeleteId(c._id)}>
                 <DeleteIcon />
               </IconButton>
             </MDBox>
@@ -209,11 +213,13 @@ export default function clientTableData() {
   // =====================
   // RETURN
   // =====================
-  return {
-    columns,
-    rows,
+return {
+  columns,
+  rows,
 
-    dialog: (
+  dialog: (
+    <>
+      {/* 👇 EXISTING VIEW DIALOG */}
       <Dialog
         open={!!selectedClient}
         onClose={() => setSelectedClient(null)}
@@ -235,7 +241,6 @@ export default function clientTableData() {
         <DialogContent sx={{ p: 3 }}>
           {selectedClient && (
             <MDBox textAlign="center">
-              {/* Avatar */}
               <Avatar
                 sx={{
                   bgcolor: "#1976d2",
@@ -254,34 +259,111 @@ export default function clientTableData() {
 
               <Divider sx={{ mb: 2 }} />
 
-              {/* Details */}
               <MDBox textAlign="left">
-                <p>
-                  <b>Email:</b> {selectedClient.email || "-"}
-                </p>
-                <p>
-                  <b>Phone:</b> {selectedClient.phone || "-"}
-                </p>
-                <p>
-                  <b>Address:</b> {selectedClient.address || "-"}
-                </p>
-
-                <Divider sx={{ my: 1 }} />
-
-                <p>
-                  <b>Total:</b> ₹{selectedClient.totalAmount}
-                </p>
-                <p>
-                  <b>Advance:</b> ₹{selectedClient.advance}
-                </p>
-                <p>
-                  <b>Balance:</b> ₹{selectedClient.balance}
-                </p>
+                <p><b>Email:</b> {selectedClient.email || "-"}</p>
+                <p><b>Phone:</b> {selectedClient.phone || "-"}</p>
+                <p><b>Address:</b> {selectedClient.address || "-"}</p>
               </MDBox>
             </MDBox>
           )}
         </DialogContent>
       </Dialog>
-    ),
-  };
+
+      {/* 👇 NEW DELETE CONFIRM DIALOG */}
+
+
+  <Dialog
+    open={!!deleteId}
+    onClose={() => setDeleteId(null)}
+    maxWidth="xs"
+    fullWidth
+    PaperProps={{
+      sx: {
+        borderRadius: "16px",
+        p: 1,
+      },
+    }}
+  >
+    {/* HEADER */}
+    <DialogTitle
+      sx={{
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "18px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
+      <WarningAmberIcon sx={{ color: "#f44336", fontSize: 40 }} />
+      Confirm Delete
+    </DialogTitle>
+
+    {/* CONTENT */}
+    <DialogContent
+      sx={{
+        textAlign: "center",
+        fontSize: "14px",
+        color: "#555",
+      }}
+    >
+      Do you really want to delete this client?
+      <br />
+      <b style={{ color: "#f44336" }}>
+        This action cannot be undone.
+      </b>
+    </DialogContent>
+
+    {/* ACTIONS */}
+    <DialogActions
+      sx={{
+        justifyContent: "center",
+        pb: 2,
+        gap: 1,
+      }}
+    >
+      {/* CANCEL */}
+      <Button
+        onClick={() => setDeleteId(null)}
+        sx={{
+          borderRadius: "8px",
+          textTransform: "none",
+          px: 3,
+          border: "1px solid #000",
+          color: "#000",
+        }}
+      >
+        Cancel
+      </Button>
+
+      {/* DELETE */}
+      <Button
+        variant="contained"
+        onClick={async () => {
+          await deleteClient(deleteId);
+          setDeleteId(null);
+        }}
+        sx={{
+          borderRadius: "8px",
+          textTransform: "none",
+          px: 3,
+          background: "#f44336",
+          color: "#fff",
+          "&:hover": {
+            background: "#d32f2f",
+          },
+        }}
+      >
+        Delete
+      </Button>
+    </DialogActions>
+  </Dialog>
+
+
+
+    </>
+  ),
+};
+
 }

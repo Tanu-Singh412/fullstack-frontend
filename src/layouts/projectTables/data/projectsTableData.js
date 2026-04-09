@@ -18,6 +18,10 @@ import DialogContent from "@mui/material/DialogContent";
 import Grid from "@mui/material/Grid";
 import { color } from "chart.js/helpers";
 
+import Button from "@mui/material/Button";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DialogActions from "@mui/material/DialogActions";
+
 export default function useProjectData() {
   const [rows, setRows] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -25,8 +29,43 @@ export default function useProjectData() {
   const [viewClientProjects, setViewClientProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [paymentProject, setPaymentProject] = useState(null);
+  const [paymentType, setPaymentType] = useState("add");
+const [paymentAmount, setPaymentAmount] = useState("");
   const [imageIndex, setImageIndex] = useState(0);
-  const columns = [
+  const [selectedDescription, setSelectedDescription] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+const openPaymentDialog = (project, type) => {
+  setPaymentProject(project);
+  setPaymentType(type);
+  setPaymentAmount("");
+};
+const handleAddPayment = async () => {
+  if (!paymentAmount || !paymentProject) return;
+
+  const amount =
+    paymentType === "subtract"
+      ? -Math.abs(paymentAmount)
+      : Math.abs(paymentAmount);
+
+  await fetch(
+    `http://localhost:5000/api/projects/${paymentProject._id}/payment`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount }),
+    }
+  );
+
+  setPaymentProject(null);
+  setPaymentAmount("");
+  loadData();
+};
+
+
+const columns = [
     { Header: "S.No.", accessor: "serial" },
     { Header: "Image", accessor: "image" },
     { Header: "Project", accessor: "project" },
@@ -101,7 +140,12 @@ export default function useProjectData() {
   // Function to format project data into table rows
   const formatRows = (data) => {
     return data.map((p, i) => {
-      const balance = Number(p.totalAmount || 0) - Number(p.advanceAmount || 0);
+const totalPaid = (p.payments || []).reduce(
+  (sum, pay) => sum + Number(pay.amount),
+  0
+);
+
+const balance = Number(p.totalAmount || 0) - totalPaid;
       const date = new Date(p.createdAt).toLocaleString();
       const currentStatus = p.status || "Pending";
 
@@ -111,23 +155,6 @@ export default function useProjectData() {
       else if (currentStatus === "Assigned") bgColor = "#ff9800";
       else if (currentStatus === "Completed") bgColor = "#9c27b0";
       else if (currentStatus === "Running") bgColor = "#4da9ce";
-      dwg: p.dwgFile ? (
-        <button
-          onClick={() => downloadDWG(p.dwgFile)}
-          style={{
-            padding: "5px 10px",
-            background: "#1976d2",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Download
-        </button>
-      ) : (
-        <span style={{ fontSize: 12 }}>No File</span>
-      );
       const downloadDWG = (file) => {
         const link = document.createElement("a");
         link.href = file.url;
@@ -135,15 +162,49 @@ export default function useProjectData() {
         link.click();
       };
       return {
+             dwg: p.dwgFile && p.dwgFile.url ? (
+  <button
+    onClick={() => downloadDWG(p.dwgFile)}
+    style={{
+      padding: "5px 10px",
+      background: "#1976d2",
+      color: "#fff",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+    }}
+  >
+    Download
+  </button>
+) : (
+  <span style={{ fontSize: 12 }}>No File</span>
+),
+
         serial: <MDTypography variant="caption">{i + 1}</MDTypography>,
         image: <img src={p.images?.[0] || "https://via.placeholder.com/60"} width="60" />,
         project: <MDTypography variant="caption">{p.projectName}</MDTypography>,
         clientId: <MDTypography variant="caption">{p.clientId || "-"}</MDTypography>,
-        description: <MDTypography variant="caption">{p.description}</MDTypography>,
-        client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
+description: (
+  <MDTypography
+    variant="caption"
+    sx={{
+      cursor: "pointer",
+      maxWidth: 150,
+      display: "inline-block",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    }}
+    onClick={() => setSelectedDescription(p.description)}
+  >
+    {p.description || "-"}
+  </MDTypography>
+),
+
+client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
         total: <MDTypography variant="caption">{p.totalAmount}</MDTypography>,
-        paid: <MDTypography variant="caption">{p.advanceAmount}</MDTypography>,
-        balance: <MDTypography variant="caption">{balance}</MDTypography>,
+paid: <MDTypography variant="caption">{totalPaid}</MDTypography>,
+balance: <MDTypography variant="caption">{balance}</MDTypography>,
         date: <MDTypography variant="caption">{date}</MDTypography>,
         status: (
           <Select
@@ -175,6 +236,23 @@ export default function useProjectData() {
 
         actions: (
           <MDBox display="flex">
+  {/* ➕ Add */}
+  <IconButton
+    color="success"
+    size="small"
+    onClick={() => openPaymentDialog(p, "add")}
+  >
+    +
+  </IconButton>
+
+  {/* ➖ Subtract */}
+  <IconButton
+    color="warning"
+    size="small"
+    onClick={() => openPaymentDialog(p, "subtract")}
+  >
+    -
+  </IconButton>
             <IconButton color="primary" size="small" onClick={() => handleView(p)}>
               <VisibilityIcon />
             </IconButton>
@@ -182,7 +260,7 @@ export default function useProjectData() {
             <IconButton color="info" size="small" onClick={() => editProject(p)}>
               <EditIcon />
             </IconButton>
-            <IconButton color="error" size="small" onClick={() => deleteProject(p._id)}>
+            <IconButton color="error" size="small" onClick={() => setDeleteId(p._id)}>
               <DeleteIcon />
             </IconButton>
           </MDBox>
@@ -570,6 +648,150 @@ export default function useProjectData() {
       )}
     </Dialog>
   );
+
+  const paymentDialog = (
+  <Dialog open={!!paymentProject} onClose={() => setPaymentProject(null)}>
+<DialogTitle>
+  {paymentType === "add" ? "Add Payment" : "Deduct Payment"}
+</DialogTitle>
+    <DialogContent>
+      <input
+        type="number"
+        placeholder="Enter amount"
+        value={paymentAmount}
+        onChange={(e) => setPaymentAmount(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "10px",
+          marginTop: "10px",
+          marginBottom: "10px",
+        }}
+      />
+
+      <button onClick={handleAddPayment}>Save</button>
+    </DialogContent>
+  </Dialog>
+);
+const descriptionDialog = (
+  <Dialog
+    open={!!selectedDescription}
+    onClose={() => setSelectedDescription(null)}
+    fullWidth
+    maxWidth="sm"
+  >
+    <DialogTitle
+      sx={{
+        textAlign: "center",
+        bgcolor: "#1976d2",
+        color: "#fff",
+        fontSize: "16px",
+        fontWeight: "bold",
+      }}
+    >
+      Description
+    </DialogTitle>
+
+    <DialogContent sx={{ mt: 2 }}>
+      <MDBox textAlign="left">
+        <MDTypography
+          variant="body2"
+          sx={{
+            fontSize: "14px",
+            lineHeight: 1.6,
+            whiteSpace: "pre-line",
+          }}
+        >
+          {selectedDescription || "-"}
+        </MDTypography>
+      </MDBox>
+    </DialogContent>
+  </Dialog>
+);
+
+
+
+const deleteDialog = (
+  <Dialog
+    open={!!deleteId}
+    onClose={() => setDeleteId(null)}
+    maxWidth="xs"
+    fullWidth
+    PaperProps={{
+      sx: {
+        borderRadius: "16px",
+        p: 1,
+      },
+    }}
+  >
+    {/* HEADER */}
+    <DialogTitle
+      sx={{
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "18px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
+      <WarningAmberIcon sx={{ color: "#f44336", fontSize: 40 }} />
+      Confirm Delete
+    </DialogTitle>
+
+    {/* CONTENT */}
+    <DialogContent sx={{ textAlign: "center", fontSize: "14px", color: "#555" }}>
+      Are you sure you want to delete this project?
+      <br />
+      <b style={{ color: "#f44336" }}>This action cannot be undone.</b>
+    </DialogContent>
+
+    {/* ACTIONS */}
+    <DialogActions
+      sx={{
+        justifyContent: "center",
+        pb: 2,
+        gap: 1,
+      }}
+    >
+      {/* CANCEL */}
+      <Button
+        onClick={() => setDeleteId(null)}
+        sx={{
+          borderRadius: "8px",
+          textTransform: "none",
+          px: 3,
+          border: "1px solid black",
+          color: "#000",
+        }}
+      >
+        Cancel
+      </Button>
+
+      {/* DELETE */}
+      <Button
+        variant="contained"
+        color="error"
+        onClick={async () => {
+          await deleteProject(deleteId);
+          setDeleteId(null);
+        }}
+        sx={{
+          borderRadius: "8px",
+          textTransform: "none",
+          px: 3,
+          background: "#f44336",
+          color: "#fff",
+          "&:hover": {
+            background: "#d32f2f"
+          }
+        }}
+      >
+        Delete
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
   return {
     columns,
     rows,
@@ -578,7 +800,12 @@ export default function useProjectData() {
         {clientProjectsDialog}
         {projectDetailsDialog}
         {imageLightbox}
+        {paymentDialog}
+            {descriptionDialog}
+            {deleteDialog}
+
       </>
     ),
+    
   };
 }

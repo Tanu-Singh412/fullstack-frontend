@@ -6,6 +6,15 @@ import jsPDF from "jspdf";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
+import { useEffect } from "react";
+
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+
 
 /* ================= PDF ================= */
 const downloadPDF = async (el) => {
@@ -181,6 +190,8 @@ Invoice.propTypes = {
 /* ================= MAIN ================= */
 export default function InvoicePage() {
   const pdfRef = useRef();
+  const [savedInvoices, setSavedInvoices] = useState([]);
+const [deleteId, setDeleteId] = useState(null);
   const [open, setOpen] = useState(false);
 
   const [data, setData] = useState({
@@ -198,7 +209,12 @@ export default function InvoicePage() {
     cgst: 9,
     items: [{ name: "", hsn: "", qty: 1, price: 0 }],
   });
-
+useEffect(() => {
+  const saved = localStorage.getItem("invoices");
+  if (saved) {
+    setSavedInvoices(JSON.parse(saved));
+  }
+}, []);
   const updateItem = (i, field, value) => {
     const items = [...data.items];
     items[i][field] = value;
@@ -211,7 +227,25 @@ export default function InvoicePage() {
       items: [...data.items, { name: "", hsn: "", qty: 1, price: 0 }],
     });
   };
+const deleteInvoice = (id) => {
+  const updated = savedInvoices.filter((inv) => inv.id !== id);
 
+  setSavedInvoices(updated);
+
+  // ✅ update localStorage also
+  localStorage.setItem("invoices", JSON.stringify(updated));
+};
+
+
+const handleDownload = async (inv) => {
+  // temporarily set data
+  setData(inv.data);
+
+  // wait for DOM update
+  setTimeout(() => {
+    downloadPDF(pdfRef.current);
+  }, 300);
+};
   const subtotal = data.items.reduce((s, i) => s + i.qty * i.price, 0);
   const sgstAmount = (subtotal * data.sgst) / 100;
   const cgstAmount = (subtotal * data.cgst) / 100;
@@ -223,7 +257,88 @@ export default function InvoicePage() {
     cgst: cgstAmount.toFixed(2),
     total: total.toFixed(2),
   };
+const deleteDialog = (
+  <Dialog
+    open={!!deleteId}
+    onClose={() => setDeleteId(null)}
+    maxWidth="xs"
+    fullWidth
+    PaperProps={{
+      sx: {
+        borderRadius: "16px",
+        p: 1,
+      },
+    }}
+  >
+    {/* HEADER */}
+    <DialogTitle
+      sx={{
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "18px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
+      <WarningAmberIcon sx={{ color: "#f44336", fontSize: 40 }} />
+      Confirm Delete
+    </DialogTitle>
 
+    {/* CONTENT */}
+    <DialogContent sx={{ textAlign: "center", fontSize: "14px", color: "#555" }}>
+      Are you sure you want to delete this invoice?
+      <br />
+      <b style={{ color: "#f44336" }}>This action cannot be undone.</b>
+    </DialogContent>
+
+    {/* ACTIONS */}
+    <DialogActions
+      sx={{
+        justifyContent: "center",
+        pb: 2,
+        gap: 1,
+      }}
+    >
+      {/* CANCEL */}
+      <Button
+        onClick={() => setDeleteId(null)}
+        sx={{
+          borderRadius: "8px",
+          textTransform: "none",
+          px: 3,
+          border: "1px solid black",
+          color: "#000",
+        }}
+      >
+        Cancel
+      </Button>
+
+      {/* DELETE */}
+      <Button
+        variant="contained"
+        color="error"
+        onClick={() => {
+          deleteInvoice(deleteId);
+          setDeleteId(null);
+        }}
+        sx={{
+          borderRadius: "8px",
+          textTransform: "none",
+          px: 3,
+          background: "#f44336",
+          color: "#fff",
+          "&:hover": {
+            background: "#d32f2f",
+          },
+        }}
+      >
+        Delete
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -325,9 +440,27 @@ export default function InvoicePage() {
             <button style={styles.btnPrimary} onClick={() => setOpen(true)}>
               Preview
             </button>
-            <button style={styles.btnSuccess} onClick={() => downloadPDF(pdfRef.current)}>
-              Download
-            </button>
+<button
+  style={styles.btnSuccess}
+  onClick={() => {
+    const invoiceData = {
+      data,
+      totals,
+      id: Date.now(),
+    };
+
+    const updated = [...savedInvoices, invoiceData];
+
+    setSavedInvoices(updated);
+
+    // ✅ SAVE TO LOCAL STORAGE
+    localStorage.setItem("invoices", JSON.stringify(updated));
+
+    downloadPDF(pdfRef.current);
+  }}
+>
+  Download
+</button>
           </div>
         </div>
 
@@ -338,6 +471,85 @@ export default function InvoicePage() {
             </div>
           </div>
         )}
+<h3 style={{ marginTop: 20 }}>Saved Invoices</h3>
+
+{savedInvoices.length === 0 ? (
+  <p style={{ fontSize: 14 }}>No invoices yet</p>
+) : (
+  savedInvoices.map((inv) => (
+    <div
+      key={inv.id}
+      style={{
+        border: "1px solid #ddd",
+        padding: 10,
+        marginBottom: 8,
+        borderRadius: 6,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      {/* LEFT */}
+      <div>
+        <b style={{ fontSize: 14 }}>
+          {inv.data.clientName}
+        </b>
+        <div style={{ fontSize: 12 }}>
+          ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
+        </div>
+      </div>
+
+      {/* RIGHT BUTTONS */}
+<div style={{ display: "flex", gap: 5 }}>
+  {/* VIEW */}
+  <button
+    style={{
+      padding: "4px 8px",
+      fontSize: 12,
+      cursor: "pointer",
+    }}
+    onClick={() => {
+      setData(inv.data);
+      setOpen(true);
+    }}
+  >
+    View
+  </button>
+
+  {/* DOWNLOAD */}
+  <button
+    style={{
+      padding: "4px 8px",
+      fontSize: 12,
+      background: "#2e7d32",
+      color: "#fff",
+      border: "none",
+      cursor: "pointer",
+    }}
+    onClick={() => handleDownload(inv)}
+  >
+    Download
+  </button>
+
+  {/* DELETE */}
+  <button
+    style={{
+      padding: "4px 8px",
+      fontSize: 12,
+      background: "#d32f2f",
+      color: "#fff",
+      border: "none",
+      cursor: "pointer",
+    }}
+    onClick={() => setDeleteId(inv.id)}
+  >
+    Delete
+  </button>
+</div>
+    </div>
+  ))
+)}
+
 
         <div style={{ position: "absolute", left: "-9999px" }}>
           <Invoice ref={pdfRef} data={data} totals={totals} />
@@ -345,8 +557,12 @@ export default function InvoicePage() {
       </div>
 
       <Footer />
+            {deleteDialog}
+
     </DashboardLayout>
+    
   );
+
 }
 
 /* ================= STYLES ================= */
@@ -491,7 +707,7 @@ const styles = {
   },
 
   modal: {
-    width: "900px",
+    width: "800px",
     maxHeight: "90vh",
     overflowY: "auto",
     background: "#fff",

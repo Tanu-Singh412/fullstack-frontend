@@ -33,17 +33,37 @@ function Basic() {
       navigate("/dashboard");
     }
   }, []);
+const handleLogin = () => {
+  const strength = getPasswordStrength(form.password);
 
-  const handleLogin = () => {
-    const success = login(form.username, form.password);
+  if (strength.label === "Weak") {
+    alert("Password is too weak");
+    return;
+  }
 
-    if (success) {
-      navigate("/dashboard");
-    } else {
-      alert("Invalid username or password");
-    }
-  };
+  const success = login(form.username, form.password);
 
+  if (success) {
+    navigate("/dashboard");
+  } else {
+    alert("Invalid username or password");
+  }
+};
+const getPasswordStrength = (password) => {
+  let score = 0;
+
+  if (password.length >= 6) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 1) return { label: "Weak", color: "red" };
+  if (score === 2 || score === 3) return { label: "Medium", color: "orange" };
+  if (score === 4) return { label: "Strong", color: "green" };
+
+  return { label: "", color: "" };
+};
+const strength = getPasswordStrength(form.password);
   return (
     <BasicLayout image={bgImage}>
       <Card>
@@ -75,15 +95,35 @@ function Basic() {
               />
             </MDBox>
 
-            {/* PASSWORD */}
-            <MDBox mb={2}>
-              <MDInput
-                type="password"
-                label="Password"
-                fullWidth
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
-            </MDBox>
+<MDBox mb={2}>
+  <MDInput
+    type="password"
+    label="Password"
+    fullWidth
+    value={form.password}
+    onChange={(e) => setForm({ ...form, password: e.target.value })}
+  />
+
+  {/* Strength Indicator */}
+  {form.password && (
+    <MDTypography
+      variant="caption"
+      sx={{
+        color: strength.color,
+        fontWeight: 600,
+        mt: 0.5,
+        display: "block",
+      }}
+    >
+      Strength: {strength.label}
+    </MDTypography>
+  )}
+
+  {/* Rules */}
+  <MDTypography variant="caption" sx={{ color: "#666" }}>
+    Must include uppercase, number, special character
+  </MDTypography>
+</MDBox>
 
             {/* REMEMBER ME */}
             <MDBox display="flex" alignItems="center" ml={-1}>
