@@ -45,7 +45,7 @@ const [deleteId, setDeleteId] = useState(null);
   // =====================
   const loadData = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/clients");
+      const res = await fetch("https://fullstack-project-1-n510.onrender.com/api/clients");
       const data = await res.json();
       setClients(data);
     } catch (error) {
@@ -62,7 +62,7 @@ const [deleteId, setDeleteId] = useState(null);
     const clientToUpdate = clients.find((c) => c._id === id);
     if (!clientToUpdate) return;
 
-    await fetch(`http://localhost:5000/api/clients/${id}`, {
+    await fetch(`https://fullstack-project-1-n510.onrender.com/api/clients/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...clientToUpdate, status: value }),
@@ -74,7 +74,7 @@ const [deleteId, setDeleteId] = useState(null);
   // =====================
   const deleteClient = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/clients/${id}`, {
+      await fetch(`https://fullstack-project-1-n510.onrender.com/api/clients/${id}`, {
         method: "DELETE",
       });
       loadData();

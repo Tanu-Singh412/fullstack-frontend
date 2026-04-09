@@ -21,7 +21,7 @@ export default function useRecentClients(limit = 5) {
       [id]: value,
     }));
 
-    await fetch("http://localhost:5000/api/clients/" + id, {
+    await fetch("https://fullstack-project-1-n510.onrender.com/api/clients/" + id, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
