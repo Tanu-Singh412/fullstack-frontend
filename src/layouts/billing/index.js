@@ -507,8 +507,18 @@ useEffect(() => {
 >
   All
 </button>
-  <button onClick={() => setFilter("month")}>Monthly</button>
-  <button onClick={() => setFilter("year")}>Yearly</button>
+  <button
+    style={{ background: filter === "month" ? "#000" : "#ccc", color: "#fff" }}
+    onClick={() => setFilter("month")}
+  >
+    Monthly
+  </button>
+  <button
+    style={{ background: filter === "year" ? "#000" : "#ccc", color: "#fff" }}
+    onClick={() => setFilter("year")}
+  >
+    Yearly
+  </button>
 </div>
         {savedInvoices.length === 0 ? (
           <p style={{ fontSize: 14 }}>No invoices yet</p>
