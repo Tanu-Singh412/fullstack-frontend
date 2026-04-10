@@ -199,30 +199,33 @@ export default function useProjectData() {
         ),
 
         client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
-        paid: <MDTypography variant="caption"> ₹ {p.totalAmount}</MDTypography>,
+        Total: <MDTypography variant="caption"> ₹ {p.totalAmount}</MDTypography>,
 
         payment: (
           <MDBox
             onClick={() => setPaymentProject(p)}
             sx={{
               cursor: "pointer",
-              px: 1.5,
-              py: 0.5,
-              borderRadius: "6px",
-              color: "#e3f2fd",
-              background: "#1976d2",
+              px: 2,
+              py: 0.7,
+              borderRadius: "8px",
+              background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+              color: "#fff",
               fontWeight: "600",
-              fontSize: "13px",
+              fontSize: "12px",
               textAlign: "center",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+              transition: "0.3s",
               "&:hover": {
-                background: "#bbdefb",
+                transform: "translateY(-2px)",
+                boxShadow: "0 6px 14px rgba(0,0,0,0.25)",
               },
             }}
           >
             Payments
           </MDBox>
         ),
-        paid: <MDTypography variant="caption">{totalPaid}</MDTypography>,
+
         balance: <MDTypography variant="caption">{balance}</MDTypography>,
         date: <MDTypography variant="caption">{date}</MDTypography>,
         status: (
@@ -662,89 +665,138 @@ export default function useProjectData() {
           color: "#fff",
         }}
       >
-        Payment History
+        Payment Details
       </DialogTitle>
 
       <DialogContent sx={{ mt: 2 }}>
-        {/* ✅ TOTAL PAID */}
-        <MDBox
-          sx={{
-            mb: 2,
-            p: 2,
-            borderRadius: "10px",
-            background: "#e3f2fd",
-            textAlign: "center",
-          }}
-        >
-          <MDTypography variant="caption">Total Paid</MDTypography>
-          <MDTypography variant="h6" fontWeight="bold" color="primary">
-            ₹ {(paymentProject?.payments || []).reduce((sum, p) => sum + Number(p.amount), 0)}
-          </MDTypography>
-        </MDBox>
+        {/* ✅ CALCULATIONS */}
+        {(() => {
+          const total = Number(paymentProject?.totalAmount || 0);
 
-        {/* ✅ PAYMENT TABLE */}
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: "#f1f5f9" }}>
-              <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
-              <th style={{ padding: "8px", textAlign: "right" }}>Amount</th>
-            </tr>
-          </thead>
+          const paid = (paymentProject?.payments || []).reduce(
+            (sum, p) => sum + Number(p.amount),
+            0
+          );
 
-          <tbody>
-            {(paymentProject?.payments || []).map((pay, i) => (
-              <tr key={i}>
-                <td style={{ padding: "8px" }}>
-                  {new Date(pay.date || pay.createdAt).toLocaleString()}
-                </td>
-                <td
-                  style={{
-                    padding: "8px",
-                    textAlign: "right",
-                    color: "green",
-                    fontWeight: "600",
+          const balance = total - paid;
+
+          return (
+            <>
+              {/* ✅ SUMMARY CARDS */}
+              <MDBox display="flex" gap={2} mb={2}>
+                {/* TOTAL */}
+                <MDBox
+                  sx={{
+                    flex: 1,
+                    p: 2,
+                    borderRadius: "10px",
+                    background: "#e3f2fd",
+                    textAlign: "center",
                   }}
                 >
-                  ₹ {pay.amount}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  <MDTypography variant="caption">Total</MDTypography>
+                  <MDTypography fontWeight="bold">₹ {total}</MDTypography>
+                </MDBox>
 
-        {/* ➕ ADD PAYMENT */}
-        <MDBox mt={3} display="flex" gap={1}>
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "10px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-            }}
-          />
+                {/* PAID */}
+                <MDBox
+                  sx={{
+                    flex: 1,
+                    p: 2,
+                    borderRadius: "10px",
+                    background: "#e8f5e9",
+                    textAlign: "center",
+                  }}
+                >
+                  <MDTypography variant="caption">Paid</MDTypography>
+                  <MDTypography fontWeight="bold" color="success">
+                    ₹ {paid}
+                  </MDTypography>
+                </MDBox>
 
-          <Button
-            variant="contained"
-            onClick={() => {
-              setPaymentType("add");
-              handleAddPayment();
-            }}
-            sx={{
-              borderRadius: "8px",
-              textTransform: "none",
-              px: 3,
-              background: "#1976d2",
-              color: "#fff",
-              "&:hover": { background: "#1976d2" },
-            }}
-          >
-            Add
-          </Button>
-        </MDBox>
+                {/* BALANCE */}
+                <MDBox
+                  sx={{
+                    flex: 1,
+                    p: 2,
+                    borderRadius: "10px",
+                    background: "#ffebee",
+                    textAlign: "center",
+                  }}
+                >
+                  <MDTypography variant="caption">Balance</MDTypography>
+                  <MDTypography fontWeight="bold" color="error">
+                    ₹ {balance}
+                  </MDTypography>
+                </MDBox>
+              </MDBox>
+
+              {/* ✅ PAYMENT TABLE */}
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#f1f5f9" }}>
+                    <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
+                    <th style={{ padding: "8px", textAlign: "right" }}>Amount</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {(paymentProject?.payments || []).map((pay, i) => (
+                    <tr key={i}>
+                      <td style={{ padding: "8px" }}>
+                        {new Date(pay.date || pay.createdAt).toLocaleString()}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px",
+                          textAlign: "right",
+                          color: "green",
+                          fontWeight: "600",
+                        }}
+                      >
+                        ₹ {pay.amount}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* ➕ ADD PAYMENT */}
+              <MDBox mt={3} display="flex" gap={1}>
+                <input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setPaymentType("add");
+                    handleAddPayment();
+                  }}
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    px: 3,
+                    background: "#1976d2",
+                    color: "#fff",
+                    "&:hover": { background: "#1565c0" },
+                  }}
+                >
+                  Add
+                </Button>
+              </MDBox>
+            </>
+          );
+        })()}
       </DialogContent>
     </Dialog>
   );
