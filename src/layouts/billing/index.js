@@ -499,39 +499,37 @@ export default function InvoicePage() {
         )}
         <h3 style={{ marginTop: 20 }}>Saved Invoices</h3>
         <div style={{ marginBottom: 10 }}>
-          <button
-            style={{
-              background: filter === "all" ? "#000" : "#ccc",
-              color: "#fff",
-              p: 1,
-              margin: 1,
-            }}
-            onClick={() => setFilter("all")}
-          >
-            All
-          </button>
-          <button
-            style={{
-              background: filter === "month" ? "#000" : "#ccc",
-              color: "#fff",
-              p: 1,
-              margin: 1,
-            }}
-            onClick={() => setFilter("month")}
-          >
-            Monthly
-          </button>
-          <button
-            style={{
-              background: filter === "year" ? "#000" : "#ccc",
-              color: "#fff",
-              p: 1,
-              margin: 1,
-            }}
-            onClick={() => setFilter("year")}
-          >
-            Yearly
-          </button>
+          <div style={styles.filterBar}>
+            <button
+              style={{
+                ...styles.filterBtn,
+                ...(filter === "all" ? styles.activeBtn : {}),
+              }}
+              onClick={() => setFilter("all")}
+            >
+              All
+            </button>
+
+            <button
+              style={{
+                ...styles.filterBtn,
+                ...(filter === "month" ? styles.activeBtn : {}),
+              }}
+              onClick={() => setFilter("month")}
+            >
+              Monthly
+            </button>
+
+            <button
+              style={{
+                ...styles.filterBtn,
+                ...(filter === "year" ? styles.activeBtn : {}),
+              }}
+              onClick={() => setFilter("year")}
+            >
+              Yearly
+            </button>
+          </div>
         </div>
         {filteredInvoices.length === 0 ? (
           <p style={{ fontSize: 14 }}>No invoices yet</p>
@@ -774,5 +772,28 @@ const styles = {
     overflowY: "auto",
     background: "#fff",
     padding: 20,
+  },
+  filterBar: {
+    display: "flex",
+    gap: 10,
+    marginBottom: 15,
+  },
+
+  filterBtn: {
+    padding: "8px 16px",
+    borderRadius: 20,
+    border: "1px solid #ccc",
+    background: "#f5f5f5",
+    cursor: "pointer",
+    fontSize: 13,
+    fontWeight: 500,
+    transition: "all 0.2s ease",
+  },
+
+  activeBtn: {
+    background: "#000",
+    color: "#fff",
+    border: "1px solid #000",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
   },
 };
