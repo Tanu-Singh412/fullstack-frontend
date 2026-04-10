@@ -192,7 +192,7 @@ export default function InvoicePage() {
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
   const [open, setOpen] = useState(false);
-
+const [filter, setFilter] = useState("all");
   const [data, setData] = useState({
     logo: "",
     clientName: "",
@@ -255,6 +255,27 @@ export default function InvoicePage() {
     cgst: cgstAmount.toFixed(2),
     total: total.toFixed(2),
   };
+
+  const filteredInvoices = savedInvoices.filter((inv) => {
+  if (!inv.createdAt) return true;
+
+  const invDate = new Date(inv.createdAt);
+  const now = new Date();
+
+  if (filter === "month") {
+    return (
+      invDate.getMonth() === now.getMonth() &&
+      invDate.getFullYear() === now.getFullYear()
+    );
+  }
+
+  if (filter === "year") {
+    return invDate.getFullYear() === now.getFullYear();
+  }
+
+  return true; // all
+});
+
   const deleteDialog = (
     <Dialog
       open={!!deleteId}
@@ -445,6 +466,7 @@ export default function InvoicePage() {
                   data,
                   totals,
                   id: Date.now(),
+                  createdAt: new Date().toISOString(),
                 };
 
                 const updated = [...savedInvoices, invoiceData];
@@ -474,7 +496,7 @@ export default function InvoicePage() {
         {savedInvoices.length === 0 ? (
           <p style={{ fontSize: 14 }}>No invoices yet</p>
         ) : (
-          savedInvoices.map((inv) => (
+          filteredInvoices.map((inv) => (
             <div
               key={inv.id}
               style={{
@@ -490,9 +512,15 @@ export default function InvoicePage() {
               {/* LEFT */}
               <div>
                 <b style={{ fontSize: 14 }}>{inv.data.clientName}</b>
-                <div style={{ fontSize: 12 }}>
-                  ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
-                </div>
+               <div style={{ fontSize: 12 }}>
+  ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
+  <br />
+  {new Date(inv.createdAt).toLocaleDateString("en-IN", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+})    }
+</div>
               </div>
 
               {/* RIGHT BUTTONS */}
@@ -545,7 +573,11 @@ export default function InvoicePage() {
             </div>
           ))
         )}
-
+<div style={{ marginBottom: 10 }}>
+  <button onClick={() => setFilter("all")}>All</button>
+  <button onClick={() => setFilter("month")}>Monthly</button>
+  <button onClick={() => setFilter("year")}>Yearly</button>
+</div>
         <div style={{ position: "absolute", left: "-9999px" }}>
           <Invoice ref={pdfRef} data={data} totals={totals} />
         </div>
