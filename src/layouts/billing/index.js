@@ -192,7 +192,7 @@ export default function InvoicePage() {
   const [savedInvoices, setSavedInvoices] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
   const [open, setOpen] = useState(false);
-const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("all");
   const [data, setData] = useState({
     logo: "",
     clientName: "",
@@ -208,21 +208,22 @@ const [filter, setFilter] = useState("all");
     cgst: 9,
     items: [{ name: "", hsn: "", qty: 1, price: 0 }],
   });
-useEffect(() => {
-  const saved = localStorage.getItem("invoices");
-  if (saved) {
-    const parsed = JSON.parse(saved);
+  useEffect(() => {
+    const saved = localStorage.getItem("invoices");
+    if (saved) {
+      const parsed = JSON.parse(saved);
 
-    // ✅ Fix old invoices
-    const updated = parsed.map((inv) => ({
-      ...inv,
-      createdAt: inv.createdAt || new Date().toISOString(),
-    }));
+      // ✅ Fix old invoices
+      const updated = parsed.map((inv) => ({
+        ...inv,
+        createdAt: inv.createdAt || new Date().toISOString(),
+      }));
 
-    setSavedInvoices(updated);
-    localStorage.setItem("invoices", JSON.stringify(updated));
-  }
-}, []);  const updateItem = (i, field, value) => {
+      setSavedInvoices(updated);
+      localStorage.setItem("invoices", JSON.stringify(updated));
+    }
+  }, []);
+  const updateItem = (i, field, value) => {
     const items = [...data.items];
     items[i][field] = value;
     setData({ ...data, items });
@@ -265,24 +266,21 @@ useEffect(() => {
   };
 
   const filteredInvoices = savedInvoices.filter((inv) => {
-  if (!inv.createdAt) return true;
+    if (!inv.createdAt) return true;
 
-  const invDate = new Date(inv.createdAt);
-  const now = new Date();
+    const invDate = new Date(inv.createdAt);
+    const now = new Date();
 
-  if (filter === "month") {
-    return (
-      invDate.getMonth() === now.getMonth() &&
-      invDate.getFullYear() === now.getFullYear()
-    );
-  }
+    if (filter === "month") {
+      return invDate.getMonth() === now.getMonth() && invDate.getFullYear() === now.getFullYear();
+    }
 
-  if (filter === "year") {
-    return invDate.getFullYear() === now.getFullYear();
-  }
+    if (filter === "year") {
+      return invDate.getFullYear() === now.getFullYear();
+    }
 
-  return true; // all
-});
+    return true; // all
+  });
 
   const deleteDialog = (
     <Dialog
@@ -500,26 +498,26 @@ useEffect(() => {
           </div>
         )}
         <h3 style={{ marginTop: 20 }}>Saved Invoices</h3>
-<div style={{ marginBottom: 10 }}>
-<button
-  style={{ background: filter === "all" ? "#000" : "#ccc", color: "#fff" }}
-  onClick={() => setFilter("all")}
->
-  All
-</button>
-  <button
-    style={{ background: filter === "month" ? "#000" : "#ccc", color: "#fff" }}
-    onClick={() => setFilter("month")}
-  >
-    Monthly
-  </button>
-  <button
-    style={{ background: filter === "year" ? "#000" : "#ccc", color: "#fff" }}
-    onClick={() => setFilter("year")}
-  >
-    Yearly
-  </button>
-</div>
+        <div style={{ marginBottom: 10 }}>
+          <button
+            style={{ background: filter === "all" ? "#000" : "#ccc", color: "#fff" }}
+            onClick={() => setFilter("all")}
+          >
+            All
+          </button>
+          <button
+            style={{ background: filter === "month" ? "#000" : "#ccc", color: "#fff" }}
+            onClick={() => setFilter("month")}
+          >
+            Monthly
+          </button>
+          <button
+            style={{ background: filter === "year" ? "#000" : "#ccc", color: "#fff" }}
+            onClick={() => setFilter("year")}
+          >
+            Yearly
+          </button>
+        </div>
         {savedInvoices.length === 0 ? (
           <p style={{ fontSize: 14 }}>No invoices yet</p>
         ) : (
@@ -539,17 +537,17 @@ useEffect(() => {
               {/* LEFT */}
               <div>
                 <b style={{ fontSize: 14 }}>{inv.data.clientName}</b>
-               <div style={{ fontSize: 12 }}>
-  ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
-  <br />
-  {new Date(inv.createdAt).toLocaleString("en-IN", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-})  }
-</div>
+                <div style={{ fontSize: 12 }}>
+                  ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
+                  <br />
+                  {new Date(inv.createdAt).toLocaleString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
               </div>
 
               {/* RIGHT BUTTONS */}
