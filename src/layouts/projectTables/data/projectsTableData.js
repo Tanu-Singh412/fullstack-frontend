@@ -71,8 +71,6 @@ export default function useProjectData() {
 
     { Header: "Client", accessor: "client" },
     { Header: "Payment", accessor: "total" },
-    { Header: "Paid", accessor: "paid" },
-    { Header: "Balance", accessor: "balance" },
     { Header: "Date", accessor: "date" },
     { Header: "Status", accessor: "status" },
     { Header: "Actions", accessor: "actions" },
@@ -198,7 +196,27 @@ export default function useProjectData() {
         ),
 
         client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
-        total: <MDTypography variant="caption">{p.totalAmount}</MDTypography>,
+        total: (
+          <MDBox
+            onClick={() => setPaymentProject(p)}
+            sx={{
+              cursor: "pointer",
+              px: 1.5,
+              py: 0.5,
+              borderRadius: "6px",
+              background: "#e3f2fd",
+              color: "#1976d2",
+              fontWeight: "600",
+              fontSize: "13px",
+              textAlign: "center",
+              "&:hover": {
+                background: "#bbdefb",
+              },
+            }}
+          >
+            ₹ {p.totalAmount}
+          </MDBox>
+        ),
         paid: <MDTypography variant="caption">{totalPaid}</MDTypography>,
         balance: <MDTypography variant="caption">{balance}</MDTypography>,
         date: <MDTypography variant="caption">{date}</MDTypography>,
@@ -232,19 +250,6 @@ export default function useProjectData() {
 
         actions: (
           <MDBox display="flex">
-            {/* ➕ Add */}
-            <IconButton color="success" size="small" onClick={() => openPaymentDialog(p, "add")}>
-              +
-            </IconButton>
-
-            {/* ➖ Subtract */}
-            <IconButton
-              color="warning"
-              size="small"
-              onClick={() => openPaymentDialog(p, "subtract")}
-            >
-              -
-            </IconButton>
             <IconButton color="primary" size="small" onClick={() => handleView(p)}>
               <VisibilityIcon />
             </IconButton>
@@ -642,26 +647,90 @@ export default function useProjectData() {
   );
 
   const paymentDialog = (
-    <Dialog open={!!paymentProject} onClose={() => setPaymentProject(null)}>
-      <DialogTitle>{paymentType === "add" ? "Add Payment" : "Deduct Payment"}</DialogTitle>
-      <DialogContent>
-        <input
-          type="number"
-          placeholder="Enter amount"
-          value={paymentAmount}
-          onChange={(e) => setPaymentAmount(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginTop: "10px",
-            marginBottom: "10px",
-          }}
-        />
+    <Dialog open={!!paymentProject} onClose={() => setPaymentProject(null)} maxWidth="sm" fullWidth>
+      <DialogTitle
+        sx={{
+          textAlign: "center",
+          fontWeight: "bold",
+          bgcolor: "#1976d2",
+          color: "#fff",
+        }}
+      >
+        Payment History
+      </DialogTitle>
 
-        <button onClick={handleAddPayment}>Save</button>
+      <DialogContent sx={{ mt: 2 }}>
+        {/* ✅ PAYMENT TABLE */}
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#f1f5f9" }}>
+              <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
+              <th style={{ padding: "8px", textAlign: "right" }}>Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {(paymentProject?.payments || []).map((pay, i) => (
+              <tr key={i}>
+                <td style={{ padding: "8px" }}>
+                  {new Date(pay.date || pay.createdAt).toLocaleString()}
+                </td>
+                <td
+                  style={{
+                    padding: "8px",
+                    textAlign: "right",
+                    color: pay.amount > 0 ? "green" : "red",
+                    fontWeight: "600",
+                  }}
+                >
+                  ₹ {pay.amount}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* ➕ ADD PAYMENT */}
+        <MDBox mt={3} display="flex" gap={1}>
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={paymentAmount}
+            onChange={(e) => setPaymentAmount(e.target.value)}
+            style={{
+              flex: 1,
+              padding: "10px",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+            }}
+          />
+
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => {
+              setPaymentType("add");
+              handleAddPayment();
+            }}
+          >
+            Add
+          </Button>
+
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={() => {
+              setPaymentType("subtract");
+              handleAddPayment();
+            }}
+          >
+            Deduct
+          </Button>
+        </MDBox>
       </DialogContent>
     </Dialog>
   );
+
   const descriptionDialog = (
     <Dialog
       open={!!selectedDescription}
