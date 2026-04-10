@@ -648,6 +648,7 @@ export default function useProjectData() {
 
   const paymentDialog = (
     <Dialog open={!!paymentProject} onClose={() => setPaymentProject(null)} maxWidth="sm" fullWidth>
+      {/* HEADER */}
       <DialogTitle
         sx={{
           textAlign: "center",
@@ -660,6 +661,22 @@ export default function useProjectData() {
       </DialogTitle>
 
       <DialogContent sx={{ mt: 2 }}>
+        {/* ✅ TOTAL PAID */}
+        <MDBox
+          sx={{
+            mb: 2,
+            p: 2,
+            borderRadius: "10px",
+            background: "#e3f2fd",
+            textAlign: "center",
+          }}
+        >
+          <MDTypography variant="caption">Total Paid</MDTypography>
+          <MDTypography variant="h6" fontWeight="bold" color="primary">
+            ₹ {(paymentProject?.payments || []).reduce((sum, p) => sum + Number(p.amount), 0)}
+          </MDTypography>
+        </MDBox>
+
         {/* ✅ PAYMENT TABLE */}
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -679,7 +696,7 @@ export default function useProjectData() {
                   style={{
                     padding: "8px",
                     textAlign: "right",
-                    color: pay.amount > 0 ? "green" : "red",
+                    color: "green",
                     fontWeight: "600",
                   }}
                 >
@@ -700,31 +717,26 @@ export default function useProjectData() {
             style={{
               flex: 1,
               padding: "10px",
-              borderRadius: "6px",
+              borderRadius: "8px",
               border: "1px solid #ccc",
             }}
           />
 
           <Button
             variant="contained"
-            color="success"
             onClick={() => {
               setPaymentType("add");
               handleAddPayment();
             }}
-          >
-            Add
-          </Button>
-
-          <Button
-            variant="contained"
-            color="warning"
-            onClick={() => {
-              setPaymentType("subtract");
-              handleAddPayment();
+            sx={{
+              borderRadius: "8px",
+              textTransform: "none",
+              px: 3,
+              background: "#4caf50",
+              "&:hover": { background: "#388e3c" },
             }}
           >
-            Deduct
+            Add
           </Button>
         </MDBox>
       </DialogContent>
