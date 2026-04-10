@@ -208,13 +208,21 @@ const [filter, setFilter] = useState("all");
     cgst: 9,
     items: [{ name: "", hsn: "", qty: 1, price: 0 }],
   });
-  useEffect(() => {
-    const saved = localStorage.getItem("invoices");
-    if (saved) {
-      setSavedInvoices(JSON.parse(saved));
-    }
-  }, []);
-  const updateItem = (i, field, value) => {
+useEffect(() => {
+  const saved = localStorage.getItem("invoices");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+
+    // ✅ Fix old invoices
+    const updated = parsed.map((inv) => ({
+      ...inv,
+      createdAt: inv.createdAt || new Date().toISOString(),
+    }));
+
+    setSavedInvoices(updated);
+    localStorage.setItem("invoices", JSON.stringify(updated));
+  }
+}, []);  const updateItem = (i, field, value) => {
     const items = [...data.items];
     items[i][field] = value;
     setData({ ...data, items });
@@ -492,7 +500,26 @@ const [filter, setFilter] = useState("all");
           </div>
         )}
         <h3 style={{ marginTop: 20 }}>Saved Invoices</h3>
-
+<div style={{ marginBottom: 10 }}>
+<button
+  style={{ background: filter === "all" ? "#000" : "#ccc", color: "#fff" }}
+  onClick={() => setFilter("all")}
+>
+  All
+</button>
+  <button
+    style={{ background: filter === "month" ? "#000" : "#ccc", color: "#fff" }}
+    onClick={() => setFilter("month")}
+  >
+    Monthly
+  </button>
+  <button
+    style={{ background: filter === "year" ? "#000" : "#ccc", color: "#fff" }}
+    onClick={() => setFilter("year")}
+  >
+    Yearly
+  </button>
+</div>
         {savedInvoices.length === 0 ? (
           <p style={{ fontSize: 14 }}>No invoices yet</p>
         ) : (
@@ -515,11 +542,13 @@ const [filter, setFilter] = useState("all");
                <div style={{ fontSize: 12 }}>
   ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
   <br />
-  {new Date(inv.createdAt).toLocaleDateString("en-IN", {
+  {new Date(inv.createdAt).toLocaleString("en-IN", {
   day: "2-digit",
   month: "short",
   year: "numeric",
-})    }
+  hour: "2-digit",
+  minute: "2-digit",
+})  }
 </div>
               </div>
 
@@ -573,11 +602,7 @@ const [filter, setFilter] = useState("all");
             </div>
           ))
         )}
-<div style={{ marginBottom: 10 }}>
-  <button onClick={() => setFilter("all")}>All</button>
-  <button onClick={() => setFilter("month")}>Monthly</button>
-  <button onClick={() => setFilter("year")}>Yearly</button>
-</div>
+
         <div style={{ position: "absolute", left: "-9999px" }}>
           <Invoice ref={pdfRef} data={data} totals={totals} />
         </div>
