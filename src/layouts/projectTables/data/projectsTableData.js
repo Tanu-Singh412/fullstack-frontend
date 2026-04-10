@@ -66,11 +66,14 @@ export default function useProjectData() {
     { Header: "Image", accessor: "image" },
     { Header: "Project", accessor: "project" },
     { Header: "Client ID", accessor: "clientId" },
+        { Header: "Client", accessor: "client" },
+
     { Header: "Description", accessor: "description" },
     { Header: "DWG File", accessor: "dwg" }, // ✅ NEW COLUMN
 
-    { Header: "Client", accessor: "client" },
-    { Header: "Payment", accessor: "total" },
+    { Header: "Total", accessor: "total" },
+    { Header: "Payment", accessor: "payment" },
+
     { Header: "Date", accessor: "date" },
     { Header: "Status", accessor: "status" },
     { Header: "Actions", accessor: "actions" },
@@ -196,7 +199,9 @@ export default function useProjectData() {
         ),
 
         client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
-        total: (
+                paid: <MDTypography variant="caption">  ₹ {p.totalAmount}</MDTypography>,
+
+        payment: (
           <MDBox
             onClick={() => setPaymentProject(p)}
             sx={{
@@ -204,8 +209,8 @@ export default function useProjectData() {
               px: 1.5,
               py: 0.5,
               borderRadius: "6px",
-              background: "#e3f2fd",
-              color: "#1976d2",
+              color: "#e3f2fd",
+              background: "#1976d2",
               fontWeight: "600",
               fontSize: "13px",
               textAlign: "center",
@@ -214,7 +219,8 @@ export default function useProjectData() {
               },
             }}
           >
-            ₹ {p.totalAmount}
+            Payments
+         
           </MDBox>
         ),
         paid: <MDTypography variant="caption">{totalPaid}</MDTypography>,
