@@ -77,7 +77,6 @@ export default function useProjectData() {
     { Header: "Client ID", accessor: "clientId" },
     { Header: "Client", accessor: "client" },
 
-    { Header: "Description", accessor: "description" },
     { Header: "DWG File", accessor: "dwg" }, // ✅ NEW COLUMN
 
     { Header: "Total", accessor: "total" },
@@ -210,22 +209,22 @@ export default function useProjectData() {
         ),
         project: <MDTypography variant="caption">{p.projectName}</MDTypography>,
         clientId: <MDTypography variant="caption">{p.clientId || "-"}</MDTypography>,
-        description: (
-          <MDTypography
-            variant="caption"
-            sx={{
-              cursor: "pointer",
-              maxWidth: 150,
-              display: "inline-block",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-            onClick={() => setSelectedDescription(p.description)}
-          >
-            {p.description || "-"}
-          </MDTypography>
-        ),
+        // description: (
+        //   <MDTypography
+        //     variant="caption"
+        //     sx={{
+        //       cursor: "pointer",
+        //       maxWidth: 150,
+        //       display: "inline-block",
+        //       whiteSpace: "nowrap",
+        //       overflow: "hidden",
+        //       textOverflow: "ellipsis",
+        //     }}
+        //     onClick={() => setSelectedDescription(p.description)}
+        //   >
+        //     {p.description || "-"}
+        //   </MDTypography>
+        // ),
 
         client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
         total: <MDTypography variant="caption"> ₹ {p.totalAmount}</MDTypography>,
@@ -287,6 +286,13 @@ export default function useProjectData() {
 
         actions: (
           <MDBox display="flex">
+            <IconButton
+  color="success"
+  size="small"
+  onClick={() => navigate("/project-details", { state: p })}
+>
+  <VisibilityIcon />
+</IconButton>
             <IconButton color="primary" size="small" onClick={() => handleView(p)}>
               <VisibilityIcon />
             </IconButton>

@@ -13,6 +13,8 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 
 import projectTableData from "layouts/projectTables/data/projectsTableData";
+import ProjectDetails from "layouts/projectTables/data/project-details";
+
 function Tables() {
   const { columns, rows, dialog } = projectTableData();
   const navigate = useNavigate();
