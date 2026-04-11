@@ -36,8 +36,9 @@ export default function useProjectData() {
   const [selectedDescription, setSelectedDescription] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [drawingDialog, setDrawingDialog] = useState(false);
-  const [drawingType, setDrawingType] = useState("");
+  const [drawingProject, setDrawingProject] = useState(null);
   const [drawingImages, setDrawingImages] = useState([]);
+  const [uploadDialog, setUploadDialog] = useState(false);
   const openPaymentDialog = (project, type) => {
     setPaymentProject(project);
     setPaymentType(type);
@@ -186,7 +187,7 @@ export default function useProjectData() {
             variant="contained"
             size="small"
             onClick={() => {
-              setSelectedProject(p);
+              setDrawingProject(p);
               setDrawingDialog(true);
             }}
             sx={{
@@ -949,106 +950,88 @@ export default function useProjectData() {
   const [tab, setTab] = useState("civil");
 
   const drawingDialogUI = (
-    <Dialog
-      open={drawingDialog}
-      onClose={() => setDrawingDialog(false)}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-        sx: {
-          borderRadius: "20px",
-          overflow: "hidden",
-        },
-      }}
-    >
-      {/* HEADER */}
-      <DialogTitle
-        sx={{
-          background: "linear-gradient(135deg,#0f172a,#1e293b)",
-          color: "#fff",
-          textAlign: "center",
-          fontWeight: "bold",
-        }}
-      >
-        Project Drawings
-      </DialogTitle>
+    <Dialog open={drawingDialog} onClose={() => setDrawingDialog(false)} maxWidth="sm" fullWidth>
+      <DialogTitle>Project Drawings</DialogTitle>
 
-      <DialogContent sx={{ mt: 2 }}>
-        {/* 🔘 TABS */}
-        <MDBox display="flex" justifyContent="center" gap={2} mb={2}>
-          {["civil", "interior"].map((t) => (
-            <Button
-              key={t}
-              variant={tab === t ? "contained" : "outlined"}
-              onClick={() => setTab(t)}
-              sx={{
-                borderRadius: "20px",
-                textTransform: "capitalize",
-                px: 3,
-              }}
-            >
-              {t}
-            </Button>
-          ))}
+      <DialogContent>
+        {/* Tabs */}
+        <MDBox display="flex" justifyContent="center" gap={2} mb={3}>
+          <Button
+            variant={tab === "civil" ? "contained" : "outlined"}
+            onClick={() => setTab("civil")}
+          >
+            Civil
+          </Button>
+
+          <Button
+            variant={tab === "interior" ? "contained" : "outlined"}
+            onClick={() => setTab("interior")}
+          >
+            Interior
+          </Button>
         </MDBox>
 
-        {/* 🖼️ EXISTING IMAGES */}
+        {/* View Images */}
         <Grid container spacing={2}>
-          {(selectedProject?.[tab + "Images"] || []).map((img, i) => (
-            <Grid item xs={6} md={3} key={i}>
-              <MDBox
-                sx={{
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  boxShadow: "0 6px 15px rgba(0,0,0,0.1)",
+          {(drawingProject?.[tab + "Images"] || []).map((img, i) => (
+            <Grid item xs={6} key={i}>
+              <img
+                src={img}
+                style={{
+                  width: "100%",
+                  height: "120px",
+                  objectFit: "cover",
+                  borderRadius: "10px",
                 }}
-              >
-                <img
-                  src={img}
-                  style={{
-                    width: "100%",
-                    height: "120px",
-                    objectFit: "cover",
-                  }}
-                />
-              </MDBox>
+              />
             </Grid>
           ))}
         </Grid>
 
-        {/* 📤 UPLOAD */}
-        <MDBox mt={3}>
-          <Button variant="contained" component="label">
-            Upload {tab} Drawings
-            <input
-              hidden
-              multiple
-              type="file"
-              onChange={(e) => {
-                const files = Array.from(e.target.files);
-                const imgs = files.map((f) => ({
-                  file: f,
-                  url: URL.createObjectURL(f),
-                }));
-                setDrawingImages(imgs);
-              }}
-            />
+        {/* ➕ ADD BUTTON */}
+        <MDBox textAlign="center" mt={3}>
+          <Button variant="contained" onClick={() => setUploadDpx ialog(true)}>
+            + Add {tab} Drawings
           </Button>
         </MDBox>
+      </DialogContent>
+    </Dialog>
+  );
+  const uploadDialogUI = (
+    <Dialog open={uploadDialog} onClose={() => setUploadDialog(false)} maxWidth="sm" fullWidth>
+      <DialogTitle>Add {tab} Drawings</DialogTitle>
 
-        {/* 👀 PREVIEW NEW */}
-        <Grid container spacing={2} mt={1}>
+      <DialogContent>
+        {/* Upload */}
+        <Button variant="contained" component="label">
+          Select Images
+          <input
+            hidden
+            multiple
+            type="file"
+            onChange={(e) => {
+              const files = Array.from(e.target.files);
+              const imgs = files.map((f) => ({
+                file: f,
+                url: URL.createObjectURL(f),
+              }));
+              setDrawingImages(imgs);
+            }}
+          />
+        </Button>
+
+        {/* Preview */}
+        <Grid container spacing={2} mt={2}>
           {drawingImages.map((img, i) => (
             <Grid item key={i}>
-              <img src={img.url} width="100" />
+              <img src={img.url} width="80" />
             </Grid>
           ))}
         </Grid>
       </DialogContent>
 
-      {/* ACTION */}
-      <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-        <Button onClick={() => setDrawingDialog(false)}>Cancel</Button>
+      <DialogActions>
+        <Button onClick={() => setUploadDialog(false)}>Cancel</Button>
 
         <Button
           variant="contained"
@@ -1070,16 +1053,15 @@ export default function useProjectData() {
             );
 
             setDrawingImages([]);
-            setDrawingDialog(false);
+            setUploadDialog(false);
             loadData();
           }}
         >
-          Save
+          Upload
         </Button>
       </DialogActions>
     </Dialog>
   );
-
   return {
     columns,
     rows,
@@ -1092,6 +1074,7 @@ export default function useProjectData() {
         {descriptionDialog}
         {deleteDialog}
         {drawingDialogUI}
+        {uploadDialogUI}
       </>
     ),
   };
