@@ -990,7 +990,7 @@ export default function useProjectData() {
 
         {/* ➕ ADD BUTTON */}
         <MDBox textAlign="center" mt={3}>
-          <Button variant="contained" onClick={() => setUploadDpx ialog(true)}>
+          <Button variant="contained" onClick={() => setUploadDialog(true)}>
             + Add {tab} Drawings
           </Button>
         </MDBox>
