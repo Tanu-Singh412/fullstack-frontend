@@ -44,10 +44,10 @@ export default function useProjectData() {
     setPaymentType(type);
     setPaymentAmount("");
   };
-  const getImages = () => {
-    if (!selectedProject) return [];
+  const getDrawingImages = () => {
+    if (!drawingProject) return [];
 
-    return selectedProject[tab + "Images"] || selectedProject.images || [];
+    return drawingProject[tab + "Images"] || [];
   };
   const handleAddPayment = async () => {
     if (!paymentAmount || !paymentProject) return;
@@ -132,14 +132,18 @@ export default function useProjectData() {
     setImageIndex(index);
   };
   const handleNext = () => {
-    const imgs = selectedProject?.images || [];
+    const imgs = getDrawingImages();
+    if (!imgs.length) return;
+
     const next = (imageIndex + 1) % imgs.length;
     setImageIndex(next);
     setSelectedImage(imgs[next]);
   };
 
   const handlePrev = () => {
-    const imgs = selectedProject?.images || [];
+    const imgs = getDrawingImages();
+    if (!imgs.length) return;
+
     const prev = (imageIndex - 1 + imgs.length) % imgs.length;
     setImageIndex(prev);
     setSelectedImage(imgs[prev]);
@@ -977,7 +981,6 @@ export default function useProjectData() {
               <img
                 src={img}
                 onClick={() => {
-                  setSelectedProject(drawingProject); // ✅ IMPORTANT
                   setSelectedImage(img);
                   setImageIndex(i);
                 }}
