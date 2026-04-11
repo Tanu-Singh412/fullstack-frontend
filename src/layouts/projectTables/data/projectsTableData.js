@@ -293,7 +293,7 @@ export default function useProjectData() {
 
         <Button
           variant="contained"
-          sx={{ ...buttonStyle, background: "#f44336", color: "#fff" }}
+          sx={{ ...buttonStyle, background: "#f44336"}}
           onClick={async () => {
             await deleteProject(deleteId);
             setDeleteId(null);
