@@ -39,6 +39,8 @@ export default function useProjectData() {
   const [drawingProject, setDrawingProject] = useState(null);
   const [drawingImages, setDrawingImages] = useState([]);
   const [uploadDialog, setUploadDialog] = useState(false);
+  const [imageSource, setImageSource] = useState("gallery");
+
   const openPaymentDialog = (project, type) => {
     setPaymentProject(project);
     setPaymentType(type);
@@ -124,6 +126,7 @@ export default function useProjectData() {
     }
   };
   const openImage = (img, index) => {
+    setImageSource("gallery"); // ✅ IMPORTANT
     setSelectedImage(img);
     setImageIndex(index);
   };
@@ -587,15 +590,14 @@ export default function useProjectData() {
       maxWidth={false}
       PaperProps={{
         sx: {
-          background: "rgba(0,0,0,0.9)",
-          backdropFilter: "blur(10px)",
+          background: "rgba(0,0,0,0.95)",
         },
       }}
     >
       {selectedImage && (
         <MDBox
           sx={{
-            width: "70vw",
+            width: "100vw",
             height: "100vh",
             display: "flex",
             alignItems: "center",
@@ -603,24 +605,28 @@ export default function useProjectData() {
             position: "relative",
           }}
         >
-          {/* Close */}
+          {/* CLOSE */}
           <MDBox
             onClick={() => setSelectedImage(null)}
             sx={{
               position: "absolute",
               top: 20,
-              right: 20,
+              right: 30,
               color: "#fff",
+              fontSize: 18,
               cursor: "pointer",
+              zIndex: 10,
             }}
           >
-            Close
+            ✕
           </MDBox>
 
-          {/* Prev */}
+          {/* PREV */}
           <MDBox
             onClick={() => {
-              const imgs = getDrawingImages();
+              const imgs = getImages();
+              if (!imgs.length) return;
+
               const prev = (imageIndex - 1 + imgs.length) % imgs.length;
               setImageIndex(prev);
               setSelectedImage(imgs[prev]);
@@ -629,17 +635,20 @@ export default function useProjectData() {
               position: "absolute",
               left: 20,
               color: "#fff",
-              fontSize: 30,
+              fontSize: 40,
               cursor: "pointer",
+              zIndex: 10,
             }}
           >
             ‹
           </MDBox>
 
-          {/* Next */}
+          {/* NEXT */}
           <MDBox
             onClick={() => {
-              const imgs = getDrawingImages();
+              const imgs = getImages();
+              if (!imgs.length) return;
+
               const next = (imageIndex + 1) % imgs.length;
               setImageIndex(next);
               setSelectedImage(imgs[next]);
@@ -648,38 +657,40 @@ export default function useProjectData() {
               position: "absolute",
               right: 20,
               color: "#fff",
-              fontSize: 30,
+              fontSize: 40,
               cursor: "pointer",
+              zIndex: 10,
             }}
           >
             ›
           </MDBox>
 
-          {/* Counter */}
+          {/* COUNTER */}
           <MDTypography
             sx={{
               position: "absolute",
               bottom: 30,
               color: "#fff",
+              fontSize: 14,
             }}
           >
-            {imageIndex + 1} / {getDrawingImages().length}
+            {imageIndex + 1} / {getImages().length}
           </MDTypography>
 
-          {/* Image */}
+          {/* IMAGE */}
           <img
             src={selectedImage}
             style={{
-              maxWidth: "90%",
-              maxHeight: "85%",
+              maxWidth: "95%",
+              maxHeight: "90%",
               borderRadius: "10px",
+              objectFit: "contain",
             }}
           />
         </MDBox>
       )}
     </Dialog>
   );
-
   const paymentDialog = (
     <Dialog open={!!paymentProject} onClose={() => setPaymentProject(null)} maxWidth="sm" fullWidth>
       {/* HEADER */}
@@ -947,10 +958,11 @@ export default function useProjectData() {
   );
 
   const [tab, setTab] = useState("civil");
-  const getDrawingImages = () => {
-    if (!drawingProject) return [];
-
-    return drawingProject[tab + "Images"] || [];
+  const getImages = () => {
+    if (imageSource === "drawing") {
+      return drawingProject?.[tab + "Images"] || [];
+    }
+    return selectedProject?.images || [];
   };
   const drawingDialogUI = (
     <Dialog open={drawingDialog} onClose={() => setDrawingDialog(false)} maxWidth="sm" fullWidth>
@@ -981,6 +993,7 @@ export default function useProjectData() {
               <img
                 src={img}
                 onClick={() => {
+                  setImageSource("drawing"); // ✅ IMPORTANT
                   setSelectedImage(img);
                   setImageIndex(i);
                 }}
