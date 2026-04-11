@@ -10,7 +10,6 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -26,18 +25,14 @@ export default function useProjectData() {
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
 
-  const [selectedProject, setSelectedProject] = useState(null);
   const [drawingProject, setDrawingProject] = useState(null);
-
   const [drawingDialog, setDrawingDialog] = useState(false);
   const [uploadDialog, setUploadDialog] = useState(false);
-
   const [drawingImages, setDrawingImages] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
-
   const [tab, setTab] = useState("civil");
 
-  // ✅ GLOBAL BUTTON STYLE
+  // ✅ GLOBAL BUTTON STYLE (ALL WHITE TEXT)
   const buttonStyle = {
     textTransform: "none",
     borderRadius: "8px",
@@ -53,7 +48,7 @@ export default function useProjectData() {
       const data = await res.json();
       setProjects(data);
     } catch (err) {
-      console.error(err);
+      console.error("Load error:", err);
     }
   };
 
@@ -61,20 +56,24 @@ export default function useProjectData() {
     loadData();
   }, []);
 
-  // ✅ DELETE
+  // ✅ DELETE PROJECT
   const deleteProject = async (id) => {
+    if (!id) return;
+
     try {
       await fetch(`https://fullstack-project-1-n510.onrender.com/api/projects/${id}`, {
         method: "DELETE",
       });
       loadData();
     } catch (err) {
-      console.error(err);
+      console.error("Delete error:", err);
     }
   };
 
-  // ✅ STATUS UPDATE
+  // ✅ UPDATE STATUS
   const handleStatusChange = async (id, value) => {
+    if (!id) return;
+
     try {
       await fetch(`https://fullstack-project-1-n510.onrender.com/api/projects/${id}`, {
         method: "PUT",
@@ -83,23 +82,24 @@ export default function useProjectData() {
       });
       loadData();
     } catch (err) {
-      console.error(err);
+      console.error("Status error:", err);
     }
   };
 
-  // ✅ FORMAT ROWS
+  // ✅ FORMAT TABLE ROWS
   const formatRows = (data) =>
     data.map((p, i) => ({
       serial: <MDTypography variant="caption">{i + 1}</MDTypography>,
 
-      project: <MDTypography variant="caption">{p.projectName}</MDTypography>,
+      project: <MDTypography variant="caption">{p?.projectName || "-"}</MDTypography>,
 
-      client: <MDTypography variant="caption">{p.clientName}</MDTypography>,
+      client: <MDTypography variant="caption">{p?.clientName || "-"}</MDTypography>,
 
       image: (
         <Button
           variant="contained"
           onClick={() => {
+            if (!p) return;
             setDrawingProject(p);
             setDrawingDialog(true);
           }}
@@ -116,12 +116,13 @@ export default function useProjectData() {
       status: (
         <Select
           size="small"
-          value={p.status || "Pending"}
+          value={p?.status || "Pending"}
           onChange={(e) => handleStatusChange(p?._id, e.target.value)}
           sx={{
             height: 30,
             color: "#fff",
             bgcolor: "#1976d2",
+            "& .MuiSvgIcon-root": { color: "#fff" },
           }}
         >
           <MenuItem value="Pending">Pending</MenuItem>
@@ -136,7 +137,7 @@ export default function useProjectData() {
             <EditIcon />
           </IconButton>
 
-          <IconButton onClick={() => setDeleteId(p?._id)}>
+          <IconButton onClick={() => p?._id && setDeleteId(p._id)}>
             <DeleteIcon />
           </IconButton>
         </MDBox>
@@ -159,7 +160,7 @@ export default function useProjectData() {
             onClick={() => setTab("civil")}
             sx={{
               ...buttonStyle,
-              background: tab === "civil" ? "#1976d2" : "#ccc",
+              background: tab === "civil" ? "#1976d2" : "#9e9e9e",
             }}
           >
             Civil
@@ -169,7 +170,7 @@ export default function useProjectData() {
             onClick={() => setTab("interior")}
             sx={{
               ...buttonStyle,
-              background: tab === "interior" ? "#1976d2" : "#ccc",
+              background: tab === "interior" ? "#1976d2" : "#9e9e9e",
             }}
           >
             Interior
@@ -180,7 +181,13 @@ export default function useProjectData() {
         <Grid container spacing={2}>
           {(drawingProject?.[tab + "Images"] || []).map((img, i) => (
             <Grid item xs={6} key={i}>
-              <img src={img} width="100%" />
+              <img
+                src={img}
+                style={{
+                  width: "100%",
+                  borderRadius: "8px",
+                }}
+              />
             </Grid>
           ))}
         </Grid>
@@ -198,7 +205,7 @@ export default function useProjectData() {
     </Dialog>
   );
 
-  // ✅ UPLOAD DIALOG (FIXED API)
+  // ✅ UPLOAD DIALOG (SAFE)
   const uploadDialogUI = (
     <Dialog open={uploadDialog} onClose={() => setUploadDialog(false)} fullWidth>
       <DialogTitle>Upload Drawings</DialogTitle>
@@ -215,7 +222,7 @@ export default function useProjectData() {
             type="file"
             multiple
             onChange={(e) => {
-              const files = Array.from(e.target.files);
+              const files = Array.from(e.target.files || []);
               setDrawingImages(files);
             }}
           />
@@ -237,6 +244,11 @@ export default function useProjectData() {
           variant="contained"
           sx={{ ...buttonStyle, background: "#1976d2" }}
           onClick={async () => {
+            if (!drawingProject?._id) {
+              console.error("No project selected");
+              return;
+            }
+
             try {
               const formData = new FormData();
 
@@ -246,9 +258,8 @@ export default function useProjectData() {
 
               formData.append("drawingType", tab);
 
-              // ✅ FIXED HERE
               await fetch(
-                `https://fullstack-project-1-n510.onrender.com/api/projects/${drawingProject?._id}/drawing`,
+                `https://fullstack-project-1-n510.onrender.com/api/projects/${drawingProject._id}/drawing`,
                 {
                   method: "POST",
                   body: formData,
@@ -259,7 +270,7 @@ export default function useProjectData() {
               setDrawingImages([]);
               loadData();
             } catch (err) {
-              console.error(err);
+              console.error("Upload error:", err);
             }
           }}
         >
@@ -272,8 +283,9 @@ export default function useProjectData() {
   // ✅ DELETE DIALOG
   const deleteDialog = (
     <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
-      <DialogTitle>
-        <WarningAmberIcon color="error" /> Confirm Delete
+      <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <WarningAmberIcon color="error" />
+        Confirm Delete
       </DialogTitle>
 
       <DialogActions>
@@ -281,7 +293,7 @@ export default function useProjectData() {
 
         <Button
           variant="contained"
-          sx={{ ...buttonStyle, background: "#f44336" }}
+          sx={{ ...buttonStyle, background: "#f44336", color: "#fff" }}
           onClick={async () => {
             await deleteProject(deleteId);
             setDeleteId(null);
