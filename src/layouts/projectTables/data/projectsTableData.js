@@ -44,11 +44,7 @@ export default function useProjectData() {
     setPaymentType(type);
     setPaymentAmount("");
   };
-  const getDrawingImages = () => {
-    if (!drawingProject) return [];
 
-    return drawingProject[tab + "Images"] || [];
-  };
   const handleAddPayment = async () => {
     if (!paymentAmount || !paymentProject) return;
 
@@ -624,7 +620,7 @@ export default function useProjectData() {
           {/* Prev */}
           <MDBox
             onClick={() => {
-              const imgs = getImages();
+              const imgs = getDrawingImages();
               const prev = (imageIndex - 1 + imgs.length) % imgs.length;
               setImageIndex(prev);
               setSelectedImage(imgs[prev]);
@@ -643,7 +639,7 @@ export default function useProjectData() {
           {/* Next */}
           <MDBox
             onClick={() => {
-              const imgs = getImages();
+              const imgs = getDrawingImages();
               const next = (imageIndex + 1) % imgs.length;
               setImageIndex(next);
               setSelectedImage(imgs[next]);
@@ -667,7 +663,7 @@ export default function useProjectData() {
               color: "#fff",
             }}
           >
-            {imageIndex + 1} / {getImages().length}
+            {imageIndex + 1} / {getDrawingImages().length}
           </MDTypography>
 
           {/* Image */}
@@ -951,7 +947,11 @@ export default function useProjectData() {
   );
 
   const [tab, setTab] = useState("civil");
+  const getDrawingImages = () => {
+    if (!drawingProject) return [];
 
+    return drawingProject[tab + "Images"] || [];
+  };
   const drawingDialogUI = (
     <Dialog open={drawingDialog} onClose={() => setDrawingDialog(false)} maxWidth="sm" fullWidth>
       <DialogTitle>Project Drawings</DialogTitle>
@@ -976,7 +976,7 @@ export default function useProjectData() {
 
         {/* Images */}
         <Grid container spacing={2}>
-          {(drawingProject?.[tab + "Images"] || []).map((img, i) => (
+          {getDrawingImages().map((img, i) => (
             <Grid item xs={6} key={i}>
               <img
                 src={img}
