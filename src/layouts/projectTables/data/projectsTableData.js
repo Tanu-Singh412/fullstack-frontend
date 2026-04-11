@@ -266,7 +266,7 @@ export default function useProjectData() {
               height: 30,
               bgcolor:
                 currentStatus === "Pending"
-                  ? "#ff9800"
+                  ? "#f44336"
                   : currentStatus === "Assigned"
                   ? "#ff9800"
                   : currentStatus === "Completed"
