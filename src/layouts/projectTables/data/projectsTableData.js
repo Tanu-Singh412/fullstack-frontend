@@ -268,7 +268,7 @@ export default function useProjectData() {
                 currentStatus === "Pending"
                   ? "#f44336"
                   : currentStatus === "Assigned"
-                  ? "#ff9800"
+                  ? "#4da9ce"
                   : currentStatus === "Completed"
                   ? "#9c27b0"
                   : "#4da9ce", // Running
@@ -286,12 +286,12 @@ export default function useProjectData() {
         actions: (
           <MDBox display="flex">
             <IconButton
-  color="success"
-  size="small"
-  onClick={() => navigate("/project-details", { state: p })}
->
-  <VisibilityIcon />
-</IconButton>
+              color="success"
+              size="small"
+              onClick={() => navigate("/project-details", { state: p })}
+            >
+              <VisibilityIcon />
+            </IconButton>
             <IconButton color="primary" size="small" onClick={() => handleView(p)}>
               <VisibilityIcon />
             </IconButton>
