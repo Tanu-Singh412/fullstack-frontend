@@ -35,6 +35,9 @@ export default function useProjectData() {
   const [imageIndex, setImageIndex] = useState(0);
   const [selectedDescription, setSelectedDescription] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [drawingDialog, setDrawingDialog] = useState(false);
+const [drawingType, setDrawingType] = useState("");
+const [drawingImages, setDrawingImages] = useState([]);
   const openPaymentDialog = (project, type) => {
     setPaymentProject(project);
     setPaymentType(type);
@@ -178,8 +181,24 @@ export default function useProjectData() {
           ),
 
         serial: <MDTypography variant="caption">{i + 1}</MDTypography>,
-        image: <img src={p.images?.[0] || "https://via.placeholder.com/60"} width="60" />,
-        project: <MDTypography variant="caption">{p.projectName}</MDTypography>,
+image: (
+  <Button
+    variant="contained"
+    size="small"
+    onClick={() => {
+      setSelectedProject(p);
+      setDrawingDialog(true);
+    }}
+    sx={{
+      textTransform: "none",
+      fontSize: "12px",
+      background: "#1e293b",
+      "&:hover": { background: "#0f172a" },
+    }}
+  >
+    Drawings
+  </Button>
+),        project: <MDTypography variant="caption">{p.projectName}</MDTypography>,
         clientId: <MDTypography variant="caption">{p.clientId || "-"}</MDTypography>,
         description: (
           <MDTypography
@@ -550,6 +569,8 @@ export default function useProjectData() {
       )}
     </Dialog>
   );
+
+
   const imageLightbox = (
     <Dialog
       open={!!selectedImage}
@@ -919,6 +940,89 @@ export default function useProjectData() {
       </DialogActions>
     </Dialog>
   );
+
+  const drawingDialogUI = (
+  <Dialog open={drawingDialog} onClose={() => setDrawingDialog(false)} fullWidth maxWidth="sm">
+    <DialogTitle>Select Drawing Type</DialogTitle>
+
+    <DialogContent>
+      {/* CATEGORY SELECT */}
+      <Select
+        fullWidth
+        value={drawingType}
+        onChange={(e) => setDrawingType(e.target.value)}
+        displayEmpty
+      >
+        <MenuItem value="" disabled>Select Category</MenuItem>
+        <MenuItem value="civil">Civil</MenuItem>
+        <MenuItem value="interior">Interior</MenuItem>
+      </Select>
+
+      {/* UPLOAD */}
+      {drawingType && (
+        <MDBox mt={2}>
+          <Button variant="contained" component="label">
+            Upload {drawingType} Images
+            <input
+              hidden
+              multiple
+              type="file"
+              onChange={(e) => {
+                const files = Array.from(e.target.files);
+                const imgs = files.map((f) => ({
+                  file: f,
+                  url: URL.createObjectURL(f),
+                }));
+                setDrawingImages(imgs);
+              }}
+            />
+          </Button>
+        </MDBox>
+      )}
+
+      {/* PREVIEW */}
+      <Grid container spacing={2} mt={1}>
+        {drawingImages.map((img, i) => (
+          <Grid item key={i}>
+            <img src={img.url} width="100" />
+          </Grid>
+        ))}
+      </Grid>
+    </DialogContent>
+
+    <DialogActions>
+      <Button onClick={() => setDrawingDialog(false)}>Cancel</Button>
+
+      <Button
+        variant="contained"
+        onClick={async () => {
+          const formData = new FormData();
+
+          drawingImages.forEach((img) => {
+            formData.append("images", img.file);
+          });
+
+          formData.append("drawingType", drawingType);
+
+          await fetch(
+            `https://fullstack-project-1-n510.onrender.com/api/projects/${selectedProject._id}/drawing`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          setDrawingDialog(false);
+          setDrawingImages([]);
+          setDrawingType("");
+          loadData();
+        }}
+      >
+        Save
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
   return {
     columns,
     rows,
@@ -930,6 +1034,7 @@ export default function useProjectData() {
         {paymentDialog}
         {descriptionDialog}
         {deleteDialog}
+        {drawingDialogUI}
       </>
     ),
   };
