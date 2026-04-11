@@ -266,7 +266,7 @@ export default function useProjectData() {
               height: 30,
               bgcolor:
                 currentStatus === "Pending"
-                  ? "#f44336"
+                  ? "#ff9800"
                   : currentStatus === "Assigned"
                   ? "#ff9800"
                   : currentStatus === "Completed"
@@ -286,12 +286,12 @@ export default function useProjectData() {
         actions: (
           <MDBox display="flex">
             <IconButton
-  color="success"
-  size="small"
-  onClick={() => navigate("/project-details", { state: p })}
->
-  <VisibilityIcon />
-</IconButton>
+              color="success"
+              size="small"
+              onClick={() => navigate("/project-details", { state: p })}
+            >
+              <VisibilityIcon />
+            </IconButton>
             <IconButton color="primary" size="small" onClick={() => handleView(p)}>
               <VisibilityIcon />
             </IconButton>

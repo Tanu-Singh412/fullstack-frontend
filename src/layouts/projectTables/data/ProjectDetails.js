@@ -38,10 +38,7 @@ export default function ProjectDetails() {
           Payments
         </Button>
 
-        <Button
-          variant={tab === "info" ? "contained" : "outlined"}
-          onClick={() => setTab("info")}
-        >
+        <Button variant={tab === "info" ? "contained" : "outlined"} onClick={() => setTab("info")}>
           Info
         </Button>
       </Box>
