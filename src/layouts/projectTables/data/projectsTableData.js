@@ -44,7 +44,11 @@ export default function useProjectData() {
     setPaymentType(type);
     setPaymentAmount("");
   };
+  const getImages = () => {
+    if (!selectedProject) return [];
 
+    return selectedProject[tab + "Images"] || selectedProject.images || [];
+  };
   const handleAddPayment = async () => {
     if (!paymentAmount || !paymentProject) return;
 
@@ -128,22 +132,19 @@ export default function useProjectData() {
     setImageIndex(index);
   };
   const handleNext = () => {
-    const imgs = getDrawingImages();
-    if (!imgs.length) return;
-
+    const imgs = selectedProject?.images || [];
     const next = (imageIndex + 1) % imgs.length;
     setImageIndex(next);
     setSelectedImage(imgs[next]);
   };
 
   const handlePrev = () => {
-    const imgs = getDrawingImages();
-    if (!imgs.length) return;
-
+    const imgs = selectedProject?.images || [];
     const prev = (imageIndex - 1 + imgs.length) % imgs.length;
     setImageIndex(prev);
     setSelectedImage(imgs[prev]);
   };
+
   // Function to format project data into table rows
   const formatRows = (data) => {
     return data.map((p, i) => {
@@ -619,7 +620,7 @@ export default function useProjectData() {
           {/* Prev */}
           <MDBox
             onClick={() => {
-              const imgs = getDrawingImages();
+              const imgs = getImages();
               const prev = (imageIndex - 1 + imgs.length) % imgs.length;
               setImageIndex(prev);
               setSelectedImage(imgs[prev]);
@@ -638,7 +639,7 @@ export default function useProjectData() {
           {/* Next */}
           <MDBox
             onClick={() => {
-              const imgs = getDrawingImages();
+              const imgs = getImages();
               const next = (imageIndex + 1) % imgs.length;
               setImageIndex(next);
               setSelectedImage(imgs[next]);
@@ -662,7 +663,7 @@ export default function useProjectData() {
               color: "#fff",
             }}
           >
-            {imageIndex + 1} / {getDrawingImages().length}
+            {imageIndex + 1} / {getImages().length}
           </MDTypography>
 
           {/* Image */}
@@ -946,11 +947,7 @@ export default function useProjectData() {
   );
 
   const [tab, setTab] = useState("civil");
-  const getDrawingImages = () => {
-    if (!drawingProject) return [];
 
-    return drawingProject[tab + "Images"] || [];
-  };
   const drawingDialogUI = (
     <Dialog open={drawingDialog} onClose={() => setDrawingDialog(false)} maxWidth="sm" fullWidth>
       <DialogTitle>Project Drawings</DialogTitle>
@@ -980,6 +977,7 @@ export default function useProjectData() {
               <img
                 src={img}
                 onClick={() => {
+                  setSelectedProject(drawingProject); // ✅ IMPORTANT
                   setSelectedImage(img);
                   setImageIndex(i);
                 }}
