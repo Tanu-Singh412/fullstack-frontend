@@ -255,6 +255,19 @@ export default function useProjectData() {
 
         actions: (
           <MDBox display="flex">
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => navigate("/project-details", { state: p })}
+              sx={{
+                textTransform: "none",
+                fontSize: "11px",
+                px: 1.5,
+                py: 0.5,
+              }}
+            >
+              Details
+            </Button>
             <IconButton color="primary" size="small" onClick={() => handleView(p)}>
               <VisibilityIcon />
             </IconButton>

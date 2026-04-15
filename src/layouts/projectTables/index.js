@@ -1,6 +1,6 @@
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-
+import { useState } from "react";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
@@ -16,6 +16,7 @@ import projectTableData from "layouts/projectTables/data/projectsTableData";
 
 function Tables() {
   const { columns, rows, dialog } = projectTableData();
+  const [openRow, setOpenRow] = useState(null);
   const navigate = useNavigate();
 
   return (
