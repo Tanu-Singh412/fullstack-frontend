@@ -42,7 +42,7 @@ function Dashboard() {
   const [totalProjects, setTotalProjects] = useState(0);
   useEffect(() => {
     const loadClients = async () => {
-      const res = await fetch("https://fullstack-project-1-n510.onrender.com/api/clients");
+      const res = await fetch("http://localhost:5000/api/clients");
 
       const data = await res.json();
 
@@ -53,7 +53,7 @@ function Dashboard() {
   }, []);
   useEffect(() => {
     const loadProjects = async () => {
-      const res = await fetch("https://fullstack-project-1-n510.onrender.com/api/projects");
+      const res = await fetch("http://localhost:5000/api/projects");
 
       const data = await res.json();
 

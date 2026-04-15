@@ -118,7 +118,7 @@ function AddVendor() {
       if (editData) {
         const parsed = JSON.parse(editData);
 
-        await fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${parsed._id}`, {
+        await fetch(` http://localhost:5000/api/vendors/${parsed._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cleanedForm),
@@ -126,7 +126,7 @@ function AddVendor() {
 
         alert("Vendor Updated");
       } else {
-        await fetch("https://fullstack-project-1-n510.onrender.com/api/vendors", {
+        await fetch("http://localhost:5000/api/vendors", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cleanedForm),

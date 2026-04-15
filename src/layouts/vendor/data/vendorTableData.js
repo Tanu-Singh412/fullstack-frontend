@@ -34,7 +34,7 @@ export default function useVendorTableData() {
   // =====================
   const loadData = async () => {
     try {
-      const res = await fetch("https://fullstack-project-1-n510.onrender.com/api/vendors");
+      const res = await fetch("http://localhost:5000/api/vendors");
 
       const text = await res.text();
 
@@ -59,7 +59,7 @@ export default function useVendorTableData() {
     try {
       setVendors((prev) => prev.map((v) => (v._id === id ? { ...v, status: value } : v)));
 
-      await fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`, {
+      await fetch(`http://localhost:5000/api/vendors/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: value }),
@@ -74,7 +74,7 @@ export default function useVendorTableData() {
   // =====================
   const deleteVendor = async (id) => {
     try {
-      await fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`, {
+      await fetch(`http://localhost:5000/api/vendors/${id}`, {
         method: "DELETE",
       });
 

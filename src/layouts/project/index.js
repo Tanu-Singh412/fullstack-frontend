@@ -47,7 +47,7 @@ function AddProject() {
   const [dwgFile, setDwgFile] = useState(null);
 
   useEffect(() => {
-    fetch("https://fullstack-project-1-n510.onrender.com/api/clients")
+    fetch("http://localhost:5000/api/clients")
       .then((res) => res.json())
       .then((data) => setClients(data));
   }, []);
@@ -155,14 +155,14 @@ function AddProject() {
       formData.append("dwgFile", dwgFile);
     }
     if (editData?._id) {
-      await fetch("https://fullstack-project-1-n510.onrender.com/api/projects/" + editData._id, {
+      await fetch("http://localhost:5000/api/projects/" + editData._id, {
         method: "PUT",
         body: formData,
       });
 
       alert("Project Updated");
     } else {
-      await fetch("https://fullstack-project-1-n510.onrender.com/api/projects", {
+      await fetch("http://localhost:5000/api/projects", {
         method: "POST",
         body: formData,
       });

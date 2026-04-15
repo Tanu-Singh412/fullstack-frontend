@@ -63,7 +63,7 @@ function AddClient() {
 
       if (form._id) {
         // Update client
-        await fetch(`https://fullstack-project-1-n510.onrender.com/api/clients/${form._id}`, {
+        await fetch(`http://localhost:5000/api/clients/${form._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
@@ -71,7 +71,7 @@ function AddClient() {
         alert("Client Updated");
       } else {
         // Add new client
-        await fetch("https://fullstack-project-1-n510.onrender.com/api/clients", {
+        await fetch("http://localhost:5000/api/clients", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),

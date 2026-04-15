@@ -52,7 +52,6 @@ function Tables() {
                   startIcon={<AddIcon />}
                   onClick={() => navigate("/add-clients")} // ✅ FIXED route
                   sx={{
-                    borderRadius: "10px",
                     textTransform: "none",
                     fontWeight: "600",
                     px: 2.5,
