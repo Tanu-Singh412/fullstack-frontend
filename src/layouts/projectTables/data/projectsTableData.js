@@ -740,7 +740,39 @@ export default function useProjectData() {
                   </MDTypography>
                 </MDBox>
               </MDBox>
+ {/* ➕ ADD PAYMENT */}
+              <MDBox mt={3} display="flex" gap={1}>
+                <input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  style={{ 
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                  }}
+                />
 
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setPaymentType("add");
+                    handleAddPayment();
+                  }}
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    px: 3,
+                    background: "#1976d2",
+                    color: "#fff",
+                    "&:hover": { background: "#1565c0" },
+                  }}
+                >
+                  Add
+                </Button>
+              </MDBox>
               {/* ✅ PAYMENT TABLE */}
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
@@ -771,39 +803,7 @@ export default function useProjectData() {
                 </tbody>
               </table>
 
-              {/* ➕ ADD PAYMENT */}
-              <MDBox mt={3} display="flex" gap={1}>
-                <input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: "10px",
-                    borderRadius: "8px",
-                    border: "1px solid #ccc",
-                  }}
-                />
-
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    setPaymentType("add");
-                    handleAddPayment();
-                  }}
-                  sx={{
-                    borderRadius: "8px",
-                    textTransform: "none",
-                    px: 3,
-                    background: "#1976d2",
-                    color: "#fff",
-                    "&:hover": { background: "#1565c0" },
-                  }}
-                >
-                  Add
-                </Button>
-              </MDBox>
+             
             </>
           );
         })()}
