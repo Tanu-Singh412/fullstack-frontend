@@ -7,7 +7,7 @@ import Billing from "layouts/billing";
 import Vendor from "layouts/vendor";
 import AddVendor from "layouts/vendor/add-vendor";
 import SignIn from "layouts/authentication/sign-in";
-  import ProjectDetails from "layouts/project-details";
+  import ProjectDetails from "layouts/projectTables/data/project-details";
 
 import Icon from "@mui/material/Icon";
 
