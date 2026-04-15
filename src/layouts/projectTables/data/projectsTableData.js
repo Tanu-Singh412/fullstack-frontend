@@ -766,8 +766,7 @@ export default function useProjectData() {
                     textTransform: "none",
                     px: 3,
                     background: "#1976d2",
-                    color: "#fff"
-                   
+                    color: "#fff",
                   }}
                 >
                   Add

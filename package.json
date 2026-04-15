@@ -42,15 +42,11 @@
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start"
   },
-  "eslintConfig": {
+"eslintConfig": {
   "extends": [
     "react-app",
-    "react-app/jest",
-    "plugin:prettier/recommended"
-  ],
-  "rules": {
-    "prettier/prettier": "off"
-  }
+    "react-app/jest"
+  ]
 },
   "browserslist": {
     "production": [
@@ -67,13 +63,10 @@
   "devDependencies": {
     "ajv": "^7.2.4",
     "eslint": "8.39.0",
-    "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-jsx-a11y": "6.7.1",
-    "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-react": "7.32.2",
-    "eslint-plugin-react-hooks": "4.6.0",
-    "prettier": "^2.8.8"
+    "eslint-plugin-react-hooks": "4.6.0"
   },
   "overrides": {
     "svgo": "3.0.2"

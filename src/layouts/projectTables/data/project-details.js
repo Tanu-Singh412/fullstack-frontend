@@ -8,7 +8,10 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 
-const [drawingType, setDrawingType] = useState(null); // civil / interior
+function ProjectDetails() {
+  const { state } = useLocation();
+  const [tab, setTab] = useState(0);
+  const [drawingType, setDrawingType] = useState(null); // civil / interior
 
 const handleUpload = async (e) => {
   const file = e.target.files[0];
@@ -26,9 +29,7 @@ const handleUpload = async (e) => {
   alert("Uploaded successfully");
 };
 
-function ProjectDetails() {
-  const { state } = useLocation();
-  const [tab, setTab] = useState(0);
+
 
   if (!state) return <div>No Data</div>;
 

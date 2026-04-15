@@ -3,7 +3,7 @@
     "browser": true,
     "es2021": true
   },
-  "extends": ["plugin:react/recommended", "prettier"],
+  "extends": ["react-app", "react-app/jest"],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -11,14 +11,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react", "prettier"],
   "rules": {
-    "prettier/prettier": [
-      "error",
-      {
-        "endOfLine": "auto"
-      }
-    ],
     "react/display-name": "off",
     "default-param-last": "off",
     "react/react-in-jsx-scope": "off",
@@ -30,6 +23,5 @@
       }
     ],
     "react/jsx-curly-spacing": [2, "never"]
-  },
-  "settings": { "import/resolver": { "node": { "paths": ["src"] } } }
+  }
 }
