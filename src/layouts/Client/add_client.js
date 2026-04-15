@@ -79,7 +79,7 @@ function AddClient() {
         alert("Client Added");
       }
 
-      localStorage.setItem("clientUpdated", Date.now());
+      localStorage.setItem("Client is Updated", Date.now());
       localStorage.removeItem("editClient");
 
       navigate("/tables"); // go back to client table
