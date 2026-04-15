@@ -740,14 +740,14 @@ export default function useProjectData() {
                   </MDTypography>
                 </MDBox>
               </MDBox>
- {/* ➕ ADD PAYMENT */}
+              {/* ➕ ADD PAYMENT */}
               <MDBox mt={3} display="flex" gap={1}>
                 <input
                   type="number"
                   placeholder="Enter amount"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
-                  style={{ 
+                  style={{
                     flex: 1,
                     padding: "10px",
                     borderRadius: "8px",
@@ -767,6 +767,7 @@ export default function useProjectData() {
                     px: 3,
                     background: "#1976d2",
                     color: "#fff",
+                    "&:hover": { background: "#1565c0" },
                   }}
                 >
                   Add
@@ -801,8 +802,6 @@ export default function useProjectData() {
                   ))}
                 </tbody>
               </table>
-
-             
             </>
           );
         })()}
