@@ -23,7 +23,7 @@ const Base_API = "https://fullstack-project-1-n510.onrender.com/api";
 function ProjectDetails() {
   const { state } = useLocation();
 
-  const [project, setProject] = useState(null);
+  const [project, setProject] = useState(state);
   const [tab, setTab] = useState(0);
 
   const [drawingType, setDrawingType] = useState(null);
@@ -44,29 +44,26 @@ function ProjectDetails() {
   const [imageIndex, setImageIndex] = useState(0);
 
   // ================= FETCH =================
+  const fetchProject = async () => {
+    if (!state?._id) return;
 
+    const res = await fetch(`${Base_API}/projects`);
+    const data = await res.json();
+    const current = data.find((p) => p._id === state._id);
+    setProject(current);
+  };
 
-const fetchProject = async () => {
-  if (!state?._id) return;
-
-  const res = await fetch(`${Base_API}/projects`);
-  const data = await res.json();
-
-  const current = data.find((p) => p._id === state._id);
-  setProject(current);
-};
-
-useEffect(() => {
-  fetchProject();
-}, []);
+  useEffect(() => {
+    fetchProject();
+  }, []);
 
   if (!project) return <div>No Data</div>;
 
-const total = Number(project?.totalAmount ?? 0);
-          const paid = (project?.payments || []).reduce(
-            (sum, p) => sum + Number(p.amount),
-            0
-          );
+const total = Number(project?.totalAmount || 0);
+       const paid = (project?.payments || []).reduce(
+  (sum, p) => sum + Number(p?.amount || 0),
+  0
+);
 
           const balance = total - paid;
 
@@ -234,7 +231,7 @@ const handleAddPayment = async () => {
                     <Grid item xs={12} sm={6} md={3} key={i}>
                       <Card sx={{ position: "relative", p: 1 }}>
                         <img
-src={`${img}?t=${Date.now()}`}
+src={`${Base_API.replace("/api","")}/${img}?t=${Date.now()}`}
   alt=""
   onError={(e) => {
     e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
@@ -458,7 +455,7 @@ src={`${img}?t=${Date.now()}`}
           <Button onClick={prev}>◀</Button>
 
           <img
-            src={selectedImage}
+src={`${Base_API.replace("/api","")}/${selectedImage}`}
             style={{ maxHeight: "80%", maxWidth: "80%" }}
           />
 
