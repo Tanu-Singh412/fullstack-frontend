@@ -59,8 +59,7 @@ function ProjectDetails() {
 
   if (!project) return <div>No Data</div>;
 
-           const total = Number(project?.totalAmount || 0);
-
+const total = Number(project.totalAmount || 0);
           const paid = (project?.payments || []).reduce(
             (sum, p) => sum + Number(p.amount),
             0
@@ -157,14 +156,24 @@ const handleAddPayment = async () => {
 
       <MDBox p={3}>
         {/* HEADER */}
-        <Card sx={{ p: 3, mb: 3 }}>
-          <MDTypography variant="h4" fontWeight="bold">
-            {project.projectName}
-          </MDTypography>
-          <MDTypography>
-            Client: <b>{project.clientName}</b>
-          </MDTypography>
-        </Card>
+       <Card
+  sx={{
+    p: 3,
+    mb: 3,
+    borderRadius: "16px",
+    background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+    color: "#fff",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+  }}
+>
+  <MDTypography variant="h4" fontWeight="bold" sx={{ color: "#fff" }}>
+    {project.projectName}
+  </MDTypography>
+
+  <MDTypography sx={{ mt: 1, color: "#e3f2fd" }}>
+    Client: <b style={{ color: "#fff" }}>{project.clientName}</b>
+  </MDTypography>
+</Card>
 
         {/* TABS */}
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
@@ -263,24 +272,27 @@ src={`${img}?t=${Date.now()}`}
     <Grid container spacing={2}>
     <Grid item xs={12} md={4}>
   <Card
-    sx={{
-      p: 3,
-      bgcolor: "#e3f2fd",
-      textAlign: "center",
-      borderRadius: "12px",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-    }}
-  >
-    <MDTypography variant="caption">Total Amount</MDTypography>
+  sx={{
+    p: 3,
+    borderRadius: "16px",
+    textAlign: "center",
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
+    color: "#fff",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
+  }}
+>
+  <MDTypography variant="caption" sx={{ color: "#cbd5f5" }}>
+    Total Amount
+  </MDTypography>
 
-    <MDTypography
-      variant="h4"
-      fontWeight="bold"
-      sx={{ mt: 1, color: "#1976d2" }}
-    >
-      ₹ {total.toLocaleString()}
-    </MDTypography>
-  </Card>
+  <MDTypography
+    variant="h3"
+    fontWeight="bold"
+    sx={{ mt: 1 }}
+  >
+    ₹ {total.toLocaleString()}
+  </MDTypography>
+</Card>
 </Grid>
 
       <Grid item xs={12} md={4}>
