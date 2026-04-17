@@ -135,8 +135,8 @@ await fetch(`${Base_API}/projects/drawing`, {
 };
 
   // ================= USE EFFECTS =================
-  useEffect(() => {
- // ALL hooks first
+// ================= USE EFFECTS =================
+
 useEffect(() => {
   fetchProject();
 }, []);
@@ -144,13 +144,17 @@ useEffect(() => {
 useEffect(() => {
   if (project?._id) {
     fetchScope();
+  }
+}, [project?._id]);
+
+useEffect(() => {
+  if (project?._id) {
     fetchDrawings();
   }
 }, [project?._id]);
 
-// THEN conditional return
+// ✅ AFTER ALL HOOKS
 if (!project?._id) return <div>Loading...</div>;
-
   // ================= PAYMENT =================
   const handleAddPayment = async () => {
     if (!paymentData.amount) return;
