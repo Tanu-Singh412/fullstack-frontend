@@ -210,55 +210,55 @@ const handleAddPayment = async () => {
 };
 
 
-const handleAddScope = async () => {
-  try {
-    setLoading(true);
+ const handleAddScope = async () => {
+    try {
+      setLoading(true);
 
-    const res = await fetch(`${Base_API}/projects/${project._id}/scope`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(scopeData),
-    });
+      const res = await fetch(
+        `${Base_API}/projects/${project._id}/scope`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(scopeData),
+        }
+      );
 
-    if (!res.ok) {
-      throw new Error("Failed to save scope");
+      if (!res.ok) throw new Error("Failed");
+
+      await fetchScope(); // ✅ instant update
+
+      // reset
+      setScopeData({
+        projectType: "",
+        workType: "",
+        area: "",
+        floors: "",
+        conceptDesign: false,
+        drawings2D: false,
+        elevation3D: false,
+        workingDrawings: false,
+        interiorLayout: false,
+        civil: false,
+        electrical: false,
+        plumbing: false,
+        interiorExecution: false,
+        supervision: false,
+        revisions: "",
+        timeline: "",
+        costPerSqft: "",
+        lumpSum: "",
+        materialIncluded: false,
+        notes: "",
+      });
+
+    } catch (err) {
+      alert("Error saving scope");
+    } finally {
+      setLoading(false);
     }
-
-    await fetchScope(); // ✅ IMPORTANT
-
-    // Reset form
-    setScopeData({
-      projectType: "",
-      workType: "",
-      area: "",
-      floors: "",
-      conceptDesign: false,
-      drawings2D: false,
-      elevation3D: false,
-      workingDrawings: false,
-      interiorLayout: false,
-      civil: false,
-      electrical: false,
-      plumbing: false,
-      interiorExecution: false,
-      supervision: false,
-      revisions: "",
-      timeline: "",
-      costPerSqft: "",
-      lumpSum: "",
-      materialIncluded: false,
-      notes: "",
-    });
-
-  } catch (err) {
-    console.error(err);
-    alert("Error saving scope");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <DashboardLayout>
@@ -546,21 +546,19 @@ const handleAddScope = async () => {
 )}
 {tab === 3 && (
   <MDBox mt={3}>
-
     {/* ================= FORM ================= */}
     <Card
       sx={{
         p: 3,
         mb: 3,
-        borderRadius: "16px",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+        borderRadius: "12px",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
       }}
     >
       <MDTypography variant="h6" mb={2}>
         Add Scope of Work
       </MDTypography>
 
-      {/* INPUTS */}
       <Grid container spacing={2}>
         <Grid item xs={12} md={3}>
           <TextField
@@ -611,9 +609,21 @@ const handleAddScope = async () => {
             }
           />
         </Grid>
+
+        <Grid item xs={12} md={2}>
+          <TextField
+            label="Timeline"
+            fullWidth
+            size="small"
+            value={scopeData.timeline}
+            onChange={(e) =>
+              setScopeData({ ...scopeData, timeline: e.target.value })
+            }
+          />
+        </Grid>
       </Grid>
 
-      {/* CHECKBOXES */}
+      {/* ================= CHECKBOX ================= */}
       <MDBox mt={3}>
         <MDTypography variant="subtitle2" mb={1}>
           Services Included
@@ -634,7 +644,14 @@ const handleAddScope = async () => {
             "materialIncluded",
           ].map((field) => (
             <Grid item xs={6} md={3} key={field}>
-              <label style={{ fontSize: 13 }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "13px",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={scopeData[field]}
@@ -644,7 +661,7 @@ const handleAddScope = async () => {
                       [field]: e.target.checked,
                     })
                   }
-                />{" "}
+                />
                 {field}
               </label>
             </Grid>
@@ -652,7 +669,7 @@ const handleAddScope = async () => {
         </Grid>
       </MDBox>
 
-      {/* NOTES */}
+      {/* ================= NOTES ================= */}
       <MDBox mt={3}>
         <TextField
           label="Notes"
@@ -666,19 +683,20 @@ const handleAddScope = async () => {
         />
       </MDBox>
 
-      {/* BUTTON */}
+      {/* ================= BUTTON ================= */}
       <Button
         variant="contained"
         sx={{
           mt: 3,
-          borderRadius: "10px",
           px: 4,
+          borderRadius: "8px",
           textTransform: "none",
           background: "#1976d2",
+          color: "#fff",
         }}
         onClick={handleAddScope}
       >
-        Add Scope
+        {loading ? <CircularProgress size={20} /> : "Add Scope"}
       </Button>
     </Card>
 
@@ -686,8 +704,8 @@ const handleAddScope = async () => {
     <Card
       sx={{
         p: 2,
-        borderRadius: "16px",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+        borderRadius: "12px",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
         overflowX: "auto",
       }}
     >
@@ -698,6 +716,7 @@ const handleAddScope = async () => {
             <th>Work</th>
             <th>Area</th>
             <th>Floors</th>
+            <th>Timeline</th>
             <th>Services</th>
             <th>Notes</th>
           </tr>
@@ -706,7 +725,7 @@ const handleAddScope = async () => {
         <tbody>
           {scopeList.length === 0 ? (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center", padding: 20 }}>
+              <td colSpan="7" style={{ textAlign: "center", padding: 20 }}>
                 No scope added yet
               </td>
             </tr>
@@ -723,6 +742,7 @@ const handleAddScope = async () => {
                 <td>{s.workType}</td>
                 <td>{s.area}</td>
                 <td>{s.floors}</td>
+                <td>{s.timeline}</td>
                 <td style={{ fontSize: 12 }}>
                   {Object.keys(s)
                     .filter((k) => s[k] === true)
@@ -737,7 +757,6 @@ const handleAddScope = async () => {
     </Card>
   </MDBox>
 )}
-
     </MDBox>
 
       {/* LIGHTBOX */}
