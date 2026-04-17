@@ -78,6 +78,7 @@ const [tab, setTab] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
 
   // ================= FETCH =================
+// ================= FETCH =================
 const fetchProject = async () => {
   if (!state?._id) return;
 
@@ -89,13 +90,32 @@ const fetchProject = async () => {
   if (current) {
     setProject({
       ...current,
-      totalAmount: Number(current.totalAmount || 0), // ✅ FIX
+      totalAmount: Number(current.totalAmount || 0),
     });
   }
 };
- 
-  if (!project) return <div>No Data</div>;
 
+const fetchScope = async () => {
+  if (!project?._id) return;
+
+  const res = await fetch(`${Base_API}/projects/${project._id}/scope`);
+  const data = await res.json();
+  setScopeList(data || []);
+};
+
+// ================= USE EFFECTS =================
+useEffect(() => {
+  fetchProject();
+}, []);
+
+useEffect(() => {
+  if (project?._id) {
+    fetchScope();
+  }
+}, [project?._id]);
+
+// ✅ AFTER hooks
+if (!project?._id) return <div>Loading...</div>;
 
   // ================= UPLOAD =================
   const handleUpload = async () => {
@@ -189,55 +209,6 @@ const handleAddPayment = async () => {
   fontSize: "14px",
 };
 
-// ================= FETCH PROJECT =================
-const fetchProject = async () => {
-  if (!state?._id) return;
-
-  try {
-    const res = await fetch(`${Base_API}/projects`);
-    const data = await res.json();
-
-    const current = data.find((p) => p._id === state._id);
-
-    if (current) {
-      setProject({
-        ...current,
-        totalAmount: Number(current.totalAmount || 0),
-      });
-    }
-  } catch (err) {
-    console.log("Project fetch error:", err);
-  }
-};
-
-// ================= FETCH SCOPE =================
-const fetchScope = async () => {
-  if (!project?._id) return;
-
-  try {
-    const res = await fetch(`${Base_API}/projects/${project._id}/scope`);
-    const data = await res.json();
-    setScopeList(data || []);
-  } catch (err) {
-    console.log("Scope fetch error:", err);
-  }
-};
-
-// ================= USE EFFECTS =================
-
-// ✅ Fetch project (ONLY ON LOAD / state change)
-useEffect(() => {
-  if (state?._id) {
-    fetchProject();
-  }
-}, [state]);
-
-// ✅ Fetch scope AFTER project loads
-useEffect(() => {
-  if (project?._id) {
-    fetchScope();
-  }
-}, [project?._id]);
 
 const handleAddScope = async () => {
   await fetch(`${Base_API}/projects/${project._id}/scope`, {
@@ -299,7 +270,7 @@ const handleAddScope = async () => {
 </Card>
 
         {/* TABS */}
-        <Tabs value={tab} onChange={(e, v) => setTab(v)} style={{background:"#1976d2", color:"#fff"}}>
+        <Tabs value={tab} onChange={(e, v) => setTab(v)}>
           <Tab label="Overview" />
           <Tab label="Drawings" />
           <Tab label="Accounts" />
