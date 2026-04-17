@@ -27,7 +27,6 @@ function ProjectDetails() {
   const [tab, setTab] = useState(0);
 
   const [drawingType, setDrawingType] = useState(null);
-
   const [openUpload, setOpenUpload] = useState(false);
   const [uploadType, setUploadType] = useState(null);
   const [files, setFiles] = useState([]);
@@ -41,27 +40,24 @@ function ProjectDetails() {
     note: "",
   });
 
-  // LIGHTBOX
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageIndex, setImageIndex] = useState(0);
 
-// ================= FETCH PROJECT =================
-const fetchProject = async () => {
-  if (!project?._id) return;
+  // ================= FETCH =================
+  const fetchProject = async () => {
+    if (!state?._id) return;
 
-  const res = await fetch(`${Base_API}/projects`);
-  const data = await res.json();
-  const current = data.find((p) => p._id === project._id);
-  setProject(current);
-};
+    const res = await fetch(`${Base_API}/projects`);
+    const data = await res.json();
+    const current = data.find((p) => p._id === state._id);
+    setProject(current);
+  };
 
-// ✅ FIXED: Hook always runs
-useEffect(() => {
-  fetchProject();
-}, []);
+  useEffect(() => {
+    fetchProject();
+  }, []);
 
-// ✅ AFTER hooks
-if (!project) return <div>No Data</div>;
+  if (!project) return <div>No Data</div>;
 
   const total = Number(project.totalAmount || 0);
   const paid = (project.payments || []).reduce(
@@ -72,106 +68,81 @@ if (!project) return <div>No Data</div>;
 
   // ================= UPLOAD =================
   const handleUpload = async () => {
-    if (!files.length) return alert("Select files first");
+    if (!files.length) return alert("Select files");
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const formData = new FormData();
-      [...files].forEach((f) => formData.append("images", f));
-      formData.append("drawingType", uploadType);
+    const formData = new FormData();
+    [...files].forEach((f) => formData.append("images", f));
+    formData.append("drawingType", uploadType);
 
-      const res = await fetch(
-        `${Base_API}/projects/${project._id}/drawing`,
-        { method: "POST", body: formData }
-      );
+    await fetch(`${Base_API}/projects/${project._id}/drawing`, {
+      method: "POST",
+      body: formData,
+    });
 
-      if (!res.ok) throw new Error("Upload failed");
-
-      await fetchProject(); // ✅ refresh UI
-      setFiles([]);
-
-      alert("Upload success ✅");
-    } catch (err) {
-      alert("Upload failed ❌");
-    } finally {
-      setLoading(false);
-      setOpenUpload(false);
-    }
+    await fetchProject();
+    setFiles([]);
+    setOpenUpload(false);
+    setLoading(false);
   };
 
   // ================= PAYMENT =================
   const handleAddPayment = async () => {
-    if (!paymentData.amount) return alert("Enter amount");
+    if (!paymentData.amount) return;
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const res = await fetch(
-        `${Base_API}/projects/${project._id}/payment`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(paymentData),
-        }
-      );
+    await fetch(`${Base_API}/projects/${project._id}/payment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(paymentData),
+    });
 
-      if (!res.ok) throw new Error("Payment failed");
-
-      await fetchProject(); // ✅ refresh UI
-
-      setPaymentData({ amount: "", date: "", note: "" });
-
-      alert("Payment added ✅");
-    } catch (err) {
-      alert("Payment failed ❌");
-    } finally {
-      setLoading(false);
-      setShowPaymentForm(false);
-    }
+    await fetchProject();
+    setPaymentData({ amount: "", date: "", note: "" });
+    setShowPaymentForm(false);
+    setLoading(false);
   };
 
   // ================= DELETE IMAGE =================
   const handleDeleteImage = async (imgUrl, type) => {
     const field = type === "civil" ? "civilImages" : "interiorImages";
 
-    const updatedImages = project[field].filter((img) => img !== imgUrl);
+    const updated = project[field].filter((img) => img !== imgUrl);
 
     await fetch(`${Base_API}/projects/${project._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [field]: updatedImages }),
+      body: JSON.stringify({ [field]: updated }),
     });
 
     await fetchProject();
   };
 
   // ================= LIGHTBOX =================
+  const images =
+    drawingType === "civil"
+      ? project.civilImages
+      : project.interiorImages;
+
   const openImage = (img, index) => {
     setSelectedImage(img);
     setImageIndex(index);
   };
 
-  const handleNext = () => {
-    const imgs =
-      drawingType === "civil"
-        ? project.civilImages
-        : project.interiorImages;
-
-    const next = (imageIndex + 1) % imgs.length;
-    setImageIndex(next);
-    setSelectedImage(imgs[next]);
+  const next = () => {
+    const i = (imageIndex + 1) % images.length;
+    setImageIndex(i);
+    setSelectedImage(images[i]);
   };
 
-  const handlePrev = () => {
-    const imgs =
-      drawingType === "civil"
-        ? project.civilImages
-        : project.interiorImages;
-
-    const prev = (imageIndex - 1 + imgs.length) % imgs.length;
-    setImageIndex(prev);
-    setSelectedImage(imgs[prev]);
+  const prev = () => {
+    const i = (imageIndex - 1 + images.length) % images.length;
+    setImageIndex(i);
+    setSelectedImage(images[i]);
   };
 
   return (
@@ -184,11 +155,12 @@ if (!project) return <div>No Data</div>;
           <MDTypography variant="h4" fontWeight="bold">
             {project.projectName}
           </MDTypography>
-          <MDTypography mt={1}>
+          <MDTypography>
             Client: <b>{project.clientName}</b>
           </MDTypography>
         </Card>
 
+        {/* TABS */}
         <Tabs value={tab} onChange={(e, v) => setTab(v)}>
           <Tab label="Overview" />
           <Tab label="Drawings" />
@@ -198,10 +170,7 @@ if (!project) return <div>No Data</div>;
         {/* OVERVIEW */}
         {tab === 0 && (
           <Card sx={{ p: 3, mt: 2 }}>
-            <MDTypography variant="h6">Description</MDTypography>
-            <MDTypography mt={1}>
-              {project.description || "No description"}
-            </MDTypography>
+            <MDTypography>{project.description}</MDTypography>
           </Card>
         )}
 
@@ -212,7 +181,7 @@ if (!project) return <div>No Data</div>;
               <Grid container spacing={3}>
                 {["civil", "interior"].map((type) => (
                   <Grid item xs={12} md={6} key={type}>
-                    <Card sx={{ p: 4 }}>
+                    <Card sx={{ p: 3, position: "relative" }}>
                       <MDTypography variant="h5">
                         {type === "civil"
                           ? "Civil Drawings"
@@ -220,6 +189,8 @@ if (!project) return <div>No Data</div>;
                       </MDTypography>
 
                       <Button
+                        size="small"
+                        sx={{ position: "absolute", top: 10, right: 10 }}
                         variant="contained"
                         onClick={() => {
                           setUploadType(type);
@@ -241,21 +212,26 @@ if (!project) return <div>No Data</div>;
                 <Button onClick={() => setDrawingType(null)}>⬅ Back</Button>
 
                 <Grid container spacing={3} mt={1}>
-                  {(drawingType === "civil"
-                    ? project.civilImages
-                    : project.interiorImages
-                  )?.map((img, i) => (
+                  {images?.map((img, i) => (
                     <Grid item xs={12} sm={6} md={3} key={i}>
-                      <Card sx={{ position: "relative" }}>
+                      <Card sx={{ position: "relative", p: 1 }}>
                         <img
                           src={img}
-                          style={{ width: "100%", height: 200 }}
+                          alt=""
+                          style={{
+                            width: "100%",
+                            height: 180,
+                            objectFit: "cover",
+                            borderRadius: 6,
+                            cursor: "pointer",
+                          }}
                           onClick={() => openImage(img, i)}
                         />
 
                         <Button
-                          color="error"
                           size="small"
+                          color="error"
+                          fullWidth
                           onClick={() =>
                             handleDeleteImage(img, drawingType)
                           }
@@ -286,12 +262,16 @@ if (!project) return <div>No Data</div>;
               </Grid>
             </Grid>
 
-            <Button onClick={() => setShowPaymentForm(true)}>
+            <Button
+              variant="contained"
+              sx={{ mt: 2 }}
+              onClick={() => setShowPaymentForm(true)}
+            >
               + Add Payment
             </Button>
 
             {showPaymentForm && (
-              <Card sx={{ p: 2 }}>
+              <Card sx={{ p: 2, mt: 2 }}>
                 <TextField
                   label="Amount"
                   fullWidth
@@ -303,14 +283,19 @@ if (!project) return <div>No Data</div>;
                     })
                   }
                 />
-                <Button onClick={handleAddPayment}>Save</Button>
+                <Button sx={{ mt: 1 }} onClick={handleAddPayment}>
+                  Save
+                </Button>
               </Card>
             )}
 
-            {/* PAYMENT HISTORY */}
-            <Card sx={{ mt: 2 }}>
-              {(project.payments || []).map((p, i) => (
-                <MDBox key={i} display="flex" justifyContent="space-between">
+            <Card sx={{ mt: 2, p: 2 }}>
+              {project.payments?.map((p, i) => (
+                <MDBox
+                  key={i}
+                  display="flex"
+                  justifyContent="space-between"
+                >
                   <span>{new Date(p.date).toLocaleString()}</span>
                   <span>₹ {p.amount}</span>
                 </MDBox>
@@ -326,19 +311,44 @@ if (!project) return <div>No Data</div>;
           sx={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.9)",
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
           }}
         >
-          <Button onClick={() => setSelectedImage(null)}>Close</Button>
-          <Button onClick={handlePrev}>Prev</Button>
-          <img src={selectedImage} style={{ maxHeight: "80%" }} />
-          <Button onClick={handleNext}>Next</Button>
+          <Button
+            sx={{ position: "absolute", top: 20, right: 20 }}
+            onClick={() => setSelectedImage(null)}
+          >
+            Close
+          </Button>
+
+          <Button onClick={prev}>◀</Button>
+
+          <img
+            src={selectedImage}
+            style={{ maxHeight: "80%", maxWidth: "80%" }}
+          />
+
+          <Button onClick={next}>▶</Button>
         </MDBox>
       )}
 
       {/* UPLOAD MODAL */}
       {openUpload && (
-        <MDBox sx={{ position: "fixed", inset: 0 }}>
+        <MDBox
+          sx={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
           <Card sx={{ p: 3 }}>
             <input
               type="file"
