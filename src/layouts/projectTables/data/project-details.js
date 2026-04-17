@@ -59,11 +59,12 @@ function ProjectDetails() {
 
   if (!project) return <div>No Data</div>;
 
-const total = Number(project?.totalAmount || 0);
-       const paid = (project?.payments || []).reduce(
-  (sum, p) => sum + Number(p?.amount || 0),
-  0
-);
+            const total = Number(paymentProject?.totalAmount || 0);
+
+          const paid = (paymentProject?.payments || []).reduce(
+            (sum, p) => sum + Number(p.amount),
+            0
+          );
 
           const balance = total - paid;
 
@@ -231,7 +232,7 @@ const handleAddPayment = async () => {
                     <Grid item xs={12} sm={6} md={3} key={i}>
                       <Card sx={{ position: "relative", p: 1 }}>
                         <img
-src={`${Base_API.replace("/api","")}/${img}?t=${Date.now()}`}
+src={`${img}?t=${Date.now()}`}
   alt=""
   onError={(e) => {
     e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
@@ -267,170 +268,117 @@ src={`${Base_API.replace("/api","")}/${img}?t=${Date.now()}`}
 
         {/* ACCOUNTS */}
 {tab === 2 && (
-  <MDBox mt={3}>
-    {/* SUMMARY CARDS */}
-    <Grid container spacing={2}>
-    <Grid item xs={12} md={4}>
-  <Card
-  sx={{
-    p: 3,
-    borderRadius: "16px",
-    textAlign: "center",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
-    color: "#fff",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.2)",
-  }}
->
-  <MDTypography variant="caption" sx={{ color: "#cbd5f5" }}>
-    Total Amount
-  </MDTypography>
+              <MDBox display="flex" gap={2} mb={2}>
+                {/* TOTAL */}
+                <MDBox
+                  sx={{
+                    flex: 1,
+                    p: 2,
+                    borderRadius: "10px",
+                    background: "#e3f2fd",
+                    textAlign: "center",
+                  }}
+                >
+                  <MDTypography variant="caption">Total</MDTypography>
+                  <MDTypography fontWeight="bold">₹ {total}</MDTypography>
+                </MDBox>
 
-  <MDTypography
-    variant="h3"
-    fontWeight="bold"
-    sx={{ mt: 1 }}
-  >
-    ₹ {total.toLocaleString()}
-  </MDTypography>
-</Card>
-</Grid>
+                {/* PAID */}
+                <MDBox
+                  sx={{
+                    flex: 1,
+                    p: 2,
+                    borderRadius: "10px",
+                    background: "#e8f5e9",
+                    textAlign: "center",
+                  }}
+                >
+                  <MDTypography variant="caption">Paid</MDTypography>
+                  <MDTypography fontWeight="bold" color="success">
+                    ₹ {paid}
+                  </MDTypography>
+                </MDBox>
 
-      <Grid item xs={12} md={4}>
-        <Card sx={{ p: 3, bgcolor: "#e8f5e9", textAlign: "center" }}>
-          <MDTypography variant="caption">Paid</MDTypography>
-          <MDTypography variant="h5" fontWeight="bold" color="success">
-            ₹ {paid}
-          </MDTypography>
-        </Card>
-      </Grid>
+                {/* BALANCE */}
+                <MDBox
+                  sx={{
+                    flex: 1,
+                    p: 2,
+                    borderRadius: "10px",
+                    background: "#ffebee",
+                    textAlign: "center",
+                  }}
+                >
+                  <MDTypography variant="caption">Balance</MDTypography>
+                  <MDTypography fontWeight="bold" color="error">
+                    ₹ {balance}
+                  </MDTypography>
+                </MDBox>
+              </MDBox>
+              {/* ➕ ADD PAYMENT */}
+              <MDBox mt={3} display="flex" gap={1}>
+                <input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                  }}
+                />
 
-      <Grid item xs={12} md={4}>
-        <Card sx={{ p: 3, bgcolor: "#ffebee", textAlign: "center" }}>
-          <MDTypography variant="caption">Balance</MDTypography>
-          <MDTypography variant="h5" fontWeight="bold" color="error">
-            ₹ {balance}
-          </MDTypography>
-        </Card>
-      </Grid>
-    </Grid>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setPaymentType("add");
+                    handleAddPayment();
+                  }}
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    px: 3,
+                    background: "#1976d2",
+                    color: "#fff",
+                  }}
+                >
+                  Add
+                </Button>
+              </MDBox>
+              {/* ✅ PAYMENT TABLE */}
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#f1f5f9" }}>
+                    <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
+                    <th style={{ padding: "8px", textAlign: "right" }}>Amount</th>
+                  </tr>
+                </thead>
 
-    {/* ADD PAYMENT BUTTON */}
-    <Button
-      variant="contained"
-      sx={{
-        mt: 3,
-        borderRadius: "10px",
-        textTransform: "none",
-        px: 3,
-        color: "#fff",
-        background: "linear-gradient(135deg,#1976d2,#42a5f5)",
-      }}
-      onClick={() => setShowPaymentForm(true)}
-    >
-      + Add Payment
-    </Button>
-
-    {/* PAYMENT FORM */}
-    {showPaymentForm && (
-      <Card sx={{ p: 3, mt: 2, borderRadius: "12px" }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
-            <TextField
-              label="Amount"
-              fullWidth
-              type="number"
-              value={paymentData.amount}
-              onChange={(e) =>
-                setPaymentData({
-                  ...paymentData,
-                  amount: e.target.value,
-                })
-              }
-            />
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <TextField
-              type="datetime-local"
-              fullWidth
-              value={paymentData.date}
-              onChange={(e) =>
-                setPaymentData({
-                  ...paymentData,
-                  date: e.target.value,
-                })
-              }
-            />
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <TextField
-              label="Note"
-              fullWidth
-              value={paymentData.note}
-              onChange={(e) =>
-                setPaymentData({
-                  ...paymentData,
-                  note: e.target.value,
-                })
-              }
-            />
-          </Grid>
-        </Grid>
-
-        <Button
-          variant="contained"
-          sx={{ mt: 2, borderRadius: "8px", color: "#fff", background: "#1976d2" }}
-          onClick={handleAddPayment}
-        >
-          {loading ? <CircularProgress size={20} /> : "Save Payment"}
-        </Button>
-      </Card>
-    )}
-
-    {/* PAYMENT TABLE */}
-    <Card sx={{ mt: 3, p: 2, borderRadius: "12px" }}>
-      <MDTypography fontWeight="bold" mb={1}>
-        Payment History
-      </MDTypography>
-
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ background: "#f1f5f9" }}>
-            <th style={{ padding: "10px", textAlign: "left" }}>Date</th>
-            <th style={{ padding: "10px", textAlign: "right" }}>Amount</th>
-            <th style={{ padding: "10px", textAlign: "left" }}>Note</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {(project.payments || []).map((p, i) => (
-            <tr key={i}>
-              <td style={{ padding: "10px" }}>
-                {new Date(p.date || p.createdAt).toLocaleString()}
-              </td>
-
-              <td
-                style={{
-                  padding: "10px",
-                  textAlign: "right",
-                  color: "green",
-                  fontWeight: "600",
-                }}
-              >
-                ₹ {p.amount}
-              </td>
-
-              <td style={{ padding: "10px" }}>{p.note || "-"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Card>
-  </MDBox>
-)}
-
-      </MDBox>
+                <tbody>
+                  {(paymentProject?.payments || []).map((pay, i) => (
+                    <tr key={i}>
+                      <td style={{ padding: "8px" }}>
+                        {new Date(pay.date || pay.createdAt).toLocaleString()}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px",
+                          textAlign: "right",
+                          color: "green",
+                          fontWeight: "600",
+                        }}
+                      >
+                        ₹ {pay.amount}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+       
+            )}
+          </MDBox>
 
       {/* LIGHTBOX */}
       {selectedImage && (
@@ -455,7 +403,7 @@ src={`${Base_API.replace("/api","")}/${img}?t=${Date.now()}`}
           <Button onClick={prev}>◀</Button>
 
           <img
-src={`${Base_API.replace("/api","")}/${selectedImage}`}
+            src={selectedImage}
             style={{ maxHeight: "80%", maxWidth: "80%" }}
           />
 
@@ -494,4 +442,5 @@ src={`${Base_API.replace("/api","")}/${selectedImage}`}
     </DashboardLayout>
   );
 }
+
 export default ProjectDetails;
