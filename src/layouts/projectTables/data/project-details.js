@@ -119,10 +119,14 @@ function ProjectDetails() {
 
   // ================= UPLOAD =================
 const handleUpload = async () => {
+  if (!files.length) return;
+
   const formData = new FormData();
 
   [...files].forEach((f) => formData.append("images", f));
-  formData.append("drawingType", uploadType);
+
+  // ❗ MUST match backend
+  formData.append("type", uploadType);
 
   await fetch(`${Base_API}/projects/${project._id}/drawing`, {
     method: "POST",
@@ -130,6 +134,7 @@ const handleUpload = async () => {
   });
 
   await fetchProject();
+  setOpenUpload(false);
 };
 
   // ================= PAYMENT =================
