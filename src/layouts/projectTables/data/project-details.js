@@ -46,34 +46,41 @@ function ProjectDetails() {
     setOpenUpload(true);
   };
 
-  const handleUpload = async () => {
-    const formData = new FormData();
-    [...files].forEach((f) => formData.append("images", f));
-    formData.append("type", uploadType);
-    formData.append("projectId", state._id);
+const handleUpload = async () => {
+  const formData = new FormData();
 
-    await fetch("/api/upload", { method: "POST", body: formData });
+  [...files].forEach((f) => formData.append("images", f));
 
-    setOpenUpload(false);
-    setFiles([]);
-    window.location.reload();
-  };
+  formData.append("drawingType", uploadType);
+
+  await fetch(`/api/projects/${state._id}/drawing`, {
+    method: "POST",
+    body: formData,
+  });
+
+  setOpenUpload(false);
+  setFiles([]);
+  window.location.reload();
+};
 
   // PAYMENT
   const handlePaymentChange = (e) =>
     setPaymentData({ ...paymentData, [e.target.name]: e.target.value });
 
-  const handleAddPayment = async () => {
-    await fetch("/api/add-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectId: state._id, ...paymentData }),
-    });
+ const handleAddPayment = async () => {
+  await fetch(`/api/projects/${state._id}/payment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(paymentData),
+  });
 
-    setShowPaymentForm(false);
-    setPaymentData({ amount: "", date: "", note: "" });
-    window.location.reload();
-  };
+  setShowPaymentForm(false);
+  setPaymentData({ amount: "", date: "", note: "" });
+
+  window.location.reload();
+};
 
   return (
     <DashboardLayout>
