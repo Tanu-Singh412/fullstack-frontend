@@ -12,36 +12,81 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 
 function ProjectDetails() {
   const { state } = useLocation();
+
   const [tab, setTab] = useState(0);
   const [drawingType, setDrawingType] = useState(null);
 
+  const [openUpload, setOpenUpload] = useState(false);
+  const [uploadType, setUploadType] = useState(null);
+  const [files, setFiles] = useState([]);
+
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentData, setPaymentData] = useState({
+    amount: "",
+    date: "",
+    note: "",
+  });
+
   if (!state) return <div>No Data</div>;
 
-  const handleChange = (event, newValue) => {
-    setTab(newValue);
-  };
+  const handleChange = (e, val) => setTab(val);
 
   const total = Number(state.totalAmount || 0);
-  const paid = (state.payments || []).reduce((sum, p) => sum + Number(p.amount), 0);
+  const paid = (state.payments || []).reduce((s, p) => s + Number(p.amount), 0);
   const balance = total - paid;
+
+  // UPLOAD
+  const handleUploadClick = (type) => {
+    setUploadType(type);
+    setOpenUpload(true);
+  };
+
+  const handleUpload = async () => {
+    const formData = new FormData();
+    [...files].forEach((f) => formData.append("images", f));
+    formData.append("type", uploadType);
+    formData.append("projectId", state._id);
+
+    await fetch("/api/upload", { method: "POST", body: formData });
+
+    setOpenUpload(false);
+    setFiles([]);
+    window.location.reload();
+  };
+
+  // PAYMENT
+  const handlePaymentChange = (e) =>
+    setPaymentData({ ...paymentData, [e.target.name]: e.target.value });
+
+  const handleAddPayment = async () => {
+    await fetch("/api/add-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId: state._id, ...paymentData }),
+    });
+
+    setShowPaymentForm(false);
+    setPaymentData({ amount: "", date: "", note: "" });
+    window.location.reload();
+  };
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
 
-      {/* ✅ MAIN WRAPPER SAME AS TABLES */}
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            {/* ✅ HEADER CARD */}
+            {/* HEADER */}
             <MDBox
               mx={2}
               mt={-3}
-              py={2.5}
-              px={3}
+              p={3}
               bgColor="info"
               borderRadius="lg"
               coloredShadow="info"
@@ -49,110 +94,109 @@ function ProjectDetails() {
               <MDTypography variant="h5" color="white" fontWeight="bold">
                 {state.projectName}
               </MDTypography>
-
               <MDTypography color="white">
                 Client: <b>{state.clientName}</b>
               </MDTypography>
             </MDBox>
 
-            {/* ✅ CONTENT AREA */}
             <MDBox pt={3} px={2}>
-              {/* TABS */}
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <Tabs value={tab} onChange={handleChange}>
-                  <Tab label="Overview" />
-                  <Tab label="Drawings" />
-                  <Tab label="Accounts" />
-                </Tabs>
-              </Box>
+              <Tabs value={tab} onChange={handleChange}>
+                <Tab label="Overview" />
+                <Tab label="Drawings" />
+                <Tab label="Accounts" />
+              </Tabs>
 
-              {/* ---------------- OVERVIEW ---------------- */}
+              {/* OVERVIEW */}
               {tab === 0 && (
-                <MDBox mt={3}>
-                  <MDBox p={3} borderRadius="lg" bgColor="white" shadow="md">
-                    <MDTypography variant="h6">Description</MDTypography>
-                    <MDTypography mt={1}>
-                      {state.description || "No description"}
-                    </MDTypography>
-                  </MDBox>
-                </MDBox>
+                <Card sx={{ mt: 3, p: 3 }}>
+                  <MDTypography variant="h6">Description</MDTypography>
+                  <MDTypography mt={1}>
+                    {state.description || "No description"}
+                  </MDTypography>
+                </Card>
               )}
 
-              {/* ---------------- DRAWINGS ---------------- */}
+              {/* DRAWINGS */}
               {tab === 1 && (
                 <MDBox mt={3}>
-                  {/* SELECT TYPE */}
                   {!drawingType && (
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <MDBox
-                          onClick={() => setDrawingType("civil")}
-                          p={4}
-                          borderRadius="lg"
-                          textAlign="center"
-                          sx={{
-                            cursor: "pointer",
-                            background: "#e3f2fd",
-                            fontWeight: "bold",
-                            "&:hover": { transform: "scale(1.03)" },
-                          }}
-                        >
-                          Civil Drawings
-                        </MDBox>
-                      </Grid>
+                    <Grid container spacing={3}>
+                      {["civil", "interior"].map((type) => (
+                        <Grid item xs={12} md={6} key={type}>
+                          <MDBox
+                            p={4}
+                            borderRadius="xl"
+                            sx={{
+                              background:
+                                type === "civil"
+                                  ? "linear-gradient(#42a5f5,#478ed1)"
+                                  : "linear-gradient(#ec407a,#d81b60)",
+                              color: "#fff",
+                              position: "relative",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <MDTypography variant="h5">
+                              {type === "civil"
+                                ? "Civil Drawings"
+                                : "Interior Drawings"}
+                            </MDTypography>
 
-                      <Grid item xs={12} md={6}>
-                        <MDBox
-                          onClick={() => setDrawingType("interior")}
-                          p={4}
-                          borderRadius="lg"
-                          textAlign="center"
-                          sx={{
-                            cursor: "pointer",
-                            background: "#fce4ec",
-                            fontWeight: "bold",
-                            "&:hover": { transform: "scale(1.03)" },
-                          }}
-                        >
-                          Interior Drawings
-                        </MDBox>
-                      </Grid>
+                            <MDBox
+                              onClick={() => handleUploadClick(type)}
+                              sx={{
+                                position: "absolute",
+                                top: 15,
+                                right: 15,
+                                width: 40,
+                                height: 40,
+                                borderRadius: "50%",
+                                background: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                              }}
+                            >
+                              +
+                            </MDBox>
+
+                            <MDBox mt={2} onClick={() => setDrawingType(type)}>
+                              View Images →
+                            </MDBox>
+                          </MDBox>
+                        </Grid>
+                      ))}
                     </Grid>
                   )}
 
-                  {/* SHOW IMAGES */}
+                  {/* IMAGE GRID */}
                   {drawingType && (
                     <>
-                      <MDBox mb={2}>
-                        <button onClick={() => setDrawingType(null)}>⬅ Back</button>
-                      </MDBox>
+                      <Button onClick={() => setDrawingType(null)}>
+                        ⬅ Back
+                      </Button>
 
-                      <Grid container spacing={2}>
+                      <Grid container spacing={3} mt={1}>
                         {(drawingType === "civil"
-                          ? state.civilImages || []
-                          : state.interiorImages || []
-                        ).length === 0 && (
-                          <MDTypography>No Images Found</MDTypography>
-                        )}
-
-                        {(drawingType === "civil"
-                          ? state.civilImages || []
-                          : state.interiorImages || []
-                        ).map((img, i) => (
+                          ? state.civilImages
+                          : state.interiorImages
+                        )?.map((img, i) => (
                           <Grid item xs={12} sm={6} md={3} key={i}>
                             <MDBox
                               sx={{
-                                borderRadius: "12px",
+                                borderRadius: 2,
                                 overflow: "hidden",
-                                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                "&:hover img": { transform: "scale(1.1)" },
                               }}
                             >
                               <img
                                 src={img}
                                 style={{
                                   width: "100%",
-                                  height: "200px",
+                                  height: 220,
                                   objectFit: "cover",
+                                  transition: "0.3s",
                                 }}
                               />
                             </MDBox>
@@ -164,34 +208,129 @@ function ProjectDetails() {
                 </MDBox>
               )}
 
-              {/* ---------------- ACCOUNTS ---------------- */}
+              {/* ACCOUNTS */}
               {tab === 2 && (
                 <MDBox mt={3}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={4}>
-                      <MDBox p={3} bgColor="info" color="white" borderRadius="lg">
+                      <MDBox p={3} bgColor="info" color="white">
                         Total: ₹ {total}
                       </MDBox>
                     </Grid>
-
                     <Grid item xs={12} md={4}>
-                      <MDBox p={3} bgColor="success" color="white" borderRadius="lg">
+                      <MDBox p={3} bgColor="success" color="white">
                         Paid: ₹ {paid}
                       </MDBox>
                     </Grid>
-
                     <Grid item xs={12} md={4}>
-                      <MDBox p={3} bgColor="error" color="white" borderRadius="lg">
+                      <MDBox p={3} bgColor="error" color="white">
                         Balance: ₹ {balance}
                       </MDBox>
                     </Grid>
                   </Grid>
+
+                  <MDBox mt={3} textAlign="right">
+                    <Button
+                      variant="contained"
+                      onClick={() => setShowPaymentForm(!showPaymentForm)}
+                    >
+                      + Add Payment
+                    </Button>
+                  </MDBox>
+
+                  {/* FORM */}
+                  {showPaymentForm && (
+                    <Card sx={{ mt: 2, p: 3 }}>
+                      <Grid container spacing={2}>
+                        {["amount", "date", "note"].map((field) => (
+                          <Grid item xs={12} md={4} key={field}>
+                            <input
+                              type={field === "date" ? "date" : "text"}
+                              name={field}
+                              placeholder={field}
+                              value={paymentData[field]}
+                              onChange={handlePaymentChange}
+                              style={{
+                                width: "100%",
+                                padding: 10,
+                                borderRadius: 8,
+                                border: "1px solid #ccc",
+                              }}
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+
+                      <MDBox mt={2} textAlign="right">
+                        <Button onClick={handleAddPayment} variant="contained">
+                          Save
+                        </Button>
+                      </MDBox>
+                    </Card>
+                  )}
+
+                  {/* TABLE */}
+                  <Card sx={{ mt: 3 }}>
+                    <MDBox p={2}>
+                      <MDTypography variant="h6">
+                        Payment History
+                      </MDTypography>
+                    </MDBox>
+
+                    {(state.payments || []).map((p, i) => (
+                      <MDBox
+                        key={i}
+                        px={3}
+                        py={2}
+                        display="flex"
+                        justifyContent="space-between"
+                        borderTop="1px solid #eee"
+                      >
+                        <span>{p.date}</span>
+                        <span>₹ {p.amount}</span>
+                        <span>{p.note}</span>
+                      </MDBox>
+                    ))}
+                  </Card>
                 </MDBox>
               )}
             </MDBox>
           </Grid>
         </Grid>
       </MDBox>
+
+      {/* UPLOAD MODAL */}
+      {openUpload && (
+        <MDBox
+          sx={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Card sx={{ p: 3 }}>
+            <MDTypography mb={2}>
+              Upload {uploadType} Images
+            </MDTypography>
+
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setFiles(e.target.files)}
+            />
+
+            <MDBox mt={2} display="flex" justifyContent="space-between">
+              <Button onClick={() => setOpenUpload(false)}>Cancel</Button>
+              <Button onClick={handleUpload} variant="contained">
+                Upload
+              </Button>
+            </MDBox>
+          </Card>
+        </MDBox>
+      )}
 
       <Footer />
     </DashboardLayout>
