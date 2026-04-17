@@ -64,7 +64,7 @@ function ProjectDetails() {
   const [openUpload, setOpenUpload] = useState(false);
   const [uploadType, setUploadType] = useState(null);
   const [files, setFiles] = useState([]);
-
+const [drawings, setDrawings] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -118,14 +118,25 @@ function ProjectDetails() {
   if (!project?._id) return <div>Loading...</div>;
 
   // ================= UPLOAD =================
+const fetchDrawings = async () => {
+  if (!project?._id) return;
+
+  const res = await fetch(
+    `${Base_API}/projects/${project._id}/drawing`
+  );
+  const data = await res.json();
+  setDrawings(data);
+};
+useEffect(() => {
+  if (project?._id) fetchDrawings();
+}, [project?._id]);
 const handleUpload = async () => {
   if (!files.length) return;
 
   const formData = new FormData();
 
   [...files].forEach((f) => formData.append("images", f));
-
-  // ❗ MUST match backend
+  formData.append("projectId", project._id);
   formData.append("type", uploadType);
 
   await fetch(`${Base_API}/projects/${project._id}/drawing`, {
@@ -133,10 +144,9 @@ const handleUpload = async () => {
     body: formData,
   });
 
-  await fetchProject();
+  await fetchDrawings();   // ✅ IMPORTANT
   setOpenUpload(false);
 };
-
   // ================= PAYMENT =================
   const handleAddPayment = async () => {
     if (!paymentData.amount) return;
@@ -162,25 +172,22 @@ const handleUpload = async () => {
   };
 
   // ================= DELETE IMAGE =================
-  const handleDeleteImage = async (imgUrl, type) => {
-    const field = type === "civil" ? "civilImages" : "interiorImages";
-
-    const updated = project[field].filter((img) => img !== imgUrl);
-
-    await fetch(`${Base_API}/projects/${project._id}`, {
+const handleDeleteImage = async (imgUrl, drawingId) => {
+  await fetch(
+    `${Base_API}/projects/${project._id}/drawing/${drawingId}`,
+    {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [field]: updated }),
-    });
+      body: JSON.stringify({ imageUrl: imgUrl }),
+    }
+  );
 
-    await fetchProject();
-  };
+  await fetchDrawings();
+};
 
   // ================= LIGHTBOX =================
   const images =
-    drawingType === "civil"
-      ? project?.civilImages || []
-      : project?.interiorImages || [];
+  drawings.find((d) => d.type === drawingType)?.images || [];
 
   const openImage = (img, index) => {
     setSelectedImage(img);
