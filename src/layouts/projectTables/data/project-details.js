@@ -133,16 +133,17 @@ useEffect(() => {
 const handleUpload = async () => {
   if (!files.length) return;
 
-  const formData = new FormData();
+ const formData = new FormData();
 
-  [...files].forEach((f) => formData.append("images", f));
-  formData.append("projectId", project._id);
-  formData.append("type", uploadType);
+[...files].forEach((f) => formData.append("images", f));
 
-  await fetch(`${Base_API}/projects/${project._id}/drawing`, {
-    method: "POST",
-    body: formData,
-  });
+formData.append("projectId", project._id);
+formData.append("type", uploadType);
+
+await fetch(`${Base_API}/projects/drawing`, {
+  method: "POST",
+  body: formData,
+});
 
   await fetchDrawings();   // ✅ IMPORTANT
   setOpenUpload(false);
