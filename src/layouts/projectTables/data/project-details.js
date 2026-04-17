@@ -18,7 +18,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-const API = "https://fullstack-project-1-n510.onrender.com/api";
+const Base_API = "https://fullstack-project-1-n510.onrender.com/api";
 
 function ProjectDetails() {
   const { state } = useLocation();
@@ -45,19 +45,23 @@ function ProjectDetails() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageIndex, setImageIndex] = useState(0);
 
-  if (!project) return <div>No Data</div>;
+// ================= FETCH PROJECT =================
+const fetchProject = async () => {
+  if (!project?._id) return;
 
-  // ================= FETCH PROJECT =================
-  const fetchProject = async () => {
-    const res = await fetch(`${API}/projects`);
-    const data = await res.json();
-    const current = data.find((p) => p._id === project._id);
-    setProject(current);
-  };
+  const res = await fetch(`${Base_API}/projects`);
+  const data = await res.json();
+  const current = data.find((p) => p._id === project._id);
+  setProject(current);
+};
 
-  useEffect(() => {
-    fetchProject();
-  }, []);
+// ✅ FIXED: Hook always runs
+useEffect(() => {
+  fetchProject();
+}, []);
+
+// ✅ AFTER hooks
+if (!project) return <div>No Data</div>;
 
   const total = Number(project.totalAmount || 0);
   const paid = (project.payments || []).reduce(
@@ -78,7 +82,7 @@ function ProjectDetails() {
       formData.append("drawingType", uploadType);
 
       const res = await fetch(
-        `${API}/projects/${project._id}/drawing`,
+        `${Base_API}/projects/${project._id}/drawing`,
         { method: "POST", body: formData }
       );
 
@@ -104,7 +108,7 @@ function ProjectDetails() {
       setLoading(true);
 
       const res = await fetch(
-        `${API}/projects/${project._id}/payment`,
+        `${Base_API}/projects/${project._id}/payment`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -133,7 +137,7 @@ function ProjectDetails() {
 
     const updatedImages = project[field].filter((img) => img !== imgUrl);
 
-    await fetch(`${API}/projects/${project._id}`, {
+    await fetch(`${Base_API}/projects/${project._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ [field]: updatedImages }),
