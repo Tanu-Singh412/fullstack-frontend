@@ -15,7 +15,10 @@ import {
   Button,
   Card,
   TextField,
+  CircularProgress,
 } from "@mui/material";
+
+const API = "https://fullstack-project-1-n510.onrender.com/api";
 
 function ProjectDetails() {
   const { state } = useLocation();
@@ -26,6 +29,8 @@ function ProjectDetails() {
   const [openUpload, setOpenUpload] = useState(false);
   const [uploadType, setUploadType] = useState(null);
   const [files, setFiles] = useState([]);
+
+  const [loading, setLoading] = useState(false);
 
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentData, setPaymentData] = useState({
@@ -45,57 +50,74 @@ function ProjectDetails() {
 
   // ================= UPLOAD =================
   const handleUpload = async () => {
-    if (!files.length) return alert("Select files");
+    if (!files.length) return alert("Select files first");
 
-    const formData = new FormData();
-    [...files].forEach((f) => formData.append("images", f));
-    formData.append("drawingType", uploadType);
+    try {
+      setLoading(true);
 
-    const res = await fetch(
-      `/api/projects/${state._id}/drawing`,
-      { method: "POST", body: formData }
-    );
+      const formData = new FormData();
+      [...files].forEach((f) => formData.append("images", f));
+      formData.append("drawingType", uploadType);
 
-    const data = await res.json();
-    console.log(data);
+      const res = await fetch(
+        `${API}/projects/${state._id}/drawing`,
+        { method: "POST", body: formData }
+      );
 
-    setOpenUpload(false);
-    setFiles([]);
-    window.location.reload();
+      if (!res.ok) throw new Error("Upload failed");
+
+      alert("Upload success ✅");
+      window.location.reload();
+
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed ❌");
+    } finally {
+      setLoading(false);
+      setOpenUpload(false);
+    }
   };
 
   // ================= PAYMENT =================
   const handleAddPayment = async () => {
     if (!paymentData.amount) return alert("Enter amount");
 
-    const res = await fetch(
-      `/api/projects/${state._id}/payment`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(paymentData),
-      }
-    );
+    try {
+      setLoading(true);
 
-    const data = await res.json();
-    console.log(data);
+      const res = await fetch(
+        `${API}/projects/${state._id}/payment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paymentData),
+        }
+      );
 
-    setShowPaymentForm(false);
-    setPaymentData({ amount: "", date: "", note: "" });
-    window.location.reload();
+      if (!res.ok) throw new Error("Payment failed");
+
+      alert("Payment added ✅");
+      window.location.reload();
+
+    } catch (err) {
+      console.error(err);
+      alert("Payment failed ❌");
+    } finally {
+      setLoading(false);
+      setShowPaymentForm(false);
+    }
   };
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
 
-      <MDBox pt={6} pb={3}>
+      <MDBox p={3}>
         {/* HEADER */}
         <Card sx={{ p: 3, mb: 3 }}>
           <MDTypography variant="h4" fontWeight="bold">
             {state.projectName}
           </MDTypography>
-
           <MDTypography mt={1}>
             Client: <b>{state.clientName}</b>
           </MDTypography>
@@ -108,7 +130,7 @@ function ProjectDetails() {
           <Tab label="Accounts" />
         </Tabs>
 
-        {/* ================= OVERVIEW ================= */}
+        {/* OVERVIEW */}
         {tab === 0 && (
           <Card sx={{ p: 3, mt: 2 }}>
             <MDTypography variant="h6">Description</MDTypography>
@@ -118,7 +140,7 @@ function ProjectDetails() {
           </Card>
         )}
 
-        {/* ================= DRAWINGS ================= */}
+        {/* DRAWINGS */}
         {tab === 1 && (
           <MDBox mt={3}>
             {!drawingType ? (
@@ -128,10 +150,8 @@ function ProjectDetails() {
                     <Card
                       sx={{
                         p: 4,
-                        cursor: "pointer",
                         position: "relative",
-                        transition: "0.3s",
-                        "&:hover": { transform: "scale(1.02)" },
+                        cursor: "pointer",
                       }}
                     >
                       <MDTypography variant="h5">
@@ -160,9 +180,7 @@ function ProjectDetails() {
               </Grid>
             ) : (
               <>
-                <Button onClick={() => setDrawingType(null)}>
-                  ⬅ Back
-                </Button>
+                <Button onClick={() => setDrawingType(null)}>⬅ Back</Button>
 
                 <Grid container spacing={3} mt={1}>
                   {(drawingType === "civil"
@@ -170,7 +188,7 @@ function ProjectDetails() {
                     : state.interiorImages
                   )?.map((img, i) => (
                     <Grid item xs={12} sm={6} md={3} key={i}>
-                      <Card sx={{ overflow: "hidden" }}>
+                      <Card>
                         <img
                           src={img}
                           style={{
@@ -188,7 +206,7 @@ function ProjectDetails() {
           </MDBox>
         )}
 
-        {/* ================= ACCOUNTS ================= */}
+        {/* ACCOUNTS */}
         {tab === 2 && (
           <MDBox mt={3}>
             <Grid container spacing={2}>
@@ -203,27 +221,22 @@ function ProjectDetails() {
               </Grid>
             </Grid>
 
-            {/* ADD PAYMENT */}
             <MDBox mt={3} textAlign="right">
               <Button
                 variant="contained"
-                onClick={() =>
-                  setShowPaymentForm(!showPaymentForm)
-                }
+                onClick={() => setShowPaymentForm(!showPaymentForm)}
               >
                 + Add Payment
               </Button>
             </MDBox>
 
-            {/* FORM */}
             {showPaymentForm && (
               <Card sx={{ p: 3, mt: 2 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={4}>
+                  <Grid item xs={4}>
                     <TextField
                       fullWidth
                       label="Amount"
-                      name="amount"
                       value={paymentData.amount}
                       onChange={(e) =>
                         setPaymentData({
@@ -233,12 +246,10 @@ function ProjectDetails() {
                       }
                     />
                   </Grid>
-
-                  <Grid item xs={12} md={4}>
+                  <Grid item xs={4}>
                     <TextField
                       fullWidth
                       type="date"
-                      name="date"
                       value={paymentData.date}
                       onChange={(e) =>
                         setPaymentData({
@@ -248,12 +259,10 @@ function ProjectDetails() {
                       }
                     />
                   </Grid>
-
-                  <Grid item xs={12} md={4}>
+                  <Grid item xs={4}>
                     <TextField
                       fullWidth
                       label="Note"
-                      name="note"
                       value={paymentData.note}
                       onChange={(e) =>
                         setPaymentData({
@@ -267,35 +276,11 @@ function ProjectDetails() {
 
                 <MDBox mt={2} textAlign="right">
                   <Button onClick={handleAddPayment} variant="contained">
-                    Save Payment
+                    Save
                   </Button>
                 </MDBox>
               </Card>
             )}
-
-            {/* HISTORY */}
-            <Card sx={{ mt: 3 }}>
-              <MDBox p={2}>
-                <MDTypography variant="h6">
-                  Payment History
-                </MDTypography>
-              </MDBox>
-
-              {(state.payments || []).map((p, i) => (
-                <MDBox
-                  key={i}
-                  px={3}
-                  py={2}
-                  display="flex"
-                  justifyContent="space-between"
-                  borderTop="1px solid #eee"
-                >
-                  <span>{p.date}</span>
-                  <span>₹ {p.amount}</span>
-                  <span>{p.note}</span>
-                </MDBox>
-              ))}
-            </Card>
           </MDBox>
         )}
       </MDBox>
@@ -306,13 +291,14 @@ function ProjectDetails() {
           sx={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.5)",
+            background: "rgba(0,0,0,0.6)",
+            zIndex: 9999, // ✅ FIXED
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Card sx={{ p: 3 }}>
+          <Card sx={{ p: 3, minWidth: 300 }}>
             <MDTypography mb={2}>
               Upload {uploadType} Images
             </MDTypography>
@@ -324,11 +310,9 @@ function ProjectDetails() {
             />
 
             <MDBox mt={2} display="flex" justifyContent="space-between">
-              <Button onClick={() => setOpenUpload(false)}>
-                Cancel
-              </Button>
+              <Button onClick={() => setOpenUpload(false)}>Cancel</Button>
               <Button onClick={handleUpload} variant="contained">
-                Upload
+                {loading ? <CircularProgress size={20} /> : "Upload"}
               </Button>
             </MDBox>
           </Card>
