@@ -118,25 +118,19 @@ function ProjectDetails() {
   if (!project?._id) return <div>Loading...</div>;
 
   // ================= UPLOAD =================
-  const handleUpload = async () => {
-    if (!files.length) return alert("Select files");
+const handleUpload = async () => {
+  const formData = new FormData();
 
-    setLoading(true);
+  [...files].forEach((f) => formData.append("images", f));
+  formData.append("drawingType", uploadType);
 
-    const formData = new FormData();
-    [...files].forEach((f) => formData.append("images", f));
-    formData.append("drawingType", uploadType);
+  await fetch(`${Base_API}/projects/${project._id}/drawing`, {
+    method: "POST",
+    body: formData,
+  });
 
-    await fetch(`${Base_API}/projects/${project._id}/drawing`, {
-      method: "POST",
-      body: formData,
-    });
-
-    await fetchProject();
-    setFiles([]);
-    setOpenUpload(false);
-    setLoading(false);
-  };
+  await fetchProject();
+};
 
   // ================= PAYMENT =================
   const handleAddPayment = async () => {
