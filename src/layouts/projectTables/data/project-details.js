@@ -193,16 +193,32 @@ const handleAddPayment = async () => {
 };
 
 const fetchScope = async () => {
-  const res = await fetch(`${Base_API}/projects/${project._id}/scope`);
-  const data = await res.json();
-  setScopeList(data);
+  if (!project?._id) return; // ✅ safety
+
+  try {
+    const res = await fetch(`${Base_API}/projects/${project._id}/scope`);
+    const data = await res.json();
+    setScopeList(data || []);
+  } catch (err) {
+    console.log("Scope fetch error:", err);
+  }
 };
 
+// Fetch project
+useEffect(() => {
+  if (state?._id) {
+    fetchProject();
+  }
+}, [state]);
+
+// Fetch scope AFTER project loads
 useEffect(() => {
   if (project?._id) {
     fetchScope();
   }
-}, [project?._id]);
+}, [project]);
+
+
 const handleAddScope = async () => {
   await fetch(`${Base_API}/projects/${project._id}/scope`, {
     method: "POST",
