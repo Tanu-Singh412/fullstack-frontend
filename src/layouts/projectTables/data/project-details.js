@@ -28,6 +28,35 @@ const [project, setProject] = useState({
   totalAmount: Number(state?.totalAmount || 0),
 });
 
+const [scopeData, setScopeData] = useState({
+  projectType: "",
+  workType: "",
+  area: "",
+  floors: "",
+
+  conceptDesign: false,
+  drawings2D: false,
+  elevation3D: false,
+  workingDrawings: false,
+
+  interiorLayout: false,
+  civil: false,
+  electrical: false,
+  plumbing: false,
+  interiorExecution: false,
+  supervision: false,
+
+  revisions: "",
+  timeline: "",
+
+  costPerSqft: "",
+  lumpSum: "",
+
+  materialIncluded: false,
+  notes: "",
+});
+
+const [scopeList, setScopeList] = useState([]);
 
 const [tab, setTab] = useState(0);
 
@@ -163,6 +192,51 @@ const handleAddPayment = async () => {
   fontSize: "14px",
 };
 
+const fetchScope = async () => {
+  const res = await fetch(`${Base_API}/projects/${project._id}/scope`);
+  const data = await res.json();
+  setScopeList(data);
+};
+
+useEffect(() => {
+  if (project?._id) {
+    fetchScope();
+  }
+}, [project]);
+const handleAddScope = async () => {
+  await fetch(`${Base_API}/projects/${project._id}/scope`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(scopeData),
+  });
+
+  fetchScope();
+
+  setScopeData({
+    projectType: "",
+    workType: "",
+    area: "",
+    floors: "",
+    conceptDesign: false,
+    drawings2D: false,
+    elevation3D: false,
+    workingDrawings: false,
+    interiorLayout: false,
+    civil: false,
+    electrical: false,
+    plumbing: false,
+    interiorExecution: false,
+    supervision: false,
+    revisions: "",
+    timeline: "",
+    costPerSqft: "",
+    lumpSum: "",
+    materialIncluded: false,
+    notes: "",
+  });
+};
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -193,6 +267,8 @@ const handleAddPayment = async () => {
           <Tab label="Overview" />
           <Tab label="Drawings" />
           <Tab label="Accounts" />
+          <Tab label="Scope of Work" />
+
         </Tabs>
 
         {/* OVERVIEW */}
@@ -442,6 +518,138 @@ src={`${img}?t=${Date.now()}`}
         </>
       );
     })()}
+  </MDBox>
+)}
+{tab === 3 && (
+  <MDBox mt={3}>
+
+    {/* ================= FORM ================= */}
+    <Card sx={{ p: 3, mb: 3 }}>
+      <MDTypography variant="h6">Add Scope</MDTypography>
+
+      <Grid container spacing={2} mt={1}>
+        <Grid item xs={3}>
+          <input
+            placeholder="Project Type"
+            value={scopeData.projectType}
+            onChange={(e) =>
+              setScopeData({ ...scopeData, projectType: e.target.value })
+            }
+          />
+        </Grid>
+
+        <Grid item xs={3}>
+          <input
+            placeholder="Work Type"
+            value={scopeData.workType}
+            onChange={(e) =>
+              setScopeData({ ...scopeData, workType: e.target.value })
+            }
+          />
+        </Grid>
+
+        <Grid item xs={2}>
+          <input
+            type="number"
+            placeholder="Area"
+            value={scopeData.area}
+            onChange={(e) =>
+              setScopeData({ ...scopeData, area: e.target.value })
+            }
+          />
+        </Grid>
+
+        <Grid item xs={2}>
+          <input
+            type="number"
+            placeholder="Floors"
+            value={scopeData.floors}
+            onChange={(e) =>
+              setScopeData({ ...scopeData, floors: e.target.value })
+            }
+          />
+        </Grid>
+      </Grid>
+
+      {/* CHECKBOXES */}
+      <MDBox mt={2}>
+        {[
+          "conceptDesign",
+          "drawings2D",
+          "elevation3D",
+          "workingDrawings",
+          "interiorLayout",
+          "civil",
+          "electrical",
+          "plumbing",
+          "interiorExecution",
+          "supervision",
+          "materialIncluded",
+        ].map((field) => (
+          <label key={field} style={{ marginRight: 15 }}>
+            <input
+              type="checkbox"
+              checked={scopeData[field]}
+              onChange={(e) =>
+                setScopeData({
+                  ...scopeData,
+                  [field]: e.target.checked,
+                })
+              }
+            />
+            {field}
+          </label>
+        ))}
+      </MDBox>
+
+      <MDBox mt={2}>
+        <input
+          placeholder="Notes"
+          value={scopeData.notes}
+          onChange={(e) =>
+            setScopeData({ ...scopeData, notes: e.target.value })
+          }
+          style={{ width: "100%" }}
+        />
+      </MDBox>
+
+      <Button sx={{ mt: 2 }} onClick={handleAddScope}>
+        Add Scope
+      </Button>
+    </Card>
+
+    {/* ================= TABLE ================= */}
+    <Card sx={{ p: 2 }}>
+      <table width="100%">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Work</th>
+            <th>Area</th>
+            <th>Floors</th>
+            <th>Services</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {scopeList.map((s, i) => (
+            <tr key={i}>
+              <td>{s.projectType}</td>
+              <td>{s.workType}</td>
+              <td>{s.area}</td>
+              <td>{s.floors}</td>
+              <td>
+                {Object.keys(s)
+                  .filter((k) => s[k] === true)
+                  .join(", ")}
+              </td>
+              <td>{s.notes}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Card>
   </MDBox>
 )}  
     </MDBox>
