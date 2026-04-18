@@ -10,11 +10,18 @@ function MaterialVendor() {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("https://fullstack-project-1-n510.onrender.com/api/vendors/by-material")
-      .then((res) => res.json())
-      .then((res) => setData(res.data));
-  }, []);
+useEffect(() => {
+  fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`)
+    .then((res) => {
+      if (!res.ok) throw new Error("Vendor not found");
+      return res.json();
+    })
+    .then((res) => setVendor(res.data))
+    .catch((err) => {
+      console.error(err);
+      setVendor(null);
+    });
+}, [id]);
 
   return (
     <MDBox p={3}>
