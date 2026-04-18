@@ -16,8 +16,11 @@ import useVendorTableData from "./data/vendorTableData";
 function Vendors() {
   const navigate = useNavigate(); // ✅ FIX
 
-  const { columns, rows, dialog } = useVendorTableData();
+const tableData = useVendorTableData();
 
+if (!tableData) return null;
+
+const { columns, rows, dialog } = tableData;
   return (
     <DashboardLayout>
       <DashboardNavbar />

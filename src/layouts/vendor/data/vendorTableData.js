@@ -1,23 +1,15 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-
-import MDBox from "components/MDBox";
-import MDTypography from "components/MDTypography";
-
 function VendorDetail() {
   const { id } = useParams();
   const [vendor, setVendor] = useState(null);
 
   useEffect(() => {
-    fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors`)
+    fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`)
       .then((res) => res.json())
-      .then((res) => {
-        const found = res.data.find((v) => v._id === id);
-        setVendor(found);
-      });
+      .then((res) => setVendor(res.data))
+      .catch((err) => console.error(err));
   }, [id]);
 
-  if (!vendor) return null;
+  if (!vendor) return <p>Loading...</p>;
 
   return (
     <MDBox p={3}>
@@ -29,11 +21,16 @@ function VendorDetail() {
       <p>GST: {vendor.gst}</p>
 
       <h3>Materials</h3>
-      {vendor.materials.map((m, i) => (
-        <p key={i}>
-          {m.materialName} - ₹{m.rate}
-        </p>
-      ))}
+
+      {vendor.materials?.length > 0 ? (
+        vendor.materials.map((m, i) => (
+          <p key={i}>
+            {m.materialName} - ₹{m.rate}
+          </p>
+        ))
+      ) : (
+        <p>No materials</p>
+      )}
     </MDBox>
   );
 }
