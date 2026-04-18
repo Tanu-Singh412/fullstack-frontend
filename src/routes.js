@@ -90,16 +90,11 @@ const routes = [
   type: "collapse",
   name: "Vendor",
   key: "vendor",
+  icon: <Icon fontSize="small">store</Icon>,
   route: "/vendor",
-  component: <VendorHome  />,
+  component: <VendorHome />, // ✅ MAIN ENTRY
 },
-{
-  type: "route",
-  name: "Vendor Detail",
-  key: "vendor-detail",
-  route: "/vendor/:id",
-  component: <VendorDetail />,
-},
+
 {
   type: "route",
   name: "Material Vendor",
@@ -107,6 +102,15 @@ const routes = [
   route: "/material-vendor",
   component: <MaterialVendor />,
 },
+
+{
+  type: "route",
+  name: "Vendor Detail",
+  key: "vendor-detail",
+  route: "/vendor/:id",
+  component: <VendorDetail />,
+},
+
 {
   type: "route",
   name: "Add Vendor",

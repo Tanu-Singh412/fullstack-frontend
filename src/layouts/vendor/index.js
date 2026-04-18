@@ -16,31 +16,38 @@ import useVendorTableData from "./data/vendorTableData";
 function VendorHome() {
   const navigate = useNavigate();
 
-  return (
-    <MDBox p={3}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Card
-            sx={{ p: 3, cursor: "pointer" }}
-            onClick={() => navigate("/material-vendor")}
-          >
-            <MDTypography variant="h6">
-              Material Vendors
-            </MDTypography>
-          </Card>
-        </Grid>
+  const categories = [
+    { name: "Material Vendors", path: "/material-vendor" },
+    { name: "Labour Vendors", path: "/labour-vendor" },
+    { name: "Contractors", path: "/contractor-vendor" },
+    { name: "Consultants", path: "/consultant-vendor" },
+  ];
 
-        {/* future types */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3 }}>
-            <MDTypography variant="h6">
-              Labour Vendors (coming soon)
-            </MDTypography>
-          </Card>
+  return (
+    <DashboardLayout>
+      <DashboardNavbar />
+
+      <MDBox p={3}>
+        <Grid container spacing={3}>
+          {categories.map((cat, i) => (
+            <Grid item xs={6} md={3} key={i}>
+              <Card
+                sx={{ p: 3, cursor: "pointer", textAlign: "center" }}
+                onClick={() => navigate(cat.path)}
+              >
+                <MDTypography variant="h6">{cat.name}</MDTypography>
+              </Card>
+            </Grid>
+             <Grid item xs={6} md={3} key={i}>
+             <Button onClick={() => navigate("/add-vendor")}>
+  + Add Vendor
+</Button>
+            </Grid>
+          ))}
         </Grid>
-      </Grid>
-    </MDBox>
+      </MDBox>
+
+      <Footer />
+    </DashboardLayout>
   );
 }
-
-export default VendorHome;

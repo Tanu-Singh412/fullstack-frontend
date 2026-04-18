@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import MDBox from "components/MDBox";
-import MDTypography from "components/MDTypography";
+import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import Footer from "examples/Footer";
 
 function MaterialVendor() {
   const [data, setData] = useState([]);
@@ -17,7 +16,10 @@ function MaterialVendor() {
       .catch((err) => console.error(err));
   }, []);
 
-  return (
+ return (
+  <DashboardLayout>
+    <DashboardNavbar />
+
     <MDBox p={3}>
       <Grid container spacing={3}>
         {data.map((group, index) => (
@@ -39,9 +41,7 @@ function MaterialVendor() {
                     cursor: "pointer",
                   }}
                 >
-                  <MDTypography fontSize="14px">
-                    {v.vendorName}
-                  </MDTypography>
+                  {v.vendorName}
                 </MDBox>
               ))}
             </Card>
@@ -49,7 +49,10 @@ function MaterialVendor() {
         ))}
       </Grid>
     </MDBox>
-  );
-}
+
+    <Footer />
+  </DashboardLayout>
+);
+};
 
 export default MaterialVendor;

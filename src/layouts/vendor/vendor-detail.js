@@ -23,6 +23,10 @@ function VendorDetail() {
   if (!vendor) return <p>No vendor found</p>;
 
   return (
+return (
+  <DashboardLayout>
+    <DashboardNavbar />
+
     <MDBox p={3}>
       <MDTypography variant="h4">{vendor.vendorName}</MDTypography>
 
@@ -43,7 +47,10 @@ function VendorDetail() {
         <p>No materials</p>
       )}
     </MDBox>
-  );
+
+    <Footer />
+  </DashboardLayout>
+);
 }
 
 export default VendorDetail;
