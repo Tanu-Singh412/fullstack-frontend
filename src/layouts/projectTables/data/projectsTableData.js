@@ -65,11 +65,10 @@ export default function useProjectData() {
     { Header: "Client ID", accessor: "clientId" },
     { Header: "Client", accessor: "client" },
 
-    { Header: "Description", accessor: "description" },
-    { Header: "DWG File", accessor: "dwg" }, // ✅ NEW COLUMN
+    // { Header: "Description", accessor: "description" },
+    // { Header: "DWG File", accessor: "dwg" }, // ✅ NEW COLUMN
 
     { Header: "Total", accessor: "total" },
-    { Header: "Payment", accessor: "payment" },
 
     { Header: "Date", accessor: "date" },
     { Header: "Status", accessor: "status" },
