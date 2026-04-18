@@ -862,6 +862,7 @@ const inputStyle = {
                         style={{
                           borderBottom: "1px solid #eee",
                           background: i % 2 === 0 ? "#fff" : "#f9f9f9",
+                          fontSize: 12,
                         }}
                       >
                         <td style={{ padding: 10 }}>{s.projectType}</td>
