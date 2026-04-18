@@ -78,21 +78,17 @@ function ProjectDetails() {
   const [imageIndex, setImageIndex] = useState(0);
 
   // ================= FETCH =================
-  const fetchProject = async () => {
-    if (!state?._id) return;
+const fetchProject = async () => {
+  if (!state?._id) return;
 
-    const res = await fetch(`${Base_API}/projects`);
-    const data = await res.json();
+  const res = await fetch(`${Base_API}/projects/${state._id}`);
+  const data = await res.json();
 
-    const current = data.find((p) => p._id === state._id);
-
-    if (current) {
-      setProject({
-        ...current,
-        totalAmount: Number(current.totalAmount || 0),
-      });
-    }
-  };
+  setProject({
+    ...data,
+    totalAmount: Number(data.totalAmount || 0),
+  });
+};
 
   const fetchScope = async () => {
     if (!project?._id) return;
@@ -121,29 +117,29 @@ const fetchDrawings = async () => {
 };
 
 const handleUpload = async () => {
-  if (!files.length) return;
+  if (!files.length || !uploadType) return;
 
   const formData = new FormData();
 
-  [...files].forEach((f) => {
-    formData.append("images", f);
+  Array.from(files).forEach((file) => {
+    formData.append("images", file);
   });
 
   formData.append("type", uploadType);
 
-  await fetch(
-    `${Base_API}/projects/${project._id}/drawing`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+  await fetch(`${Base_API}/projects/${project._id}/drawing`, {
+    method: "POST",
+    body: formData,
+  });
 
   await fetchDrawings();
   setOpenUpload(false);
   setFiles([]);
 };
+
 // ================= USE EFFECTS =================
+
+
 
 useEffect(() => {
   fetchProject();
@@ -192,7 +188,10 @@ const handleDeleteImage = async (imgUrl) => {
   await fetch(`${Base_API}/projects/${project._id}/drawing/image`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageUrl: imgUrl }),
+    body: JSON.stringify({
+      imageUrl: imgUrl,
+      type: drawingType, // 🔥 IMPORTANT FIX
+    }),
   });
 
   await fetchDrawings();
@@ -205,7 +204,11 @@ const handleDeleteImage = async (imgUrl) => {
 const interiorImages =
   drawings.find((d) => d.type === "interior")?.images || [];
 const images =
-  drawingType === "civil" ? civilImages : interiorImages;
+  drawingType === "civil"
+    ? civilImages
+    : drawingType === "interior"
+    ? interiorImages
+    : [];
 
 const openImage = (img, index) => {
   setSelectedImage(img);
