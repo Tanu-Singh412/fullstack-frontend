@@ -1,3 +1,7 @@
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
+import { useEffect, useState, useParams } from "react";
+
 function VendorDetail() {
   const { id } = useParams();
   const [vendor, setVendor] = useState(null);
