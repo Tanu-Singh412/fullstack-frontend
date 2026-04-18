@@ -1,7 +1,7 @@
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import { useEffect, useState, useParams } from "react";
-
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom"; ✅
 function VendorDetail() {
   const { id } = useParams();
   const [vendor, setVendor] = useState(null);
