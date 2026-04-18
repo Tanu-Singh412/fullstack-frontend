@@ -15,10 +15,11 @@ function VendorDetail() {
   const [vendor, setVendor] = useState(null);
 
 useEffect(() => {
-  fetch(`/api/vendors?category=${category}`)
+  fetch(`/api/vendors/${id}`)
     .then((res) => res.json())
-    .then((res) => setVendors(res.data));
-}, [category]);
+    .then((res) => setVendor(res.data))
+    .catch((err) => console.error(err));
+}, [id]);
 
   if (!vendor) return <p>Loading...</p>;
 
