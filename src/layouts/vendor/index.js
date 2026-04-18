@@ -47,3 +47,5 @@ function VendorHome() {
     </DashboardLayout>
   );
 }
+
+export default VendorHome;
