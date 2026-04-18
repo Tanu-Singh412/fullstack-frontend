@@ -11,9 +11,9 @@ function MaterialVendor() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("https://fullstack-project-1-n510.onrender.com/api/vendors/by-material")
+    fetch("https://fullstack-project-1-n510.onrender.com/api/vendors/material")
       .then((res) => res.json())
-      .then((res) => setData(res.data))
+      .then((res) => setData(res.data || []))
       .catch((err) => console.error(err));
   }, []);
 
@@ -27,7 +27,7 @@ function MaterialVendor() {
                 {group._id || "Uncategorized"}
               </MDTypography>
 
-              {group.vendors.map((v) => (
+              {group.vendors?.map((v) => (
                 <MDBox
                   key={v._id}
                   onClick={() => navigate(`/vendor/${v._id}`)}

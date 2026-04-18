@@ -11,17 +11,11 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 
-import useVendorTableData from "./data/vendorTableData";
 
 function Vendors() {
   const navigate = useNavigate();
 
-  const tableData = useVendorTableData();
-
-  if (!tableData) return <p>Loading...</p>;
-
-  const { columns, rows, dialog } = tableData;
-
+  
   return (
     <DashboardLayout>
       <DashboardNavbar />
