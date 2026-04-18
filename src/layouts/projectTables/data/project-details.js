@@ -237,10 +237,7 @@ const inputStyle = {
     outline: "none",
     fontSize: "14px",
   };
-useEffect(() => {
-  setImageIndex(0);
-  setSelectedImage(null);
-}, [drawingType]);
+
   const handleAddScope = async () => {
     try {
       setLoading(true);
