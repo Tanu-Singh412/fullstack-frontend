@@ -37,7 +37,6 @@ const { columns, rows, dialog } = tableData;
                 px={2}
                 bgColor="info"
                 variant="gradient"
-                borderRadius="lg"
                 coloredShadow="info"
                 display="flex"
                 justifyContent="space-between"
