@@ -4,7 +4,7 @@ import ProjectTables from "layouts/projectTables";
 import Projects from "layouts/project";
 import Add_clients from "layouts/Client/add_client";
 import Billing from "layouts/billing";
-import Vendors from "layouts/vendor";
+import VendorHome  from "layouts/vendor";
 import AddVendor from "layouts/vendor/add-vendor";
 import VendorDetail from "layouts/vendor/vendor-detail";
 import SignIn from "layouts/authentication/sign-in";
@@ -91,7 +91,7 @@ const routes = [
   name: "Vendor",
   key: "vendor",
   route: "/vendor",
-  component: <Vendors />,
+  component: <VendorHome  />,
 },
 {
   type: "route",

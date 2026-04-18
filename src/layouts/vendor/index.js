@@ -13,76 +13,34 @@ import DataTable from "examples/Tables/DataTable";
 
 import useVendorTableData from "./data/vendorTableData";
 
-function Vendors() {
+function VendorHome() {
   const navigate = useNavigate();
 
-  const tableData = useVendorTableData();
-
-  if (!tableData) return <p>Loading...</p>;
-
-  const { columns, rows, dialog } = tableData;
-
   return (
-    <DashboardLayout>
-      <DashboardNavbar />
-
-      <MDBox pt={6} pb={3}>
-        <Grid container spacing={6}>
-          <Grid item xs={12}>
-            <Card>
-              {/* HEADER */}
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                bgColor="info"
-                variant="gradient"
-                borderRadius="lg"
-                coloredShadow="info"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <MDTypography variant="h6" color="white">
-                  Vendor Management
-                </MDTypography>
-
-                <MDBox
-                  sx={{
-                    cursor: "pointer",
-                    border: "1px solid white",
-                    px: 2,
-                    py: 1,
-                    borderRadius: "8px",
-                    color: "#fff",
-                  }}
-                  onClick={() => navigate("/add-vendor")}
-                >
-                  + Add Vendor
-                </MDBox>
-              </MDBox>
-
-              {/* TABLE */}
-              <MDBox pt={3}>
-                <DataTable
-                  table={{ columns, rows }}
-                  isSorted={false}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  noEndBorder
-                />
-              </MDBox>
-
-              {dialog}
-            </Card>
-          </Grid>
+    <MDBox p={3}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
+          <Card
+            sx={{ p: 3, cursor: "pointer" }}
+            onClick={() => navigate("/material-vendor")}
+          >
+            <MDTypography variant="h6">
+              Material Vendors
+            </MDTypography>
+          </Card>
         </Grid>
-      </MDBox>
 
-      <Footer />
-    </DashboardLayout>
+        {/* future types */}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3 }}>
+            <MDTypography variant="h6">
+              Labour Vendors (coming soon)
+            </MDTypography>
+          </Card>
+        </Grid>
+      </Grid>
+    </MDBox>
   );
 }
 
-export default Vendors;
+export default VendorHome;
