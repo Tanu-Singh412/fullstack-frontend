@@ -79,7 +79,6 @@ function VendorHome() {
                     background: "#fff",
                     color: "#1976d2",
                     fontWeight: "600",
-                    color : "#fff"
                   }}
                 >
                   + Add Category
@@ -130,7 +129,8 @@ function VendorHome() {
 
           <Button
             fullWidth
-            sx={{ mt: 2 }}
+            sx={{ mt: 2 , color: "#fff"}}
+
             variant="contained"
             onClick={addCategory}
           >
