@@ -431,6 +431,7 @@ const inputStyle = {
                   setUploadType(type);
                   setOpenUpload(true);
                 }}
+
               >
                 Upload
               </Button>
@@ -997,6 +998,7 @@ const inputStyle = {
         sx={{
           textTransform: "none",
           borderRadius: "8px",
+          color:"#fff"
         }}
       >
         {loading ? "Uploading..." : "Upload"}
