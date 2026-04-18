@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
 import Footer from "examples/Footer";
 
 function MaterialVendor() {
