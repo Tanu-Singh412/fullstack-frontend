@@ -113,10 +113,10 @@ const fetchDrawings = async () => {
 
     const data = await res.json();
 
-    // IMPORTANT: ensure always array
     setDrawings(Array.isArray(data) ? data : []);
+
   } catch (err) {
-    console.log("Drawing fetch error:", err);
+    console.log("DRAWINGS ERROR:", err);
     setDrawings([]);
   }
 };
@@ -203,9 +203,8 @@ const handleDeleteImage = async (imgUrl) => {
 };
 
   // ================= LIGHTBOX =================
-const images = Array.isArray(drawings)
-  ? (drawings.find((d) => d.type === drawingType)?.images || [])
-  : [];
+const images =
+  drawings.find((d) => d.type === drawingType)?.images || [];
 
   const openImage = (img, index) => {
     setSelectedImage(img);
