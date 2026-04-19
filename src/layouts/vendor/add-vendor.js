@@ -34,14 +34,21 @@ function AddVendor() {
     gst: "",
     status: "Active",
     note: "",
-    category: "", // ✅ STRING CATEGORY
+    category: "",
     materials: [],
   });
 
   // =====================
-  // CATEGORY LIST
+  // DYNAMIC CATEGORIES (FROM DB)
   // =====================
-  const categories = ["Cement", "Steel", "Labour"];
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch("https://fullstack-project-1-n510.onrender.com/api/vendor-categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data.data || data))
+      .catch((err) => console.log(err));
+  }, []);
 
   // =====================
   // INPUT CHANGE
@@ -123,7 +130,7 @@ function AddVendor() {
     };
 
     try {
-      const res = await fetch(
+      await fetch(
         "https://fullstack-project-1-n510.onrender.com/api/vendors",
         {
           method: "POST",
@@ -132,12 +139,10 @@ function AddVendor() {
         }
       );
 
-      await res.json();
-
       alert("Vendor Saved Successfully");
       navigate("/vendor");
     } catch (err) {
-      console.log("ERROR:", err);
+      console.log(err);
       alert("Something went wrong");
     }
   };
@@ -228,7 +233,7 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* CATEGORY */}
+                {/* CATEGORY (DYNAMIC) */}
                 <Grid item xs={12}>
                   <TextField
                     select
@@ -240,9 +245,13 @@ function AddVendor() {
                     SelectProps={{ native: true }}
                   >
                     <option value=""></option>
+
                     {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
+                      <option
+                        key={cat._id || cat.name}
+                        value={cat.name}
+                      >
+                        {cat.name}
                       </option>
                     ))}
                   </TextField>
