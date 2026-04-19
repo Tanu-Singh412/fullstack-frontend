@@ -22,6 +22,9 @@ import Footer from "examples/Footer";
 function AddVendor() {
   const navigate = useNavigate();
 
+  // =====================
+  // FORM STATE
+  // =====================
   const [form, setForm] = useState({
     vendorName: "",
     phone: "",
@@ -31,8 +34,14 @@ function AddVendor() {
     gst: "",
     status: "Active",
     note: "",
+    category: "", // ✅ STRING CATEGORY
     materials: [],
   });
+
+  // =====================
+  // CATEGORY LIST
+  // =====================
+  const categories = ["Cement", "Steel", "Labour"];
 
   // =====================
   // INPUT CHANGE
@@ -86,6 +95,7 @@ function AddVendor() {
         gst: parsed.gst || "",
         status: parsed.status || "Active",
         note: parsed.note || "",
+        category: parsed.category || "",
         materials: parsed.materials || [],
       });
 
@@ -97,8 +107,8 @@ function AddVendor() {
   // SUBMIT
   // =====================
   const handleSubmit = async () => {
-    if (!form.vendorName || !form.phone) {
-      alert("Vendor Name & Phone required");
+    if (!form.vendorName || !form.phone || !form.category) {
+      alert("Vendor Name, Phone & Category required");
       return;
     }
 
@@ -112,36 +122,29 @@ function AddVendor() {
         })),
     };
 
-    const editData = localStorage.getItem("editVendor");
-
     try {
-      if (editData) {
-        const parsed = JSON.parse(editData);
-
-        await fetch(` https://fullstack-project-1-n510.onrender.com/api/vendors/${parsed._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(cleanedForm),
-        });
-
-        alert("Vendor Updated");
-      } else {
-        await fetch("https://fullstack-project-1-n510.onrender.com/api/vendors", {
+      const res = await fetch(
+        "https://fullstack-project-1-n510.onrender.com/api/vendors",
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cleanedForm),
-        });
+        }
+      );
 
-        alert("Vendor Added");
-      }
+      await res.json();
 
+      alert("Vendor Saved Successfully");
       navigate("/vendor");
     } catch (err) {
-      console.log("SUBMIT ERROR:", err);
+      console.log("ERROR:", err);
       alert("Something went wrong");
     }
   };
 
+  // =====================
+  // UI
+  // =====================
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -149,7 +152,8 @@ function AddVendor() {
       <MDBox pt={6} pb={3}>
         <Grid container justifyContent="center">
           <Grid item xs={12} md={10} lg={8}>
-            <Card sx={{ p: 3, backgroundColor: "#fff" }}>
+            <Card sx={{ p: 3 }}>
+
               <MDTypography variant="h5" mb={2}>
                 Add Vendor
               </MDTypography>
@@ -157,7 +161,8 @@ function AddVendor() {
               <Divider sx={{ mb: 3 }} />
 
               <Grid container spacing={2}>
-                {/* BASIC INFO */}
+
+                {/* NAME */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -168,6 +173,7 @@ function AddVendor() {
                   />
                 </Grid>
 
+                {/* PHONE */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -178,6 +184,7 @@ function AddVendor() {
                   />
                 </Grid>
 
+                {/* EMAIL */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -188,6 +195,7 @@ function AddVendor() {
                   />
                 </Grid>
 
+                {/* ADDRESS */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -198,6 +206,7 @@ function AddVendor() {
                   />
                 </Grid>
 
+                {/* COMPANY */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -208,6 +217,7 @@ function AddVendor() {
                   />
                 </Grid>
 
+                {/* GST */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -218,13 +228,34 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* MATERIAL SECTION */}
+                {/* CATEGORY */}
+                <Grid item xs={12}>
+                  <TextField
+                    select
+                    fullWidth
+                    label="Category *"
+                    name="category"
+                    value={form.category}
+                    onChange={handleChange}
+                    SelectProps={{ native: true }}
+                  >
+                    <option value=""></option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </TextField>
+                </Grid>
+
+                {/* MATERIAL HEADER */}
                 <Grid item xs={12}>
                   <MDBox display="flex" justifyContent="space-between">
-                    <MDTypography variant="h6">Materials Supplied</MDTypography>
+                    <MDTypography variant="h6">
+                      Materials
+                    </MDTypography>
 
                     <Button
-                      sx="color: #fff"
                       variant="contained"
                       startIcon={<AddIcon />}
                       onClick={addMaterial}
@@ -234,14 +265,18 @@ function AddVendor() {
                   </MDBox>
                 </Grid>
 
+                {/* MATERIAL LIST */}
                 {form.materials.map((mat, index) => (
                   <Grid container spacing={2} key={index} sx={{ mt: 1 }}>
+
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
                         label="Material Name"
                         value={mat.materialName}
-                        onChange={(e) => updateMaterial(index, "materialName", e.target.value)}
+                        onChange={(e) =>
+                          updateMaterial(index, "materialName", e.target.value)
+                        }
                       />
                     </Grid>
 
@@ -251,22 +286,27 @@ function AddVendor() {
                         label="Rate"
                         type="number"
                         value={mat.rate}
-                        onChange={(e) => updateMaterial(index, "rate", e.target.value)}
+                        onChange={(e) =>
+                          updateMaterial(index, "rate", e.target.value)
+                        }
                       />
                     </Grid>
 
                     <Grid item xs={2}>
-                      <IconButton onClick={() => removeMaterial(index)} sx={{ color: "red" }}>
+                      <IconButton
+                        onClick={() => removeMaterial(index)}
+                        sx={{ color: "red" }}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </Grid>
+
                   </Grid>
                 ))}
 
-                {/* SAVE */}
-                <Grid item xs={12}>
+                {/* SUBMIT */}
+                <Grid item xs={12} mt={2}>
                   <Button
-                    sx={{ color: "#fff" }}
                     fullWidth
                     variant="contained"
                     size="large"
@@ -275,6 +315,7 @@ function AddVendor() {
                     Save Vendor
                   </Button>
                 </Grid>
+
               </Grid>
             </Card>
           </Grid>

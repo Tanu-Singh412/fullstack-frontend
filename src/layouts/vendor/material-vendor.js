@@ -19,12 +19,14 @@ function VendorList() {
   const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
 
-  useEffect(() => {
-    fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors?category=${category}`)
-      .then((res) => res.json())
-      .then((res) => setVendors(res.data || []))
-      .catch((err) => console.error(err));
-  }, [category]);
+useEffect(() => {
+  fetch(
+    `https://fullstack-project-1-n510.onrender.com/api/vendors?category=${category}`
+  )
+    .then((res) => res.json())
+    .then((res) => setVendors(res.data || []))
+    .catch((err) => console.log(err));
+}, [category]);
 
   return (
     <DashboardLayout>
