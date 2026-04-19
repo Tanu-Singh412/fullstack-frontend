@@ -19,14 +19,19 @@ function VendorList() {
   const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
 const cleanCategory = category?.trim();
+
+// ✅ Capitalize first letter
+const formattedCategory =
+  cleanCategory?.charAt(0).toUpperCase() + cleanCategory?.slice(1);
+
 useEffect(() => {
   fetch(
-    `https://fullstack-project-1-n510.onrender.com/api/vendors?category=${cleanCategory}`
+    `https://fullstack-project-1-n510.onrender.com/api/vendors?category=${formattedCategory}`
   )
     .then((res) => res.json())
     .then((res) => setVendors(res.data || []))
     .catch((err) => console.log(err));
-}, [cleanCategory]);
+}, [formattedCategory]);
 
   return (
     <DashboardLayout>

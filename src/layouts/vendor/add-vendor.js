@@ -121,7 +121,7 @@ function AddVendor() {
 
   const cleanedForm = {
   ...form,
-  category: form.category.trim(), // ✅ VERY IMPORTANT
+  category: form.category.trim().toLowerCase(), // ✅ VERY IMPORTANT
   materials: form.materials
     .filter((m) => m.materialName?.trim())
     .map((m) => ({
