@@ -16,8 +16,8 @@ function VendorDetail() {
 const { id } = useParams();
 
 useEffect(() => {
-  fetch(`/api/vendors/${id}`)
-    .then((res) => res.json())
+fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`)
+     .then((res) => res.json())
     .then((res) => setVendor(res.data))
     .catch((err) => console.error(err));
 }, [id]);

@@ -104,7 +104,7 @@ const routes = [
     name: "Vendor Category",
     key: "vendor-category",
     route: "/vendor/category/:categoryId",
-    component: <MaterialVendor />, // reuse component
+    component: <VendorList  />, // reuse component
   },
 
   // ✅ SINGLE VENDOR DETAIL
@@ -121,7 +121,7 @@ const routes = [
   type: "route",
   name: "Add Vendor",
   key: "add-vendor",
-  route: "/add-vendor/:categoryId",
+  route: "/add-vendor/:category",
   component: <AddVendor />,
 },
 

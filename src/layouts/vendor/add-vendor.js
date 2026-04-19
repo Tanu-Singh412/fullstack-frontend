@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"; // ✅ ADD THIS
 
 // MUI
 import Grid from "@mui/material/Grid";
@@ -21,6 +21,7 @@ import Footer from "examples/Footer";
 
 function AddVendor() {
   const navigate = useNavigate();
+  const { categoryId } = useParams(); // ✅ GET CATEGORY FROM URL
 
   // =====================
   // FORM STATE
@@ -39,7 +40,19 @@ function AddVendor() {
   });
 
   // =====================
-  // DYNAMIC CATEGORIES (FROM DB)
+  // AUTO SET CATEGORY FROM URL ✅
+  // =====================
+  useEffect(() => {
+    if (categoryId) {
+      setForm((prev) => ({
+        ...prev,
+        category: categoryId.toLowerCase(), // ✅ IMPORTANT
+      }));
+    }
+  }, [categoryId]);
+
+  // =====================
+  // FETCH CATEGORIES
   // =====================
   const [categories, setCategories] = useState([]);
 
@@ -85,32 +98,6 @@ function AddVendor() {
   };
 
   // =====================
-  // LOAD EDIT DATA
-  // =====================
-  useEffect(() => {
-    const editData = localStorage.getItem("editVendor");
-
-    if (editData) {
-      const parsed = JSON.parse(editData);
-
-      setForm({
-        vendorName: parsed.vendorName || "",
-        phone: parsed.phone || "",
-        email: parsed.email || "",
-        address: parsed.address || "",
-        company: parsed.company || "",
-        gst: parsed.gst || "",
-        status: parsed.status || "Active",
-        note: parsed.note || "",
-        category: parsed.category || "",
-        materials: parsed.materials || [],
-      });
-
-      localStorage.removeItem("editVendor");
-    }
-  }, []);
-
-  // =====================
   // SUBMIT
   // =====================
   const handleSubmit = async () => {
@@ -119,16 +106,16 @@ function AddVendor() {
       return;
     }
 
-  const cleanedForm = {
-  ...form,
-  category: form.category.trim().toLowerCase(), // ✅ VERY IMPORTANT
-  materials: form.materials
-    .filter((m) => m.materialName?.trim())
-    .map((m) => ({
-      materialName: m.materialName,
-      rate: Number(m.rate) || 0,
-    })),
-};
+    const cleanedForm = {
+      ...form,
+      category: form.category.trim().toLowerCase(), // ✅ KEEP LOWERCASE
+      materials: form.materials
+        .filter((m) => m.materialName?.trim())
+        .map((m) => ({
+          materialName: m.materialName,
+          rate: Number(m.rate) || 0,
+        })),
+    };
 
     try {
       await fetch(
@@ -161,14 +148,13 @@ function AddVendor() {
             <Card sx={{ p: 3 }}>
 
               <MDTypography variant="h5" mb={2}>
-                Add Vendor
+                Add Vendor ({categoryId}) {/* ✅ SHOW CATEGORY */}
               </MDTypography>
 
               <Divider sx={{ mb: 3 }} />
 
               <Grid container spacing={2}>
 
-                {/* NAME */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -179,7 +165,6 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* PHONE */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -190,7 +175,6 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* EMAIL */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -201,7 +185,6 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* ADDRESS */}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
@@ -212,7 +195,6 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* COMPANY */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -223,7 +205,6 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* GST */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -234,7 +215,7 @@ function AddVendor() {
                   />
                 </Grid>
 
-                {/* CATEGORY (DYNAMIC) */}
+                {/* CATEGORY */}
                 <Grid item xs={12}>
                   <TextField
                     select
@@ -246,19 +227,15 @@ function AddVendor() {
                     SelectProps={{ native: true }}
                   >
                     <option value=""></option>
-
                     {categories.map((cat) => (
-                      <option
-                        key={cat._id || cat.name}
-                        value={cat.name}
-                      >
+                      <option key={cat._id || cat.name} value={cat.name.toLowerCase()}>
                         {cat.name}
                       </option>
                     ))}
                   </TextField>
                 </Grid>
 
-                {/* MATERIAL HEADER */}
+                {/* MATERIALS */}
                 <Grid item xs={12}>
                   <MDBox display="flex" justifyContent="space-between">
                     <MDTypography variant="h6">
@@ -275,10 +252,8 @@ function AddVendor() {
                   </MDBox>
                 </Grid>
 
-                {/* MATERIAL LIST */}
                 {form.materials.map((mat, index) => (
                   <Grid container spacing={2} key={index} sx={{ mt: 1 }}>
-
                     <Grid item xs={6}>
                       <TextField
                         fullWidth
@@ -310,11 +285,9 @@ function AddVendor() {
                         <DeleteIcon />
                       </IconButton>
                     </Grid>
-
                   </Grid>
                 ))}
 
-                {/* SUBMIT */}
                 <Grid item xs={12} mt={2}>
                   <Button
                     fullWidth
