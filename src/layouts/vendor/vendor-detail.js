@@ -11,17 +11,16 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 
 function VendorDetail() {
-  const { id } = useParams();
-  const [vendor, setVendor] = useState(null);
+ const [vendor, setVendor] = useState(null);
+
+const { id } = useParams();
 
 useEffect(() => {
-  if (categoryId) {
-    setForm((prev) => ({
-      ...prev,
-      category: categoryId,
-    }));
-  }
-}, [categoryId]);
+  fetch(`/api/vendors/${id}`)
+    .then((res) => res.json())
+    .then((res) => setVendor(res.data))
+    .catch((err) => console.error(err));
+}, [id]);
 
   if (!vendor) return <p>Loading...</p>;
 
