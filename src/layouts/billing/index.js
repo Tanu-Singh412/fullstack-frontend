@@ -10,7 +10,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
-const API = "http://127.0.0.1:5000/api/invoices"; // use 127.0.0.1 to avoid axios network error
+const API = "https://fullstack-project-1-n510.onrender.com/api/invoices"; // use 127.0.0.1 to avoid axios network error
 
 const generateInvoiceNo = () => `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
 
