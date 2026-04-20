@@ -18,6 +18,7 @@
     "@emotion/styled": "11.10.8",
     "@mui/icons-material": "5.11.16",
     "@mui/material": "5.12.3",
+    "axios": "^1.15.1",
     "chart.js": "4.3.0",
     "chroma-js": "2.4.2",
     "html2canvas": "^1.4.1",
@@ -42,12 +43,12 @@
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start"
   },
-"eslintConfig": {
-  "extends": [
-    "react-app",
-    "react-app/jest"
-  ]
-},
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",

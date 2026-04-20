@@ -1,136 +1,68 @@
-import React, { useRef, useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import {
+  Container,
+  Card,
+  Grid,
+  TextField,
+  Button,
+  Typography,
+  IconButton,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import "./invoice.css";
 
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-
-/* ================= PDF ================= */
-const downloadPDF = async (el, invoiceNo = "invoice") => {
-  if (!el) return alert("Invoice not ready");
-
-  const canvas = await html2canvas(el, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#fff",
-  });
-
+const downloadPDF = async (el) => {
+  const canvas = await html2canvas(el, { scale: 2 });
   const imgData = canvas.toDataURL("image/png");
-
   const pdf = new jsPDF("p", "mm", "a4");
   const width = pdf.internal.pageSize.getWidth();
   const height = (canvas.height * width) / canvas.width;
-
   pdf.addImage(imgData, "PNG", 0, 0, width, height);
-  pdf.save(`${invoiceNo}.pdf`);
+  pdf.save("invoice.pdf");
 };
 
-/* ================= NUMBER TO WORD ================= */
-const numberToWords = (num) => {
-  const a = ["", "One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-  const b = ["", "", "Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-
-  const inWords = (n) => {
-    if (n < 20) return a[n];
-    if (n < 100) return b[Math.floor(n / 10)] + " " + a[n % 10];
-    if (n < 1000) return a[Math.floor(n / 100)] + " Hundred " + inWords(n % 100);
-    if (n < 100000) return inWords(Math.floor(n / 1000)) + " Thousand " + inWords(n % 1000);
-    if (n < 10000000) return inWords(Math.floor(n / 100000)) + " Lakh " + inWords(n % 100000);
-    return inWords(Math.floor(n / 10000000)) + " Crore " + inWords(n % 10000000);
-  };
-
-  return inWords(Math.floor(num)) + " Rupees Only";
-};
-
-/* ================= INVOICE ================= */
-const Invoice = React.forwardRef(({ data, totals }, ref) => (
-  <div ref={ref} style={styles.page}>
-    <h2 style={{ textAlign: "center" }}>TAX INVOICE</h2>
-
-    <div>
-      <b>{data.company}</b><br />
-      {data.clientName}
-    </div>
-
-    <hr />
-
-    <table style={styles.table}>
+const Invoice = React.forwardRef(({ data, total }, ref) => (
+  <div ref={ref} style={{ padding: 30, background: "#fff" }}>
+    <h2>TAX INVOICE</h2>
+    <p><b>{data.company}</b></p>
+    <p>{data.clientName}</p>
+    <table width="100%" border="1" cellPadding="8">
       <thead>
         <tr>
           <th>Item</th>
           <th>Qty</th>
-          <th>Rate</th>
-          <th>Amount</th>
+          <th>Price</th>
         </tr>
       </thead>
       <tbody>
-        {data.items.map((item, i) => (
-          <tr key={i}>
-            <td>{item.name}</td>
-            <td>{item.qty}</td>
-            <td>{item.price}</td>
-            <td>{item.qty * item.price}</td>
+        {data.items.map((i, idx) => (
+          <tr key={idx}>
+            <td>{i.name}</td>
+            <td>{i.qty}</td>
+            <td>{i.price}</td>
           </tr>
         ))}
       </tbody>
     </table>
-
-    <h3>Total: ₹{totals.total}</h3>
-    <p>{numberToWords(totals.total)}</p>
+    <h3>Total: ₹{total}</h3>
   </div>
 ));
 
-Invoice.propTypes = {
-  data: PropTypes.object,
-  totals: PropTypes.object,
-};
-
-/* ================= MAIN ================= */
 export default function InvoicePage() {
   const pdfRef = useRef();
-
-  const [savedInvoices, setSavedInvoices] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [deleteId, setDeleteId] = useState(null);
 
   const [data, setData] = useState({
     clientName: "",
     company: "",
-    invoiceNo: "",
-    sgst: 9,
-    cgst: 9,
     items: [{ name: "", qty: 1, price: 0 }],
   });
 
-  /* LOAD */
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("invoices") || "[]");
-    setSavedInvoices(saved);
-  }, []);
+  const [saved, setSaved] = useState([]);
 
-  /* CALC */
   const subtotal = data.items.reduce((s, i) => s + i.qty * i.price, 0);
-  const total = subtotal + (subtotal * data.sgst) / 100 + (subtotal * data.cgst) / 100;
-
-  const totals = {
-    total: total.toFixed(2),
-  };
-
-  /* ITEM UPDATE */
-  const updateItem = (i, field, value) => {
-    const items = [...data.items];
-    items[i][field] = value;
-    setData({ ...data, items });
-  };
 
   const addItem = () => {
     setData({
@@ -139,167 +71,133 @@ export default function InvoicePage() {
     });
   };
 
-  const removeItem = (i) => {
-    const items = data.items.filter((_, index) => index !== i);
+  const updateItem = (i, field, value) => {
+    const items = [...data.items];
+    items[i][field] = value;
     setData({ ...data, items });
   };
 
-  /* SAVE */
-  const saveInvoice = () => {
-    if (!data.clientName) return alert("Client name required");
-
-    const newInvoice = {
-      id: editingId || Date.now(),
-      data,
-      totals,
-      createdAt: new Date().toISOString(),
-    };
-
-    let updated;
-
-    if (editingId) {
-      updated = savedInvoices.map((inv) => (inv.id === editingId ? newInvoice : inv));
-    } else {
-      updated = [...savedInvoices, newInvoice];
-    }
-
-    setSavedInvoices(updated);
-    localStorage.setItem("invoices", JSON.stringify(updated));
-
-    setEditingId(null);
-
-    // reset form
-    setData({
-      clientName: "",
-      company: "",
-      invoiceNo: "",
-      sgst: 9,
-      cgst: 9,
-      items: [{ name: "", qty: 1, price: 0 }],
-    });
-
-    downloadPDF(pdfRef.current, data.invoiceNo || "invoice");
-  };
-
-  /* DELETE */
-  const deleteInvoice = (id) => {
-    const updated = savedInvoices.filter((i) => i.id !== id);
-    setSavedInvoices(updated);
-    localStorage.setItem("invoices", JSON.stringify(updated));
-  };
-
   return (
-    <DashboardLayout>
-      <DashboardNavbar />
+    <Container maxWidth="lg" style={{ marginTop: 30 }}>
+      <Typography variant="h4" gutterBottom>
+        Invoice Generator
+      </Typography>
 
-      <div style={{ padding: 20 }}>
-        <h2>Invoice Generator</h2>
+      <Card style={{ padding: 20, marginBottom: 20 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Client Name"
+              onChange={(e) => setData({ ...data, clientName: e.target.value })}
+            />
+          </Grid>
 
-        {/* FORM */}
-        <input
-          placeholder="Client Name"
-          value={data.clientName}
-          onChange={(e) => setData({ ...data, clientName: e.target.value })}
-        />
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Company"
+              onChange={(e) => setData({ ...data, company: e.target.value })}
+            />
+          </Grid>
+        </Grid>
 
-        <input
-          placeholder="Company"
-          value={data.company}
-          onChange={(e) => setData({ ...data, company: e.target.value })}
-        />
-
-        <h4>Items</h4>
+        <Typography variant="h6" style={{ marginTop: 20 }}>
+          Items
+        </Typography>
 
         {data.items.map((item, i) => (
-          <div key={i}>
-            <input
-              placeholder="Item"
-              onChange={(e) => updateItem(i, "name", e.target.value)}
-            />
-            <input
-              type="number"
-              placeholder="Qty"
-              onChange={(e) => updateItem(i, "qty", Number(e.target.value))}
-            />
-            <input
-              type="number"
-              placeholder="Price"
-              onChange={(e) => updateItem(i, "price", Number(e.target.value))}
-            />
+          <Grid container spacing={2} key={i} style={{ marginTop: 10 }}>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Item"
+                onChange={(e) => updateItem(i, "name", e.target.value)}
+              />
+            </Grid>
 
-            <button onClick={() => removeItem(i)}>Remove</button>
-          </div>
+            <Grid item xs={3}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Qty"
+                onChange={(e) => updateItem(i, "qty", +e.target.value)}
+              />
+            </Grid>
+
+            <Grid item xs={3}>
+              <TextField
+                type="number"
+                fullWidth
+                label="Price"
+                onChange={(e) => updateItem(i, "price", +e.target.value)}
+              />
+            </Grid>
+          </Grid>
         ))}
 
-        <button onClick={addItem}>Add Item</button>
-        <button onClick={saveInvoice}>
-          {editingId ? "Update Invoice" : "Save & Download"}
-        </button>
+        <Button onClick={addItem} style={{ marginTop: 10 }}>
+          Add Item
+        </Button>
 
-        {/* SAVED LIST */}
-        <h3>Saved</h3>
+        <Typography variant="h6" style={{ marginTop: 20 }}>
+          Total: ₹{subtotal}
+        </Typography>
 
-        {savedInvoices.map((inv) => (
-          <div key={inv.id}>
-            {inv.data.clientName} - ₹{inv.totals.total}
+        <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+          <Button
+            variant="contained"
+            onClick={() => downloadPDF(pdfRef.current)}
+          >
+            Download PDF
+          </Button>
 
-            <button
-              onClick={() => {
-                setData(inv.data);
-                setEditingId(inv.id);
-              }}
-            >
-              Edit
-            </button>
-
-            <button onClick={() => downloadPDF(pdfRef.current, inv.data.invoiceNo)}>
-              Download
-            </button>
-
-            <button onClick={() => setDeleteId(inv.id)}>Delete</button>
-          </div>
-        ))}
-
-        {/* HIDDEN PDF */}
-        <div style={{ position: "absolute", left: "-9999px" }}>
-          <Invoice ref={pdfRef} data={data} totals={totals} />
+          <Button
+            variant="outlined"
+            onClick={() => setSaved([...saved, { ...data, total: subtotal }])}
+          >
+            Save
+          </Button>
         </div>
+      </Card>
 
-        {/* DELETE DIALOG */}
-        <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
-          <DialogTitle>
-            <WarningAmberIcon /> Confirm Delete
-          </DialogTitle>
-          <DialogContent>Are you sure?</DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteId(null)}>Cancel</Button>
-            <Button
-              color="error"
-              onClick={() => {
-                deleteInvoice(deleteId);
-                setDeleteId(null);
-              }}
+      <Typography variant="h5">Saved Invoices</Typography>
+
+      {saved.map((inv, i) => (
+        <Card
+          key={i}
+          style={{
+            padding: 15,
+            marginTop: 10,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <Typography>{inv.clientName}</Typography>
+            <Typography variant="body2">₹{inv.total}</Typography>
+          </div>
+
+          <div>
+            <IconButton onClick={() => setData(inv)}>
+              <VisibilityIcon />
+            </IconButton>
+
+            <IconButton
+              onClick={() =>
+                setSaved(saved.filter((_, idx) => idx !== i))
+              }
             >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
+              <DeleteIcon />
+            </IconButton>
+          </div>
+        </Card>
+      ))}
 
-      <Footer />
-    </DashboardLayout>
+      <div style={{ position: "absolute", left: -9999 }}>
+        <Invoice ref={pdfRef} data={data} total={subtotal} />
+      </div>
+    </Container>
   );
 }
 
-/* ================= STYLES ================= */
-const styles = {
-  page: {
-    width: "210mm",
-    padding: 20,
-    background: "#fff",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-};
