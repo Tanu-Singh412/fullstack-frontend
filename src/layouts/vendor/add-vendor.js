@@ -21,7 +21,7 @@ import Footer from "examples/Footer";
 
 function AddVendor() {
   const navigate = useNavigate();
-  const { categoryId } = useParams(); // ✅ GET CATEGORY FROM URL
+  const { category } = useParams(); // ✅ GET CATEGORY FROM URL
 
   // =====================
   // FORM STATE
@@ -42,14 +42,14 @@ function AddVendor() {
   // =====================
   // AUTO SET CATEGORY FROM URL ✅
   // =====================
-  useEffect(() => {
-    if (categoryId) {
-      setForm((prev) => ({
-        ...prev,
-        category: categoryId.toLowerCase(), // ✅ IMPORTANT
-      }));
-    }
-  }, [categoryId]);
+useEffect(() => {
+  if (category) {
+    setForm((prev) => ({
+      ...prev,
+      category: category.toLowerCase(),
+    }));
+  }
+}, [category]);
 
   // =====================
   // FETCH CATEGORIES
@@ -128,7 +128,7 @@ function AddVendor() {
       );
 
       alert("Vendor Saved Successfully");
-      navigate("/vendor");
+navigate(`/vendor/category/${form.category}`);
     } catch (err) {
       console.log(err);
       alert("Something went wrong");
