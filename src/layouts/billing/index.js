@@ -139,6 +139,7 @@ export default function InvoicePage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [previewData, setPreviewData] = useState(null);
+  const [openPreview, setOpenPreview] = useState(false);
   const pdfRef = useRef();
 
   const fetchInvoices = async () => {
@@ -260,7 +261,27 @@ export default function InvoicePage() {
           </button>
         </div>
 
-        <h3 style={{ marginTop: 30 }}>Saved Invoices</h3>
+        <div style={{ display:'flex', gap:10, marginTop:30, marginBottom:20, flexWrap:'wrap' }}>
+  <input
+    placeholder="Search by client or invoice no"
+    value={search}
+    onChange={(e)=>setSearch(e.target.value)}
+    style={{ padding:12, minWidth:260, border:'1px solid #ddd', borderRadius:8 }}
+  />
+
+  <select
+    value={filter}
+    onChange={(e)=>setFilter(e.target.value)}
+    style={{ padding:12, border:'1px solid #ddd', borderRadius:8 }}
+  >
+    <option value="all">All</option>
+    <option value="day">Today</option>
+    <option value="month">This Month</option>
+    <option value="year">This Year</option>
+  </select>
+</div>
+
+<h3 style={{ marginTop: 10 }}>Saved Invoices</h3>
 
         {invoices.map((inv) => (
           <div
@@ -290,7 +311,30 @@ export default function InvoicePage() {
         </div>
       </div>
 
-      <Footer />
+      {openPreview && previewData && (
+  <div
+    style={{
+      position:'fixed',
+      inset:0,
+      background:'rgba(0,0,0,0.6)',
+      display:'flex',
+      justifyContent:'center',
+      alignItems:'center',
+      zIndex:9999,
+      padding:20
+    }}
+    onClick={() => setOpenPreview(false)}
+  >
+    <div
+      style={{ background:'#fff', borderRadius:12, maxHeight:'90vh', overflow:'auto' }}
+      onClick={(e)=>e.stopPropagation()}
+    >
+      <ForwardInvoice form={previewData} totals={totals} />
+    </div>
+  </div>
+)}
+
+<Footer />
     </DashboardLayout>
   );
 }
