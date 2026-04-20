@@ -148,7 +148,7 @@ navigate(`/vendor/category/${form.category}`);
             <Card sx={{ p: 3 }}>
 
               <MDTypography variant="h5" mb={2}>
-                Add Vendor ({categoryId}) {/* ✅ SHOW CATEGORY */}
+                Add Vendor ({category}) {/* ✅ SHOW CATEGORY */}
               </MDTypography>
 
               <Divider sx={{ mb: 3 }} />
