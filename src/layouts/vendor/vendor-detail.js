@@ -42,7 +42,7 @@ function VendorDetail() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(vendor),
-        }
+        },
       );
 
       alert("Vendor updated ✅");
@@ -59,10 +59,10 @@ function VendorDetail() {
     try {
       await fetch(
         `https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
-      alert("Vendor deleted ❌");
+      alert("Vendor deleted successfully ✅");
       navigate("/vendor");
     } catch (err) {
       console.log(err);
@@ -79,7 +79,6 @@ function VendorDetail() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Card sx={{ p: 3 }}>
-
               {/* HEADER */}
               <MDBox display="flex" justifyContent="space-between">
                 <MDTypography variant="h4">
@@ -184,14 +183,82 @@ function VendorDetail() {
                 Materials
               </MDTypography>
 
-              {vendor.materials?.length > 0 ? (
-                vendor.materials.map((m, i) => (
-                  <MDBox key={i}>
-                    {m.materialName} — ₹{m.rate}
-                  </MDBox>
-                ))
+              {editMode ? (
+                <>
+                  {vendor.materials?.map((m, index) => (
+                    <Grid container spacing={2} key={index} sx={{ mb: 1 }}>
+                      <Grid item xs={5}>
+                        <TextField
+                          fullWidth
+                          label="Material Name"
+                          value={m.materialName}
+                          onChange={(e) => {
+                            const updated = [...vendor.materials];
+                            updated[index].materialName = e.target.value;
+                            setVendor({ ...vendor, materials: updated });
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={5}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label="Rate"
+                          value={m.rate}
+                          onChange={(e) => {
+                            const updated = [...vendor.materials];
+                            updated[index].rate = e.target.value;
+                            setVendor({ ...vendor, materials: updated });
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={2}>
+                        <Button
+                          color="error"
+                          onClick={() => {
+                            const updated = vendor.materials.filter(
+                              (_, i) => i !== index,
+                            );
+                            setVendor({ ...vendor, materials: updated });
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  ))}
+
+                  {/* ADD MATERIAL BUTTON */}
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 2 }}
+                    onClick={() =>
+                      setVendor({
+                        ...vendor,
+                        materials: [
+                          ...(vendor.materials || []),
+                          { materialName: "", rate: "" },
+                        ],
+                      })
+                    }
+                  >
+                    + Add Material
+                  </Button>
+                </>
               ) : (
-                <MDTypography>No materials</MDTypography>
+                <>
+                  {vendor.materials?.length > 0 ? (
+                    vendor.materials.map((m, i) => (
+                      <MDBox key={i}>
+                        {m.materialName} — ₹{m.rate}
+                      </MDBox>
+                    ))
+                  ) : (
+                    <MDTypography>No materials</MDTypography>
+                  )}
+                </>
               )}
             </Card>
           </Grid>
