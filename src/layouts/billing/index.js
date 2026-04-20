@@ -1,6 +1,3 @@
-// Professional Invoice Generator UI (Frontend)
-// Connected with your existing backend: /api/invoices
-
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import html2canvas from "html2canvas";
@@ -10,209 +7,111 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
-const API = "https://fullstack-project-1-n510.onrender.com/api/invoices"; // use 127.0.0.1 to avoid axios network error
+// MUI
+import Card from "@mui/material/Card";
+import IconButton from "@mui/material/IconButton";
+import Icon from "@mui/material/Icon";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 
-const generateInvoiceNo = () => `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
+
+const API = "https://fullstack-project-1-n510.onrender.com/api/invoices";
 
 const defaultForm = {
   clientName: "",
-  email: "",
   company: "",
-  address: "",
-  gstin: "",
-  phone: "",
-  invoiceNo: generateInvoiceNo(),
-  date: new Date().toISOString().split("T")[0],
-    sgst: 9,
+  invoiceNo: "",
+  date: "",
+  sgst: 9,
   cgst: 9,
-  items: [
-    {
-      name: "",
-      hsn: "",
-      qty: 1,
-      price: 0,
-    },
-  ],
+  items: [{ name: "", qty: 1, price: 0 }],
 };
-
-function numberToWords(num) {
-  return `${Number(num).toLocaleString("en-IN")} Rupees Only`;
-}
-
-function InvoiceTemplate({ form, totals }, ref) {
-  return (
-    <div
-      ref={ref}
-      style={{
-        width: "210mm",
-        minHeight: "297mm",
-        background: "#fff",
-        padding: 24,
-        fontFamily: "Arial",
-        color: "#000",
-        border: "1px solid #ddd",
-      }}
-    >
-      <h1 style={{ textAlign: "center", marginBottom: 20 }}>
-        TAX INVOICE
-      </h1>
-
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ width: "60%" }}>
-          <h3>{form.company || "Company Name"}</h3>
-          <p>{form.address}</p>
-          <p>GSTIN: {form.gstin}</p>
-          <p>Phone: {form.phone}</p>
-        </div>
-
-        <div style={{ width: "35%" }}>
-          <p><b>Invoice No:</b> {form.invoiceNo}</p>
-          <p><b>Date:</b> {form.date}</p>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 20, border: "1px solid #000", padding: 12 }}>
-        <h4>Buyer (Bill To)</h4>
-        <p><b>{form.clientName}</b></p>
-        <p>{form.email}</p>
-        <p>{form.address}</p>
-        
-      </div>
-
-      <table
-        style={{
-          width: "100%",
-          marginTop: 20,
-          borderCollapse: "collapse",
-        }}
-      >
-        <thead>
-          <tr>
-            {["Description", "HSN", "Qty", "Rate", "Amount"].map((h) => (
-              <th
-                key={h}
-                style={{
-                  border: "1px solid #000",
-                  padding: 10,
-                  background: "#f5f5f5",
-                }}
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody>
-          {form.items.map((item, i) => (
-            <tr key={i}>
-              <td style={{ border: "1px solid #000", padding: 10 }}>{item.name}</td>
-              <td style={{ border: "1px solid #000", padding: 10 }}>{item.hsn}</td>
-              <td style={{ border: "1px solid #000", padding: 10 }}>{item.qty}</td>
-              <td style={{ border: "1px solid #000", padding: 10 }}>₹{item.price}</td>
-              <td style={{ border: "1px solid #000", padding: 10 }}>
-                ₹{item.qty * item.price}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div style={{ marginTop: 20, textAlign: "right" }}>
-        <p><b>Sub Total:</b> ₹{totals.subtotal}</p>
-        <p><b>SGST:</b> ₹{totals.sgst}</p>
-        <p><b>CGST:</b> ₹{totals.cgst}</p>
-        <h2><b>Total:</b> ₹{totals.total}</h2>
-      </div>
-
-      <div style={{ marginTop: 20 }}>
-        <b>Amount Payable (in words):</b>
-        <p>{numberToWords(totals.total)}</p>
-      </div>
-    </div>
-  );
-}
-
-const ForwardInvoice = React.forwardRef(InvoiceTemplate);
 
 export default function InvoicePage() {
   const [form, setForm] = useState(defaultForm);
   const [invoices, setInvoices] = useState([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [previewData, setPreviewData] = useState(null);
-  const [openPreview, setOpenPreview] = useState(false);
+  const [preview, setPreview] = useState(null);
+
   const pdfRef = useRef();
 
-  const fetchInvoices = async () => {
-    try {
-    const res = await axios.get(`${API}?search=${search}&filter=${filter}`);
+  /* ================= FETCH ================= */
+  useEffect(() => {
+    loadInvoices();
+  }, []);
+
+  const loadInvoices = async () => {
+    const res = await axios.get(API);
     setInvoices(res.data.data || []);
-    } catch (err) {
-      console.log("Axios Error:", err);
-      alert("Backend not connected. Please start backend server on port 5000.");
-    }
   };
 
-  useEffect(() => {
-    fetchInvoices();
-  }, [search, filter]);
+  /* ================= FILTER ================= */
+  const filtered = invoices.filter((inv) => {
+    const match =
+      inv.clientName?.toLowerCase().includes(search.toLowerCase()) ||
+      inv.invoiceNo?.toLowerCase().includes(search.toLowerCase());
 
-  const updateItem = (index, field, value) => {
-    const updated = [...form.items];
-    updated[index][field] = value;
-    setForm({ ...form, items: updated });
+    if (!match) return false;
+
+    const d = new Date(inv.createdAt);
+    const now = new Date();
+
+    if (filter === "day") return d.toDateString() === now.toDateString();
+    if (filter === "month")
+      return d.getMonth() === now.getMonth() &&
+             d.getFullYear() === now.getFullYear();
+    if (filter === "year") return d.getFullYear() === now.getFullYear();
+
+    return true;
+  });
+
+  /* ================= ITEMS ================= */
+  const updateItem = (i, field, value) => {
+    const items = [...form.items];
+    items[i][field] = value;
+    setForm({ ...form, items });
   };
 
   const addItem = () => {
     setForm({
       ...form,
-      items: [...form.items, { name: "", hsn: "", qty: 1, price: 0 }],
+      items: [...form.items, { name: "", qty: 1, price: 0 }],
     });
   };
 
-  const subtotal = form.items.reduce(
-    (sum, item) => sum + Number(item.qty) * Number(item.price),
-    0
-  );
+  /* ================= TOTAL ================= */
+  const subtotal = form.items.reduce((s, i) => s + i.qty * i.price, 0);
+  const sgst = (subtotal * form.sgst) / 100;
+  const cgst = (subtotal * form.cgst) / 100;
+  const total = subtotal + sgst + cgst;
 
-  const sgstAmount = (subtotal * Number(form.sgst)) / 100;
-  const cgstAmount = (subtotal * Number(form.cgst)) / 100;
-  const total = subtotal + sgstAmount + cgstAmount;
-
-  const totals = {
-    subtotal: subtotal.toFixed(2),
-    sgst: sgstAmount.toFixed(2),
-    cgst: cgstAmount.toFixed(2),
-    total: total.toFixed(2),
-  };
-
+  /* ================= SAVE ================= */
   const saveInvoice = async () => {
-    await axios.post(API, {
-      ...form,
-      subtotal,
-      total,
-    });
-
-    fetchInvoices();
+    await axios.post(API, { ...form, subtotal, total });
+    loadInvoices();
     downloadPDF();
     setForm(defaultForm);
   };
 
+  /* ================= DELETE ================= */
   const deleteInvoice = async (id) => {
     await axios.delete(`${API}/${id}`);
-    fetchInvoices();
+    loadInvoices();
   };
 
+  /* ================= PDF ================= */
   const downloadPDF = async () => {
     const canvas = await html2canvas(pdfRef.current, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
+    const img = canvas.toDataURL("image/png");
 
     const pdf = new jsPDF("p", "mm", "a4");
-    const width = pdf.internal.pageSize.getWidth();
-    const height = (canvas.height * width) / canvas.width;
+    const w = pdf.internal.pageSize.getWidth();
+    const h = (canvas.height * w) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 0, 0, width, height);
+    pdf.addImage(img, "PNG", 0, 0, w, h);
     pdf.save("invoice.pdf");
   };
 
@@ -220,176 +119,134 @@ export default function InvoicePage() {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <div style={{ padding: 24 }}>
-        <h2 style={{ fontWeight:'700', marginBottom:20 }}>Professional Invoice Generator</h2>
+      <MDBox p={3}>
 
-        <div style={{ background:'#fff', padding:24, borderRadius:16, boxShadow:'0 8px 24px rgba(0,0,0,0.06)' }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
-            {Object.keys(defaultForm)
-              .filter((k) => k !== "items")
-              .map((field) => (
-                <input
-                  key={field}
-                  placeholder={field.replace(/([A-Z])/g,' $1')}
-                  value={form[field]}
-                  onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                  style={{ padding:14, border:'1px solid #dcdcdc', borderRadius:10, width:'100%' }}
+        <MDTypography variant="h5" mb={2}>
+          Invoice Generator
+        </MDTypography>
+
+        {/* FORM */}
+        <Card sx={{ p: 3, mb: 3 }}>
+          <MDBox display="grid" gridTemplateColumns="repeat(3,1fr)" gap={2}>
+            <TextField label="Client Name"
+              value={form.clientName}
+              onChange={(e)=>setForm({...form, clientName:e.target.value})}
+            />
+            <TextField label="Company"
+              value={form.company}
+              onChange={(e)=>setForm({...form, company:e.target.value})}
+            />
+            <TextField label="Invoice No"
+              value={form.invoiceNo}
+              onChange={(e)=>setForm({...form, invoiceNo:e.target.value})}
+            />
+          </MDBox>
+
+          <MDBox mt={2}>
+            <MDTypography variant="h6">Items</MDTypography>
+
+            {form.items.map((item,i)=>(
+              <MDBox key={i} display="grid" gridTemplateColumns="2fr 1fr 1fr" gap={2} mt={1}>
+                <TextField placeholder="Item"
+                  value={item.name}
+                  onChange={(e)=>updateItem(i,"name",e.target.value)}
                 />
-              ))}
-          </div>
-
-          <h3 style={{ marginTop: 20 }}>Invoice Items</h3>
-
-          {form.items.map((item, i) => (
-            <div
-              key={i}
-              style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 10 }}
-            >
-              {["name", "hsn", "qty", "price"].map((field) => (
-                <input
-                  key={field}
-                  placeholder={field.replace(/([A-Z])/g,' $1')}
-                  value={item[field]}
-                  onChange={(e) => updateItem(i, field, e.target.value)}
-                  style={{ padding:14, border:'1px solid #dcdcdc', borderRadius:10, width:'100%' }}
+                <TextField type="number"
+                  placeholder="Qty"
+                  value={item.qty}
+                  onChange={(e)=>updateItem(i,"qty",+e.target.value)}
                 />
-              ))}
-            </div>
-          ))}
+                <TextField type="number"
+                  placeholder="Price"
+                  value={item.price}
+                  onChange={(e)=>updateItem(i,"price",+e.target.value)}
+                />
+              </MDBox>
+            ))}
 
-          <div style={{ display:'flex', gap:12, flexWrap:'wrap', marginTop:20 }}>
-<button onClick={addItem} style={{ padding:'12px 20px', border:'none', borderRadius:10, background:'#111', color:'#fff', cursor:'pointer' }}>Add Item</button>
-          <button
-  onClick={saveInvoice}
-  style={{
-    padding:'12px 20px',
-    border:'none',
-    borderRadius:10,
-    background:'#2e7d32',
-    color:'#fff',
-    cursor:'pointer'
-  }}
->
-  Save + Download PDF
-</button>
-</div>
-        </div>
+            <Button onClick={addItem} sx={{ mt:1 }}>
+              + Add Item
+            </Button>
+          </MDBox>
 
-        <div style={{ display:'flex', gap:10, marginTop:30, marginBottom:20, flexWrap:'wrap' }}>
-  <input
-    placeholder="Search by client or invoice no"
-    value={search}
-    onChange={(e)=>setSearch(e.target.value)}
-    style={{ padding:12, minWidth:260, border:'1px solid #ddd', borderRadius:8 }}
-  />
+          <MDTypography mt={2}>Total: ₹{total}</MDTypography>
 
-  <select
-    value={filter}
-    onChange={(e)=>setFilter(e.target.value)}
-    style={{ padding:12, border:'1px solid #ddd', borderRadius:8 }}
-  >
-    <option value="all">All</option>
-    <option value="day">Today</option>
-    <option value="month">This Month</option>
-    <option value="year">This Year</option>
-  </select>
-</div>
-
-<h3 style={{ marginTop: 10 }}>Saved Invoices</h3>
-
-        {invoices.map((inv) => (
-          <div
-            key={inv._id}
-            style={{
-              background: "#fff",
-              padding: 16,
-              borderRadius: 10,
-              marginBottom: 10,
-              display: "flex",
-              justifyContent: "space-between",
-            }}
+          <Button variant="contained" color="success" sx={{ mt:2 }}
+            onClick={saveInvoice}
           >
+            Save + Download
+          </Button>
+        </Card>
+
+        {/* SEARCH + FILTER */}
+        <MDBox display="flex" gap={2} mb={2}>
+          <TextField
+            placeholder="Search"
+            value={search}
+            onChange={(e)=>setSearch(e.target.value)}
+          />
+
+          <TextField
+            select
+            SelectProps={{ native:true }}
+            value={filter}
+            onChange={(e)=>setFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="day">Today</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </TextField>
+        </MDBox>
+
+        {/* LIST */}
+        {filtered.map((inv)=>(
+          <Card key={inv._id} sx={{ p:2, mb:1, display:"flex", justifyContent:"space-between" }}>
             <div>
-              <b style={{ fontSize:15 }}>{inv.clientName}</b>
-              <p style={{ margin:'6px 0' }}>{inv.invoiceNo}</p>
-              <small>{new Date(inv.createdAt).toLocaleDateString('en-IN')}</small>
+              <MDTypography fontWeight="bold">{inv.clientName}</MDTypography>
+              <MDTypography variant="caption">{inv.invoiceNo}</MDTypography>
             </div>
 
-            <div style={{ display:'flex', gap:10 }}>
-            <button
-              onClick={() => {
-                setPreviewData(inv);
-                setOpenPreview(true);
-              }}
-              style={{ padding:'8px 14px', border:'1px solid #ddd', borderRadius:8, cursor:'pointer' }}
-            >
-              View
-            </button>
+            <MDBox display="flex" gap={1}>
+              <IconButton onClick={()=>setPreview(inv)}>
+                <Icon>visibility</Icon>
+              </IconButton>
 
-            <button
-              onClick={async () => {
+              <IconButton onClick={()=>{
                 setForm(inv);
-                setTimeout(() => downloadPDF(), 500);
-              }}
-              style={{ padding:'8px 14px', background:'#1976d2', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}
-            >
-              Download
-            </button>
+                setTimeout(downloadPDF,400);
+              }}>
+                <Icon>download</Icon>
+              </IconButton>
 
-            <button
-  onClick={() => deleteInvoice(inv._id)}
-  style={{
-    padding:'8px 14px',
-    background:'#d32f2f',
-    color:'#fff',
-    border:'none',
-    borderRadius:8,
-    cursor:'pointer'
-  }}
->
-  Delete
-</button>
-            </div>
-          </div>
+              <IconButton color="error" onClick={()=>deleteInvoice(inv._id)}>
+                <Icon>delete</Icon>
+              </IconButton>
+            </MDBox>
+          </Card>
         ))}
 
-        <div style={{ position: "absolute", left: "-9999px" }}>
-          <ForwardInvoice ref={pdfRef} form={form} totals={totals} />
+        {/* PDF */}
+        <div ref={pdfRef} style={{ position:"absolute", left:-9999 }}>
+          <h2>{form.company}</h2>
+          <p>{form.clientName}</p>
+          <h3>Total ₹{total}</h3>
         </div>
-      </div>
 
-      {openPreview && previewData && (
-  <div
-    style={{
-      position:'fixed',
-      inset:0,
-      background:'rgba(0,0,0,0.6)',
-      display:'flex',
-      justifyContent:'center',
-      alignItems:'center',
-      zIndex:9999,
-      padding:20
-    }}
-    onClick={() => setOpenPreview(false)}
-  >
-    <div
-      style={{ background:'#fff', borderRadius:12, maxHeight:'90vh', overflow:'auto' }}
-      onClick={(e)=>e.stopPropagation()}
-    >
-      <ForwardInvoice
-  form={previewData}
-  totals={{
-    subtotal: previewData.subtotal || 0,
-    sgst: ((previewData.subtotal || 0) * (previewData.sgst || 0) / 100).toFixed(2),
-    cgst: ((previewData.subtotal || 0) * (previewData.cgst || 0) / 100).toFixed(2),
-    total: previewData.total || 0,
-  }}
-/>
-    </div>
-  </div>
-)}
+        {/* PREVIEW */}
+        {preview && (
+          <div className="modal" onClick={()=>setPreview(null)}>
+            <div onClick={(e)=>e.stopPropagation()}>
+              <h2>{preview.company}</h2>
+              <p>{preview.clientName}</p>
+              <h3>₹{preview.total}</h3>
+            </div>
+          </div>
+        )}
 
-<Footer />
+      </MDBox>
+
+      <Footer />
     </DashboardLayout>
   );
 }
