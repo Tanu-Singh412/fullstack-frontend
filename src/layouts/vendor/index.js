@@ -77,7 +77,7 @@ function VendorHome() {
                   onClick={() => setOpen(true)}
                   sx={{
                     background: "#fff",
-                    color: "#1976d2",
+                    color: "#fff",
                     fontWeight: "600",
                   }}
                 >

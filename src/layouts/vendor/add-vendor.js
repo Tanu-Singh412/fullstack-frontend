@@ -242,7 +242,7 @@ navigate(`/vendor/category/${form.category}`);
                       Materials
                     </MDTypography>
 
-                    <Button
+                    <Button sx={{color: "#fff", background: "#1976d2"}}
                       variant="contained"
                       startIcon={<AddIcon />}
                       onClick={addMaterial}
@@ -289,7 +289,7 @@ navigate(`/vendor/category/${form.category}`);
                 ))}
 
                 <Grid item xs={12} mt={2}>
-                  <Button
+                  <Button sx={{color: "#fff", background: "#1976d2"}}
                     fullWidth
                     variant="contained"
                     size="large"
