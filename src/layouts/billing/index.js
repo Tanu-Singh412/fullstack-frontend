@@ -10,7 +10,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
-const API = "http://localhost:5000/api/invoices";
+const API = "http://127.0.0.1:5000/api/invoices"; // use 127.0.0.1 to avoid axios network error
 
 const defaultForm = {
   clientName: "",
@@ -19,10 +19,9 @@ const defaultForm = {
   address: "",
   gstin: "",
   phone: "",
-  invoiceNo: "",
+  invoiceNo: `INV-${Date.now()}`, // auto generated invoice no
   date: "",
-  clientGstin: "",
-  sgst: 9,
+    sgst: 9,
   cgst: 9,
   items: [
     {
@@ -75,7 +74,7 @@ function InvoiceTemplate({ form, totals }, ref) {
         <p><b>{form.clientName}</b></p>
         <p>{form.email}</p>
         <p>{form.address}</p>
-        <p>Client GSTIN: {form.clientGstin}</p>
+        
       </div>
 
       <table
@@ -137,16 +136,24 @@ const ForwardInvoice = React.forwardRef(InvoiceTemplate);
 export default function InvoicePage() {
   const [form, setForm] = useState(defaultForm);
   const [invoices, setInvoices] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [previewData, setPreviewData] = useState(null);
   const pdfRef = useRef();
 
   const fetchInvoices = async () => {
-    const res = await axios.get(API);
+    try {
+    const res = await axios.get(`${API}?search=${search}&filter=${filter}`);
     setInvoices(res.data.data || []);
+    } catch (err) {
+      console.log("Axios Error:", err);
+      alert("Backend not connected. Please start backend server on port 5000.");
+    }
   };
 
   useEffect(() => {
     fetchInvoices();
-  }, []);
+  }, [search, filter]);
 
   const updateItem = (index, field, value) => {
     const updated = [...form.items];
