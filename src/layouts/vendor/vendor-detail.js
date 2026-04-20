@@ -90,7 +90,7 @@ function VendorDetail() {
                     <>
                       <Button
                         variant="contained"
-                        sx={{ mr: 1 }}
+                        sx={{ mr: 1 , color: "#fff", background: "#1976d2"}}
                         onClick={() => setEditMode(true)}
                       >
                         Edit
@@ -108,13 +108,13 @@ function VendorDetail() {
                     <>
                       <Button
                         variant="contained"
-                        sx={{ mr: 1 }}
+                        sx={{ mr: 1, color: "#fff", background: "#1976d2" }}
                         onClick={handleUpdate}
                       >
                         Save
                       </Button>
 
-                      <Button
+                      <Button sx={{color: "#1976d2", border: "1px solid #1976d2"}}
                         variant="outlined"
                         onClick={() => setEditMode(false)}
                       >
@@ -233,7 +233,7 @@ function VendorDetail() {
                   {/* ADD MATERIAL BUTTON */}
                   <Button
                     variant="contained"
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 2, color: "#fff", background: "#1976d2" }}
                     onClick={() =>
                       setVendor({
                         ...vendor,
