@@ -177,9 +177,11 @@ const handleAddPayment = async () => {
     body: JSON.stringify(payload),
   });
 
-  const newPayment = await res.json(); // ✅ get created payment
+  const data = await res.json();
 
-  // ✅ INSTANT UI UPDATE (no refresh needed)
+  const newPayment =
+    data?.payment || data?.data || data;
+
   setProject((prev) => ({
     ...prev,
     payments: [...(prev.payments || []), newPayment],
@@ -188,7 +190,6 @@ const handleAddPayment = async () => {
   setPaymentData({ amount: "", date: "", note: "" });
   setLoading(false);
 };
-
   // ================= DELETE IMAGE =================
 const handleDeleteImage = async (imgUrl) => {
   await fetch(`${Base_API}/projects/${project._id}/drawing/image`, {
@@ -498,7 +499,9 @@ const inputStyle = {
       const total = Number(project?.totalAmount || 0);
 
       const paid = (project?.payments || []).reduce(
-        (sum, p) => sum + Number(p?.amount || 0),
+        (sum, p) =>
+          sum +
+          Number(p?.amount || p?.payment?.amount || 0),
         0
       );
 
@@ -527,7 +530,7 @@ const inputStyle = {
                   background: item.bg,
                 }}
               >
-                <MDTypography variant="caption" color="text">
+                <MDTypography variant="caption">
                   {item.label}
                 </MDTypography>
 
@@ -551,10 +554,14 @@ const inputStyle = {
             >
               <input
                 type="number"
+                step="0.01"
                 placeholder="Amount"
                 value={paymentData.amount}
                 onChange={(e) =>
-                  setPaymentData({ ...paymentData, amount: e.target.value })
+                  setPaymentData({
+                    ...paymentData,
+                    amount: e.target.value,
+                  })
                 }
                 style={inputStyle}
               />
@@ -563,7 +570,10 @@ const inputStyle = {
                 type="date"
                 value={paymentData.date}
                 onChange={(e) =>
-                  setPaymentData({ ...paymentData, date: e.target.value })
+                  setPaymentData({
+                    ...paymentData,
+                    date: e.target.value,
+                  })
                 }
                 style={inputStyle}
               />
@@ -573,7 +583,10 @@ const inputStyle = {
                 placeholder="Note"
                 value={paymentData.note}
                 onChange={(e) =>
-                  setPaymentData({ ...paymentData, note: e.target.value })
+                  setPaymentData({
+                    ...paymentData,
+                    note: e.target.value,
+                  })
                 }
                 style={inputStyle}
               />
@@ -585,7 +598,6 @@ const inputStyle = {
                   borderRadius: "8px",
                   textTransform: "none",
                   height: "40px",
-                  alignSelf: "center",
                 }}
               >
                 {loading ? <CircularProgress size={20} /> : "Add Payment"}
@@ -599,54 +611,66 @@ const inputStyle = {
               style={{
                 width: "100%",
                 borderCollapse: "collapse",
-                fontSize: "14px",
                 tableLayout: "fixed",
               }}
             >
-           <thead>
-  <tr>
-    <th style={{ ...thStyle, width: "33%" }}>Date</th>
-    <th style={{ ...thStyle, width: "33%", textAlign: "right" }}>
-      Amount
-    </th>
-    <th style={{ ...thStyle, width: "34%" }}>Note</th>
-  </tr>
-</thead>
+              <thead>
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={{ ...thStyle, width: "33%" }}>Date</th>
+                  <th
+                    style={{
+                      ...thStyle,
+                      width: "33%",
+                      textAlign: "center",
+                    }}
+                  >
+                    Amount
+                  </th>
+                  <th style={{ ...thStyle, width: "34%" }}>Note</th>
+                </tr>
+              </thead>
 
               <tbody>
-                {(project?.payments || []).map((pay, i) => (
-                  <tr
-                    key={i}
-                    style={{
-                      background: i % 2 === 0 ? "#ffffff" : "#f9fafb",
-                      transition: "0.2s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#eef2ff")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background =
-                        i % 2 === 0 ? "#ffffff" : "#f9fafb")
-                    }
-                  >
-                    <td style={tdStyle}>
-                      {new Date(pay.date || pay.createdAt).toLocaleDateString()}
-                    </td>
+                {(project?.payments || []).map((pay, i) => {
+                  const amount =
+                    Number(
+                      pay?.amount ||
+                        pay?.payment?.amount ||
+                        pay?.data?.amount ||
+                        0
+                    );
 
-                    <td
+                  return (
+                    <tr
+                      key={i}
                       style={{
-                        ...tdStyle,
-                        textAlign: "right",
-                        fontWeight: "600",
-                        color: "#2e7d32",
+                        background: i % 2 === 0 ? "#fff" : "#f9fafb",
+                        height: "52px",
                       }}
                     >
-                      ₹ {pay.amount}
-                    </td>
+                      <td style={tdStyle}>
+                        {new Date(
+                          pay?.date || pay?.createdAt
+                        ).toLocaleDateString()}
+                      </td>
 
-                    <td style={tdStyle}>{pay.note || "-"}</td>
-                  </tr>
-                ))}
+                      <td
+                        style={{
+                          ...tdStyle,
+                          textAlign: "center",
+                          fontWeight: "600",
+                          color: "#2e7d32",
+                        }}
+                      >
+                        ₹ {amount}
+                      </td>
+
+                      <td style={tdStyle}>
+                        {pay?.note || "-"}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </Card>
@@ -654,8 +678,7 @@ const inputStyle = {
       );
     })()}
   </MDBox>
-)}      
-
+)}
 
   {tab === 3 && (
 
@@ -1037,6 +1060,7 @@ const thStyle = {
 const tdStyle = {
   padding: "14px 16px",
   borderBottom: "1px solid #f1f5f9",
+  textAlign: "center",
 };
 
 const inputStyle = {
