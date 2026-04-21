@@ -78,17 +78,17 @@ function ProjectDetails() {
   const [imageIndex, setImageIndex] = useState(0);
 
   // ================= FETCH =================
-const fetchProject = async () => {
-  if (!state?._id) return;
+  const fetchProject = async () => {
+    if (!state?._id) return;
 
-  const res = await fetch(`${Base_API}/projects/${state._id}`);
-  const data = await res.json();
+    const res = await fetch(`${Base_API}/projects/${state._id}`);
+    const data = await res.json();
 
-  setProject({
-    ...data,
-    totalAmount: Number(data.totalAmount || 0),
-  });
-};
+    setProject({
+      ...data,
+      totalAmount: Number(data.totalAmount || 0),
+    });
+  };
 
   const fetchScope = async () => {
     if (!project?._id) return;
@@ -98,149 +98,142 @@ const fetchProject = async () => {
     setScopeList(data || []);
   };
   // ================= UPLOAD =================
-const fetchDrawings = async () => {
-  if (!project?._id) return;
+  const fetchDrawings = async () => {
+    if (!project?._id) return;
 
-  try {
-    const res = await fetch(
-      `${Base_API}/projects/${project._id}/drawing`
-    );
+    try {
+      const res = await fetch(`${Base_API}/projects/${project._id}/drawing`);
+
+      const data = await res.json();
+
+      setDrawings(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.log("DRAWINGS ERROR:", err);
+      setDrawings([]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!files.length || !uploadType) return;
+
+    const formData = new FormData();
+
+    Array.from(files).forEach((file) => {
+      formData.append("images", file);
+    });
+
+    formData.append("type", uploadType);
+
+    await fetch(`${Base_API}/projects/${project._id}/drawing`, {
+      method: "POST",
+      body: formData,
+    });
+
+    await fetchDrawings();
+    setOpenUpload(false);
+    setFiles([]);
+  };
+
+  // ================= USE EFFECTS =================
+
+  useEffect(() => {
+    fetchProject();
+  }, []);
+
+  useEffect(() => {
+    if (project?._id) {
+      fetchScope();
+    }
+  }, [project?._id]);
+
+  useEffect(() => {
+    if (project?._id) {
+      fetchDrawings();
+    }
+  }, [project?._id]);
+
+  // ✅ AFTER ALL HOOKS
+  if (!project?._id) return <div>Loading...</div>;
+  // ================= PAYMENT =================
+  const handleAddPayment = async () => {
+    if (!paymentData.amount) return;
+
+    setLoading(true);
+
+    const payload = {
+      amount: Number(paymentData.amount),
+      date: paymentData.date || new Date().toISOString(),
+      note: paymentData.note,
+    };
+
+    const res = await fetch(`${Base_API}/projects/${project._id}/payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
     const data = await res.json();
 
-    setDrawings(Array.isArray(data) ? data : []);
+    const newPayment = data?.payment || data?.data || payload;
 
-  } catch (err) {
-    console.log("DRAWINGS ERROR:", err);
-    setDrawings([]);
-  }
-};
+    // ✅ instant UI update (NO refresh needed)
+    setProject((prev) => ({
+      ...prev,
+      payments: [...(prev.payments || []), newPayment],
+    }));
 
-const handleUpload = async () => {
-  if (!files.length || !uploadType) return;
-
-  const formData = new FormData();
-
-  Array.from(files).forEach((file) => {
-    formData.append("images", file);
-  });
-
-  formData.append("type", uploadType);
-
-  await fetch(`${Base_API}/projects/${project._id}/drawing`, {
-    method: "POST",
-    body: formData,
-  });
-
-  await fetchDrawings();
-  setOpenUpload(false);
-  setFiles([]);
-};
-
-// ================= USE EFFECTS =================
-
-
-
-useEffect(() => {
-  fetchProject();
-}, []);
-
-useEffect(() => {
-  if (project?._id) {
-    fetchScope();
-  }
-}, [project?._id]);
-
-useEffect(() => {
-  if (project?._id) {
-    fetchDrawings();
-  }
-}, [project?._id]);
-
-// ✅ AFTER ALL HOOKS
-if (!project?._id) return <div>Loading...</div>;
-  // ================= PAYMENT =================
-const handleAddPayment = async () => {
-  if (!paymentData.amount) return;
-
-  setLoading(true);
-
-  const payload = {
-    amount: Number(paymentData.amount),
-    date: paymentData.date || new Date().toISOString(),
-    note: paymentData.note,
+    setPaymentData({ amount: "", date: "", note: "" });
+    setLoading(false);
   };
 
-  const res = await fetch(`${Base_API}/projects/${project._id}/payment`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  const newPayment =
-    data?.payment || data?.data || payload;
-
-  // ✅ instant UI update (NO refresh needed)
-  setProject((prev) => ({
-    ...prev,
-    payments: [...(prev.payments || []), newPayment],
-  }));
-
-  setPaymentData({ amount: "", date: "", note: "" });
-  setLoading(false);
-};
-
   // ================= DELETE IMAGE =================
-const handleDeleteImage = async (imgUrl) => {
-  await fetch(`${Base_API}/projects/${project._id}/drawing/image`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      imageUrl: imgUrl,
-      type: drawingType, // 🔥 IMPORTANT FIX
-    }),
-  });
+  const handleDeleteImage = async (imgUrl) => {
+    await fetch(`${Base_API}/projects/${project._id}/drawing/image`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        imageUrl: imgUrl,
+        type: drawingType, // 🔥 IMPORTANT FIX
+      }),
+    });
 
-  await fetchDrawings();
-};
+    await fetchDrawings();
+  };
 
   // ================= LIGHTBOX =================
-  const civilImages =
-  drawings.find((d) => d.type === "civil")?.images || [];
+  const civilImages = drawings.find((d) => d.type === "civil")?.images || [];
 
-const interiorImages =
-  drawings.find((d) => d.type === "interior")?.images || [];
-const images =
-  drawingType === "civil"
-    ? civilImages
-    : drawingType === "interior"
-    ? interiorImages
-    : [];
+  const interiorImages =
+    drawings.find((d) => d.type === "interior")?.images || [];
+  const images =
+    drawingType === "civil"
+      ? civilImages
+      : drawingType === "interior"
+        ? interiorImages
+        : [];
 
-const openImage = (img, index) => {
-  setSelectedImage(img);
-  setImageIndex(index);
-};
+  const openImage = (img, index) => {
+    setSelectedImage(img);
+    setImageIndex(index);
+  };
 
-const next = () => {
-  if (!images.length) return;
+  const next = () => {
+    if (!images.length) return;
 
-  const i = (imageIndex + 1) % images.length;
-  setImageIndex(i);
-  setSelectedImage(images[i]);
-};
+    const i = (imageIndex + 1) % images.length;
+    setImageIndex(i);
+    setSelectedImage(images[i]);
+  };
 
-const prev = () => {
-  if (!images.length) return;
+  const prev = () => {
+    if (!images.length) return;
 
-  const i = (imageIndex - 1 + images.length) % images.length;
-  setImageIndex(i);
-  setSelectedImage(images[i]);
-};
+    const i = (imageIndex - 1 + images.length) % images.length;
+    setImageIndex(i);
+    setSelectedImage(images[i]);
+  };
 
-const inputStyle = {
+  const inputStyle = {
     flex: 1,
     minWidth: "140px",
     padding: "10px",
@@ -357,6 +350,46 @@ const inputStyle = {
       notes: "",
     });
   };
+
+  const handleSendWhatsApp = (payment) => {
+    const phone = project?.clientPhone || project?.phone;
+
+    if (!phone) {
+      alert("Client phone number not available");
+      return;
+    }
+
+    const amount =
+      payment?.amount || payment?.payment?.amount || payment?.data?.amount || 0;
+
+    const date = payment?.date || payment?.createdAt;
+
+    const formattedDate = date
+      ? new Date(date).toLocaleDateString("en-IN")
+      : "-";
+
+    const message = `
+🧾 Payment Receipt
+
+Client: ${project.clientName}
+Project: ${project.projectName}
+
+Amount Paid: ₹${amount}
+Date: ${formattedDate}
+
+Thank you!
+`;
+
+    const encodedMsg = encodeURIComponent(message);
+
+    // IMPORTANT: remove +91, spaces etc.
+    const cleanPhone = phone.replace(/\D/g, "");
+
+    const url = `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
+
+    window.open(url, "_blank");
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -381,308 +414,340 @@ const inputStyle = {
             Client: <b style={{ color: "#fff" }}>{project.clientName}</b>
           </MDTypography>
         </Card>
-
         {/* TABS */}
-<Tabs
-  value={tab}
-  onChange={(e, v) => setTab(v)}
-  sx={{
-    "& .MuiTab-root": {
-      textTransform: "none",
-      fontWeight: 500,
-      color: "#555",
-      borderRadius: "8px",
-      mx: 0.5,
-      minHeight: "40px",
-    },
+        <Tabs
+          value={tab}
+          onChange={(e, v) => setTab(v)}
+          sx={{
+            "& .MuiTab-root": {
+              textTransform: "none",
+              fontWeight: 500,
+              color: "#555",
+              borderRadius: "8px",
+              mx: 0.5,
+              minHeight: "40px",
+            },
 
-    "& .Mui-selected": {
-      backgroundColor: "#1976d2",
-      color: "#fff !important",
-    },
+            "& .Mui-selected": {
+              backgroundColor: "#1976d2",
+              color: "#fff !important",
+            },
 
-    "& .MuiTabs-indicator": {
-      display: "none", // ❌ hide bottom line
-    },
-  }}
->
-  <Tab label="Overview" />
-  <Tab label="Drawings" />
-  <Tab label="Accounts" />
-  <Tab label="Scope of Work" />
-</Tabs>
-
-
+            "& .MuiTabs-indicator": {
+              display: "none", // ❌ hide bottom line
+            },
+          }}
+        >
+          <Tab label="Overview" />
+          <Tab label="Drawings" />
+          <Tab label="Accounts" />
+          <Tab label="Scope of Work" />
+        </Tabs>
         {/* OVERVIEW */}
         {tab === 0 && (
           <Card sx={{ p: 3, mt: 2 }}>
             <MDTypography>{project.description}</MDTypography>
           </Card>
         )}
-
         {/* DRAWINGS */}
-{tab === 1 && (
-  <MDBox mt={3}>
-    {!drawingType ? (
-      <Grid container spacing={3}>
-        {["civil", "interior"].map((type) => (
-          <Grid item xs={12} md={6} key={type}>
-            <Card sx={{ p: 3, position: "relative" }}>
-              <MDTypography variant="h5">
-                {type === "civil" ? "Civil Drawings" : "Interior Drawings"}
-              </MDTypography>
+        {tab === 1 && (
+          <MDBox mt={3}>
+            {!drawingType ? (
+              <Grid container spacing={3}>
+                {["civil", "interior"].map((type) => (
+                  <Grid item xs={12} md={6} key={type}>
+                    <Card sx={{ p: 3, position: "relative" }}>
+                      <MDTypography variant="h5">
+                        {type === "civil"
+                          ? "Civil Drawings"
+                          : "Interior Drawings"}
+                      </MDTypography>
 
-              <Button
-                size="small"
-                sx={{ position: "absolute", top: 10, right: 10, color: "#fff"}}
-                variant="contained"
-                onClick={() => {
-                  setUploadType(type);
-                  setOpenUpload(true);
-                }}
-
-              >
-                Upload
-              </Button>
-
-              <MDBox
-                mt={2}
-                sx={{ cursor: "pointer", color: "#1976d2" }}
-                onClick={() => setDrawingType(type)}
-              >
-                View Images →
-              </MDBox>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    ) : (
-      <>
-        <Button onClick={() => setDrawingType(null)}>⬅ Back</Button>
-
-        <Grid container spacing={3} mt={1}>
-          {images.map((img, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
-              <Card sx={{ p: 1 }}>
-                <img
-                  src={img}
-                  onClick={() => openImage(img, i)}
-                  style={{
-                    width: "100%",
-                    height: 180,
-                    objectFit: "cover",
-                    borderRadius: 10,
-                    cursor: "pointer",
-                  }}
-                />
-
-                <Button
-                  size="small"
-                  color="error"
-                  fullWidth
-                  onClick={() => handleDeleteImage(img)}
-                >
-                  Delete
-                </Button>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </>
-    )}
-  </MDBox>
-)}        {/* ACCOUNTS */}
-
-
-
-{tab === 2 && (
-  <MDBox mt={3}>
-    {(() => {
-      const total = Number(project?.totalAmount || 0);
-
-      const paid = (project?.payments || []).reduce((sum, p) => {
-        const amount =
-          Number(
-            p?.amount ??
-            p?.payment?.amount ??
-            p?.data?.amount ??
-            0
-          );
-
-        return sum + amount;
-      }, 0);
-
-      const balance = total - paid;
-
-      return (
-        <>
-          {/* ================= SUMMARY ================= */}
-          <MDBox
-            display="grid"
-            gridTemplateColumns="repeat(3, 1fr)"
-            gap={2}
-            mb={3}
-          >
-            {[
-              { label: "Total", value: total, color: "#1976d2", bg: "#e3f2fd" },
-              { label: "Paid", value: paid, color: "#2e7d32", bg: "#e8f5e9" },
-              { label: "Balance", value: balance, color: "#d32f2f", bg: "#ffebee" },
-            ].map((item, i) => (
-              <Card
-                key={i}
-                sx={{
-                  p: 2,
-                  borderRadius: "12px",
-                  textAlign: "center",
-                  background: item.bg,
-                }}
-              >
-                <MDTypography variant="caption">
-                  {item.label}
-                </MDTypography>
-
-                <MDTypography
-                  variant="h6"
-                  fontWeight="bold"
-                  sx={{ color: item.color }}
-                >
-                  ₹ {item.value}
-                </MDTypography>
-              </Card>
-            ))}
-          </MDBox>
-
-          {/* ================= ADD PAYMENT ================= */}
-          <Card sx={{ p: 2, borderRadius: "12px", mb: 3 }}>
-            <MDBox
-              display="grid"
-              gridTemplateColumns="repeat(4, 1fr)"
-              gap={2}
-            >
-              <input
-                type="number"
-                placeholder="Amount"
-                value={paymentData.amount}
-                onChange={(e) =>
-                  setPaymentData({
-                    ...paymentData,
-                    amount: e.target.value,
-                  })
-                }
-                style={inputStyle}
-              />
-
-              <input
-                type="date"
-                value={paymentData.date}
-                onChange={(e) =>
-                  setPaymentData({
-                    ...paymentData,
-                    date: e.target.value,
-                  })
-                }
-                style={inputStyle}
-              />
-
-              <input
-                type="text"
-                placeholder="Note"
-                value={paymentData.note}
-                onChange={(e) =>
-                  setPaymentData({
-                    ...paymentData,
-                    note: e.target.value,
-                  })
-                }
-                style={inputStyle}
-              />
-
-              <Button
-                variant="contained"
-                onClick={handleAddPayment}
-                sx={{
-                  borderRadius: "8px",
-                  textTransform: "none",
-                  height: "40px",
-                }}
-              >
-                {loading ? <CircularProgress size={20} /> : "Add Payment"}
-              </Button>
-            </MDBox>
-          </Card>
-
-          {/* ================= TABLE ================= */}
-          <Card sx={{ p: 2, borderRadius: "12px" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-              }}
-            >
-              <thead>
-                <tr style={{ background: "#f8fafc" }}>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Date</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Amount</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Note</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {(project?.payments || []).map((pay, i) => {
-                  const amount =
-                    Number(
-                      pay?.amount ??
-                      pay?.payment?.amount ??
-                      pay?.data?.amount ??
-                      0
-                    );
-
-                  const date = pay?.date || pay?.createdAt;
-
-                  return (
-                    <tr key={i}>
-                      <td style={{ padding: "10px", textAlign: "center" }}>
-                        {date
-                          ? new Date(date).toLocaleDateString("en-IN", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })
-                          : "-"}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "10px",
-                          textAlign: "center",
-                          fontWeight: "600",
-                          color: "#2e7d32",
+                      <Button
+                        size="small"
+                        sx={{
+                          position: "absolute",
+                          top: 10,
+                          right: 10,
+                          color: "#fff",
+                        }}
+                        variant="contained"
+                        onClick={() => {
+                          setUploadType(type);
+                          setOpenUpload(true);
                         }}
                       >
-                        ₹ {amount}
-                      </td>
+                        Upload
+                      </Button>
 
-                      <td style={{ padding: "10px", textAlign: "center" }}>
-                        {pay?.note || pay?.payment?.note || "-"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </Card>
-        </>
-      );
-    })()}
-  </MDBox>
-)}      
+                      <MDBox
+                        mt={2}
+                        sx={{ cursor: "pointer", color: "#1976d2" }}
+                        onClick={() => setDrawingType(type)}
+                      >
+                        View Images →
+                      </MDBox>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <>
+                <Button onClick={() => setDrawingType(null)}>⬅ Back</Button>
 
+                <Grid container spacing={3} mt={1}>
+                  {images.map((img, i) => (
+                    <Grid item xs={12} sm={6} md={3} key={i}>
+                      <Card sx={{ p: 1 }}>
+                        <img
+                          src={img}
+                          onClick={() => openImage(img, i)}
+                          style={{
+                            width: "100%",
+                            height: 180,
+                            objectFit: "cover",
+                            borderRadius: 10,
+                            cursor: "pointer",
+                          }}
+                        />
 
+                        <Button
+                          size="small"
+                          color="error"
+                          fullWidth
+                          onClick={() => handleDeleteImage(img)}
+                        >
+                          Delete
+                        </Button>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </>
+            )}
+          </MDBox>
+        )}{" "}
+        {/* ACCOUNTS */}
+        {tab === 2 && (
+          <MDBox mt={3}>
+            {(() => {
+              const total = Number(project?.totalAmount || 0);
 
-  {tab === 3 && (
+              const paid = (project?.payments || []).reduce((sum, p) => {
+                const amount = Number(
+                  p?.amount ?? p?.payment?.amount ?? p?.data?.amount ?? 0,
+                );
 
+                return sum + amount;
+              }, 0);
 
-  
+              const balance = total - paid;
+
+              return (
+                <>
+                  {/* ================= SUMMARY ================= */}
+                  <MDBox
+                    display="grid"
+                    gridTemplateColumns="repeat(3, 1fr)"
+                    gap={2}
+                    mb={3}
+                  >
+                    {[
+                      {
+                        label: "Total",
+                        value: total,
+                        color: "#1976d2",
+                        bg: "#e3f2fd",
+                      },
+                      {
+                        label: "Paid",
+                        value: paid,
+                        color: "#2e7d32",
+                        bg: "#e8f5e9",
+                      },
+                      {
+                        label: "Balance",
+                        value: balance,
+                        color: "#d32f2f",
+                        bg: "#ffebee",
+                      },
+                    ].map((item, i) => (
+                      <Card
+                        key={i}
+                        sx={{
+                          p: 2,
+                          borderRadius: "12px",
+                          textAlign: "center",
+                          background: item.bg,
+                        }}
+                      >
+                        <MDTypography variant="caption">
+                          {item.label}
+                        </MDTypography>
+
+                        <MDTypography
+                          variant="h6"
+                          fontWeight="bold"
+                          sx={{ color: item.color }}
+                        >
+                          ₹ {item.value}
+                        </MDTypography>
+                      </Card>
+                    ))}
+                  </MDBox>
+
+                  {/* ================= ADD PAYMENT ================= */}
+                  <Card sx={{ p: 2, borderRadius: "12px", mb: 3 }}>
+                    <MDBox
+                      display="grid"
+                      gridTemplateColumns="repeat(4, 1fr)"
+                      gap={2}
+                    >
+                      <input
+                        type="number"
+                        placeholder="Amount"
+                        value={paymentData.amount}
+                        onChange={(e) =>
+                          setPaymentData({
+                            ...paymentData,
+                            amount: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+
+                      <input
+                        type="date"
+                        value={paymentData.date}
+                        onChange={(e) =>
+                          setPaymentData({
+                            ...paymentData,
+                            date: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+
+                      <input
+                        type="text"
+                        placeholder="Note"
+                        value={paymentData.note}
+                        onChange={(e) =>
+                          setPaymentData({
+                            ...paymentData,
+                            note: e.target.value,
+                          })
+                        }
+                        style={inputStyle}
+                      />
+
+                      <Button
+                        variant="contained"
+                        onClick={handleAddPayment}
+                        sx={{
+                          borderRadius: "8px",
+                          textTransform: "none",
+                          height: "40px",
+                          color: "#fff",
+                        }}
+                      >
+                        {loading ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          "Add Payment"
+                        )}
+                      </Button>
+                    </MDBox>
+                  </Card>
+
+                  {/* ================= TABLE ================= */}
+                  <Card sx={{ p: 2, borderRadius: "12px" }}>
+                    <table
+                      style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                      }}
+                    >
+                      <thead>
+                        <tr style={{ background: "#f8fafc" }}>
+                          <th style={{ padding: "10px", textAlign: "center" }}>
+  WhatsApp
+</th>
+                          <th style={{ padding: "10px", textAlign: "center" }}>
+                            Date
+                          </th>
+                          <th style={{ padding: "10px", textAlign: "center" }}>
+                            Amount
+                          </th>
+                          <th style={{ padding: "10px", textAlign: "center" }}>
+                            Note
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {(project?.payments || []).map((pay, i) => {
+                          const amount = Number(
+                            pay?.amount ??
+                              pay?.payment?.amount ??
+                              pay?.data?.amount ??
+                              0,
+                          );
+
+                          const date = pay?.date || pay?.createdAt;
+
+                          return (
+                            <tr key={i}>
+                              <td
+                                style={{ padding: "10px", textAlign: "center" }}
+                              >
+                                {date
+                                  ? new Date(date).toLocaleDateString("en-IN", {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
+                                  : "-"}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "10px",
+                                  textAlign: "center",
+                                  fontWeight: "600",
+                                  color: "#2e7d32",
+                                }}
+                              >
+                                ₹ {amount}
+                              </td>
+
+                              <td style={{ textAlign: "center" }}>
+                                {pay?.note || "-"}
+                              </td>
+
+                              {/* ✅ WHATSAPP */}
+                              <td style={{ textAlign: "center" }}>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  color="success"
+                                  onClick={() => handleSendWhatsApp(pay)}
+                                >
+                                  Send Slip
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </Card>
+                </>
+              );
+            })()}
+          </MDBox>
+        )}
+        {tab === 3 && (
           <MDBox mt={3}>
             {/* ================= FORM ================= */}
             <Card
@@ -935,115 +1000,115 @@ const inputStyle = {
       </MDBox>
 
       {/* LIGHTBOX */}
-{/* LIGHTBOX */}
-{selectedImage && (
-  <MDBox
-    sx={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.85)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 9999,
-    }}
-  >
-    {/* CLOSE BUTTON */}
-    <Button
-      sx={{ position: "absolute", top: 20, right: 20, color: "#fff" }}
-      onClick={() => setSelectedImage(null)}
-    >
-      Close
-    </Button>
+      {/* LIGHTBOX */}
+      {selectedImage && (
+        <MDBox
+          sx={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          {/* CLOSE BUTTON */}
+          <Button
+            sx={{ position: "absolute", top: 20, right: 20, color: "#fff" }}
+            onClick={() => setSelectedImage(null)}
+          >
+            Close
+          </Button>
 
-    {/* PREV BUTTON */}
-    <Button
-      onClick={prev}
-      disabled={!images.length}
-      sx={{ color: "#fff", fontSize: "20px" }}
-    >
-      ◀
-    </Button>
+          {/* PREV BUTTON */}
+          <Button
+            onClick={prev}
+            disabled={!images.length}
+            sx={{ color: "#fff", fontSize: "20px" }}
+          >
+            ◀
+          </Button>
 
-    {/* IMAGE */}
-    <img
-      src={selectedImage}
-      alt="preview"
-      style={{
-        maxHeight: "80%",
-        maxWidth: "80%",
-        borderRadius: "10px",
-      }}
-    />
+          {/* IMAGE */}
+          <img
+            src={selectedImage}
+            alt="preview"
+            style={{
+              maxHeight: "80%",
+              maxWidth: "80%",
+              borderRadius: "10px",
+            }}
+          />
 
-    {/* NEXT BUTTON */}
-    <Button
-      onClick={next}
-      disabled={!images.length}
-      sx={{ color: "#fff", fontSize: "20px" }}
-    >
-      ▶
-    </Button>
-  </MDBox>
-)}
+          {/* NEXT BUTTON */}
+          <Button
+            onClick={next}
+            disabled={!images.length}
+            sx={{ color: "#fff", fontSize: "20px" }}
+          >
+            ▶
+          </Button>
+        </MDBox>
+      )}
 
-{/* UPLOAD MODAL */}
-{openUpload && (
-  <MDBox
-    sx={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.6)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 9999,
-    }}
-  >
-    <Card
-      sx={{
-        p: 3,
-        minWidth: 300,
-        borderRadius: "12px",
-        textAlign: "center",
-      }}
-    >
-      {/* FILE INPUT */}
-      <input
-        type="file"
-        multiple
-        onChange={(e) => setFiles(e.target.files)}
-        style={{ marginBottom: "15px" }}
-      />
+      {/* UPLOAD MODAL */}
+      {openUpload && (
+        <MDBox
+          sx={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <Card
+            sx={{
+              p: 3,
+              minWidth: 300,
+              borderRadius: "12px",
+              textAlign: "center",
+            }}
+          >
+            {/* FILE INPUT */}
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setFiles(e.target.files)}
+              style={{ marginBottom: "15px" }}
+            />
 
-      {/* UPLOAD BUTTON */}
-      <Button
-        onClick={handleUpload}
-        variant="contained"
-        fullWidth
-        sx={{
-          textTransform: "none",
-          borderRadius: "8px",
-          color:"#fff"
-        }}
-      >
-        {loading ? "Uploading..." : "Upload"}
-      </Button>
+            {/* UPLOAD BUTTON */}
+            <Button
+              onClick={handleUpload}
+              variant="contained"
+              fullWidth
+              sx={{
+                textTransform: "none",
+                borderRadius: "8px",
+                color: "#fff",
+              }}
+            >
+              {loading ? "Uploading..." : "Upload"}
+            </Button>
 
-      {/* CANCEL BUTTON */}
-      <Button
-        onClick={() => {
-          setOpenUpload(false);
-          setFiles([]);
-        }}
-        fullWidth
-        sx={{ mt: 1, textTransform: "none" }}
-      >
-        Cancel
-      </Button>
-    </Card>
-  </MDBox>
-)}
+            {/* CANCEL BUTTON */}
+            <Button
+              onClick={() => {
+                setOpenUpload(false);
+                setFiles([]);
+              }}
+              fullWidth
+              sx={{ mt: 1, textTransform: "none" }}
+            >
+              Cancel
+            </Button>
+          </Card>
+        </MDBox>
+      )}
 
       <Footer />
     </DashboardLayout>
