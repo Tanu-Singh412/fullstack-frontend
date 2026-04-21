@@ -84,12 +84,16 @@ const fetchProject = async () => {
   const res = await fetch(`${Base_API}/projects/${state._id}`);
   const data = await res.json();
 
-setProject({
-  ...data,
-  totalAmount: Number(data.totalAmount || 0),
-  clientPhone: data.client?.phone || "",
-  clientName: data.client?.name || "",
-});
+  setProject({
+    ...data,
+    totalAmount: Number(data.totalAmount || 0),
+  clientPhone:
+    data.phone ||              // 🔥 MAIN
+    data.clientPhone ||
+    data.client?.phone ||
+    "",
+  
+  });
 };
 
   const fetchScope = async () => {
@@ -156,36 +160,40 @@ useEffect(() => {
   }
 }, [project?._id]);
 
-
 const handleSendWhatsApp = (pay) => {
- let phone = project?.client?.phone || "";
+let phone =
+  project?.clientPhone ||
+  project?.phone ||
+  project?.client?.phone ||
+  "";
 
   if (!phone) {
-    console.log("DEBUG PROJECT:", project); // 🔥 add this
     alert("Client phone not found");
     return;
   }
 
-  let cleaned = String(phone).replace(/\D/g, "");
+  phone = String(phone).replace(/\D/g, "");
 
-  if (cleaned.length === 10) {
-    cleaned = "91" + cleaned;
+  if (phone.length === 10) {
+    phone = "91" + phone;
   }
+
+  const amount = Number(pay?.amount || 0);
+  const date = pay?.date || new Date();
 
   const msg = `🧾 Payment Receipt
 
 Client: ${project.clientName}
 Project: ${project.projectName}
 
-Amount: ₹${pay?.amount || 0}
-Date: ${new Date(pay?.date || new Date()).toLocaleDateString("en-IN")}
+Amount: ₹${amount}
+Date: ${new Date(date).toLocaleDateString("en-IN")}
 
 Thank you!`;
 
-  window.open(
-    `https://wa.me/${cleaned}?text=${encodeURIComponent(msg)}`,
-    "_blank"
-  );
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+
+  window.open(url, "_blank");
 };
 
 // ✅ AFTER ALL HOOKS
