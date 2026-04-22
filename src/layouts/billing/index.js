@@ -1,19 +1,28 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+// MUI Components
+import {
+  Card, Grid, TextField, Button, Typography, Dialog, DialogTitle,
+  DialogContent, DialogActions, Box, IconButton, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Select,
+  MenuItem, FormControl, InputLabel, Divider, CircularProgress,
+  InputAdornment
+} from "@mui/material";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
+import DownloadIcon from "@mui/icons-material/Download";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import { useEffect } from "react";
 
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import { fetchInvoices, createInvoice, deleteInvoice as apiDeleteInvoice } from "./api/invoiceApi";
 
 /* ================= PDF ================= */
 const downloadPDF = async (el) => {
@@ -21,7 +30,7 @@ const downloadPDF = async (el) => {
 
   const canvas = await html2canvas(el, {
     scale: 2,
-    useCORS: true, // ✅ FIX
+    useCORS: true,
     allowTaint: true,
     backgroundColor: "#fff",
   });
@@ -38,28 +47,7 @@ const downloadPDF = async (el) => {
 
 /* ================= NUMBER TO WORD ================= */
 const numberToWords = (num) => {
-  const a = [
-    "",
-    "One",
-    "Two",
-    "Three",
-    "Four",
-    "Five",
-    "Six",
-    "Seven",
-    "Eight",
-    "Nine",
-    "Ten",
-    "Eleven",
-    "Twelve",
-    "Thirteen",
-    "Fourteen",
-    "Fifteen",
-    "Sixteen",
-    "Seventeen",
-    "Eighteen",
-    "Nineteen",
-  ];
+  const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
   const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
 
   const inWords = (n) => {
@@ -74,60 +62,37 @@ const numberToWords = (num) => {
   return inWords(Math.floor(num)) + " Rupees Only";
 };
 
-/* ================= INVOICE ================= */
+/* ================= INVOICE COMPONENT ================= */
 const Invoice = React.forwardRef(({ data, totals }, ref) => {
   return (
     <div ref={ref} style={styles.page}>
-      {/* HEADER */}
       <div style={styles.header}>
         <div style={styles.logoBox}>
           {data.logo && (
             <img src={data.logo} alt="logo" style={styles.logo} crossOrigin="anonymous" />
           )}
         </div>
-
         <div style={styles.companyBox}>
           <h2 style={styles.title}>TAX INVOICE</h2>
           <b>{data.company}</b>
           <br />
-          {data.address && (
-            <>
-              {data.address}
-              <br />
-            </>
-          )}
-          {data.gstin && (
-            <>
-              GSTIN: {data.gstin}
-              <br />
-            </>
-          )}
+          {data.address && <>{data.address}<br /></>}
+          {data.gstin && <>GSTIN: {data.gstin}<br /></>}
           {data.phone && <>Phone: {data.phone}</>}
         </div>
-
         <div style={styles.invoiceBox}>
-          <b>Invoice No:</b> {data.invoiceNo}
-          <br />
-          <b>Date:</b> {data.date}
+          <b>Invoice No:</b> {data.invoiceNo}<br />
+          <b>Date:</b> {data.date ? new Date(data.date).toLocaleDateString('en-IN') : ''}
         </div>
       </div>
 
-      {/* BILL TO */}
       <div style={styles.billBox}>
-        <b>Bill To</b>
-        <br />
-        {data.clientName}
-        <br />
-        {data.email && (
-          <>
-            {data.email}
-            <br />
-          </>
-        )}
-        {data.clientGstin && <>GSTIN: {data.clientGstin}</>}
+        <b>Bill To</b><br />
+        {data.billingName}<br />
+        {data.email && <>{data.email}<br /></>}
+        {data.billingGstin && <>GSTIN: {data.billingGstin}</>}
       </div>
 
-      {/* ITEMS */}
       <table style={styles.table}>
         <thead>
           <tr>
@@ -138,14 +103,11 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
             <th style={styles.th}>Amount</th>
           </tr>
         </thead>
-
         <tbody>
           {data.items.map((item, i) => (
             <tr key={i}>
               <td style={styles.td}>{item.name}</td>
-
               {data.items.some((i) => i.hsn) && <td style={styles.td}>{item.hsn || "-"}</td>}
-
               <td style={styles.td}>{item.qty}</td>
               <td style={styles.td}>₹{item.price}</td>
               <td style={styles.td}>₹{item.qty * item.price}</td>
@@ -154,26 +116,13 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
         </tbody>
       </table>
 
-      {/* TOTAL */}
       <div style={styles.totalBox}>
         <div>Subtotal: ₹{totals.subtotal}</div>
-
-        {data.sgst > 0 && (
-          <div>
-            SGST ({data.sgst}%): ₹{totals.sgst}
-          </div>
-        )}
-
-        {data.cgst > 0 && (
-          <div>
-            CGST ({data.cgst}%): ₹{totals.cgst}
-          </div>
-        )}
-
+        {data.sgst > 0 && <div>SGST ({data.sgst}%): ₹{totals.sgst}</div>}
+        {data.cgst > 0 && <div>CGST ({data.cgst}%): ₹{totals.cgst}</div>}
         <h3>Total: ₹{totals.total}</h3>
       </div>
 
-      {/* WORDS */}
       <div style={styles.words}>
         <b>Amount in Words:</b> {numberToWords(totals.total)}
       </div>
@@ -186,78 +135,44 @@ Invoice.propTypes = {
   totals: PropTypes.object.isRequired,
 };
 
-/* ================= MAIN ================= */
+/* ================= MAIN COMPONENT ================= */
 export default function InvoicePage() {
   const pdfRef = useRef();
-  const [savedInvoices, setSavedInvoices] = useState([]);
+  
+  // Data States
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  
+  // Filter States
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all"); // all, day, month, year, custom
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Form State
   const [data, setData] = useState({
     logo: "",
-    clientName: "",
+    billingName: "",
     email: "",
     company: "",
     address: "",
     gstin: "",
     phone: "",
     invoiceNo: "",
-    date: "",
-    clientGstin: "",
+    date: new Date().toISOString().split('T')[0],
+    billingGstin: "",
     sgst: 9,
     cgst: 9,
     items: [{ name: "", hsn: "", qty: 1, price: 0 }],
   });
-  useEffect(() => {
-    const saved = localStorage.getItem("invoices");
-    if (saved) {
-      const parsed = JSON.parse(saved);
 
-      // ✅ Fix old invoices
-      const updated = parsed.map((inv) => ({
-        ...inv,
-        createdAt: inv.createdAt || new Date().toISOString(),
-      }));
-
-      setSavedInvoices(updated);
-      localStorage.setItem("invoices", JSON.stringify(updated));
-    }
-  }, []);
-  const updateItem = (i, field, value) => {
-    const items = [...data.items];
-    items[i][field] = value;
-    setData({ ...data, items });
-  };
-
-  const addItem = () => {
-    setData({
-      ...data,
-      items: [...data.items, { name: "", hsn: "", qty: 1, price: 0 }],
-    });
-  };
-  const deleteInvoice = (id) => {
-    const updated = savedInvoices.filter((inv) => inv.id !== id);
-
-    setSavedInvoices(updated);
-
-    // ✅ update localStorage also
-    localStorage.setItem("invoices", JSON.stringify(updated));
-  };
-
-  const handleDownload = async (inv) => {
-    // temporarily set data
-    setData(inv.data);
-
-    // wait for DOM update
-    setTimeout(() => {
-      downloadPDF(pdfRef.current);
-    }, 300);
-  };
+  // Calculate Totals
   const subtotal = data.items.reduce((s, i) => s + i.qty * i.price, 0);
   const sgstAmount = (subtotal * data.sgst) / 100;
   const cgstAmount = (subtotal * data.cgst) / 100;
   const total = subtotal + sgstAmount + cgstAmount;
-
   const totals = {
     subtotal: subtotal.toFixed(2),
     sgst: sgstAmount.toFixed(2),
@@ -265,535 +180,368 @@ export default function InvoicePage() {
     total: total.toFixed(2),
   };
 
-  const filteredInvoices = savedInvoices.filter((inv) => {
-    if (!inv.createdAt) return filter === "all";
-
-    const invDate = new Date(inv.createdAt);
-    const now = new Date();
-
-    if (filter === "month") {
-      return invDate.getMonth() === now.getMonth() && invDate.getFullYear() === now.getFullYear();
+  // Fetch from API
+  const loadInvoices = async () => {
+    setLoading(true);
+    try {
+      const response = await fetchInvoices(search, filter, filter === 'custom' ? startDate : '', filter === 'custom' ? endDate : '');
+      if (response.success) {
+        setInvoices(response.data);
+      }
+    } catch (err) {
+      console.error("Failed to load invoices", err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (filter === "year") {
-      return invDate.getFullYear() === now.getFullYear();
+  useEffect(() => {
+    loadInvoices();
+  }, [search, filter, startDate, endDate]);
+
+  // Form Handlers
+  const handleInputChange = (field, value) => {
+    setData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const updateItem = (i, field, value) => {
+    const items = [...data.items];
+    items[i][field] = value;
+    setData({ ...data, items });
+  };
+
+  const addItem = () => {
+    setData({ ...data, items: [...data.items, { name: "", hsn: "", qty: 1, price: 0 }] });
+  };
+
+  const removeItem = (index) => {
+    const items = data.items.filter((_, i) => i !== index);
+    setData({ ...data, items });
+  };
+
+  const handleSaveAndDownload = async () => {
+    try {
+      const payload = {
+        ...data,
+        invoiceName: data.billingName,
+        clientGstin: data.billingGstin, // backend uses clientGstin or we should keep it billingGstin
+        subtotal: Number(totals.subtotal),
+        total: Number(totals.total),
+      };
+      // Create invoice in backend
+      const res = await createInvoice(payload);
+      if (res.success) {
+        loadInvoices(); // Refresh list
+        downloadPDF(pdfRef.current);
+        // Reset form
+        setData({
+          ...data,
+          billingName: "", email: "", invoiceNo: "", date: new Date().toISOString().split('T')[0],
+          items: [{ name: "", hsn: "", qty: 1, price: 0 }]
+        });
+      }
+    } catch (err) {
+      console.error("Failed to save invoice", err);
+      alert("Failed to save invoice. Please check the required fields.");
     }
+  };
 
-    return true;
-  });
+  const handleDelete = async () => {
+    try {
+      await apiDeleteInvoice(deleteId);
+      setDeleteId(null);
+      loadInvoices();
+    } catch (err) {
+      console.error("Failed to delete", err);
+    }
+  };
 
-  const deleteDialog = (
-    <Dialog
-      open={!!deleteId}
-      onClose={() => setDeleteId(null)}
-      maxWidth="xs"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: "16px",
-          p: 1,
-        },
-      }}
-    >
-      {/* HEADER */}
-      <DialogTitle
-        sx={{
-          textAlign: "center",
-          fontWeight: "bold",
-          fontSize: "18px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <WarningAmberIcon sx={{ color: "#f44336", fontSize: 40 }} />
-        Confirm Delete
-      </DialogTitle>
+  const handleDownloadExisting = async (inv) => {
+    // Populate form temporarily for PDF generation
+    setData({
+      ...data,
+      ...inv,
+      billingName: inv.invoiceName,
+      billingGstin: inv.clientGstin || inv.billingGstin,
+      date: inv.date ? new Date(inv.date).toISOString().split('T')[0] : data.date
+    });
+    // Wait for state to update, then download
+    setTimeout(() => {
+      downloadPDF(pdfRef.current);
+    }, 500);
+  };
 
-      {/* CONTENT */}
-      <DialogContent sx={{ textAlign: "center", fontSize: "14px", color: "#555" }}>
-        Are you sure you want to delete this invoice?
-        <br />
-        <b style={{ color: "#f44336" }}>This action cannot be undone.</b>
-      </DialogContent>
-
-      {/* ACTIONS */}
-      <DialogActions
-        sx={{
-          justifyContent: "center",
-          pb: 2,
-          gap: 1,
-        }}
-      >
-        {/* CANCEL */}
-        <Button
-          onClick={() => setDeleteId(null)}
-          sx={{
-            borderRadius: "8px",
-            textTransform: "none",
-            px: 3,
-            border: "1px solid black",
-            color: "#000",
-          }}
-        >
-          Cancel
-        </Button>
-
-        {/* DELETE */}
-        <Button
-          variant="contained"
-          color="error"
-          onClick={() => {
-            deleteInvoice(deleteId);
-            setDeleteId(null);
-          }}
-          sx={{
-            borderRadius: "8px",
-            textTransform: "none",
-            px: 3,
-            background: "#f44336",
-            color: "#fff",
-            "&:hover": {
-              background: "#d32f2f",
-            },
-          }}
-        >
-          Delete
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
   return (
     <DashboardLayout>
       <DashboardNavbar />
+      <Box p={3}>
+        <Typography variant="h4" fontWeight="bold" mb={3} color="primary">
+          Billing & Invoicing
+        </Typography>
 
-      <div style={{ padding: 20 }}>
-        <h2>Invoice Generator</h2>
+        {/* ================= INVOICE FORM ================= */}
+        <Card sx={{ p: 4, mb: 4, borderRadius: 3, boxShadow: 3 }}>
+          <Typography variant="h6" fontWeight="bold" mb={3}>
+            Create New Invoice
+          </Typography>
+          <Grid container spacing={3}>
+            {/* Company Info */}
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth label="Your Company Name" variant="outlined" value={data.company} onChange={(e) => handleInputChange("company", e.target.value)} />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth label="Company GSTIN" variant="outlined" value={data.gstin} onChange={(e) => handleInputChange("gstin", e.target.value)} />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth label="Company Phone" variant="outlined" value={data.phone} onChange={(e) => handleInputChange("phone", e.target.value)} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth label="Company Address" variant="outlined" value={data.address} onChange={(e) => handleInputChange("address", e.target.value)} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+               <Button variant="outlined" component="label" fullWidth sx={{ height: '100%' }}>
+                  Upload Logo
+                  <input type="file" hidden accept="image/*" onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => handleInputChange("logo", reader.result);
+                      reader.readAsDataURL(file);
+                    }
+                  }} />
+                </Button>
+            </Grid>
 
-        <div style={styles.card}>
-          <div style={styles.grid}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  setData({ ...data, logo: reader.result });
-                };
-                if (file) reader.readAsDataURL(file);
-              }}
-            />
-            <input
-              style={styles.input}
-              placeholder="Client Name"
-              onChange={(e) => setData({ ...data, clientName: e.target.value })}
-            />
+            {/* Client Info */}
+            <Grid item xs={12}>
+              <Divider><Typography variant="body2" color="textSecondary">Billing Information</Typography></Divider>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth label="Billing Name *" variant="outlined" value={data.billingName} onChange={(e) => handleInputChange("billingName", e.target.value)} required />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth label="Billing Email" variant="outlined" value={data.email} onChange={(e) => handleInputChange("email", e.target.value)} />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth label="Billing GSTIN" variant="outlined" value={data.billingGstin} onChange={(e) => handleInputChange("billingGstin", e.target.value)} />
+            </Grid>
 
-            <input
-              style={styles.input}
-              placeholder="Company"
-              onChange={(e) => setData({ ...data, company: e.target.value })}
-            />
+            {/* Invoice Details */}
+            <Grid item xs={12}>
+              <Divider><Typography variant="body2" color="textSecondary">Invoice Details</Typography></Divider>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField fullWidth label="Invoice Number *" variant="outlined" value={data.invoiceNo} onChange={(e) => handleInputChange("invoiceNo", e.target.value)} required />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField fullWidth label="Date *" type="date" InputLabelProps={{ shrink: true }} value={data.date} onChange={(e) => handleInputChange("date", e.target.value)} required />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField fullWidth label="SGST %" type="number" variant="outlined" value={data.sgst} onChange={(e) => handleInputChange("sgst", Number(e.target.value))} />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField fullWidth label="CGST %" type="number" variant="outlined" value={data.cgst} onChange={(e) => handleInputChange("cgst", Number(e.target.value))} />
+            </Grid>
 
-            <input
-              style={styles.input}
-              placeholder="Invoice No"
-              onChange={(e) => setData({ ...data, invoiceNo: e.target.value })}
-            />
+            {/* Items */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" fontWeight="bold" mt={2} mb={1}>
+                Items
+              </Typography>
+              {data.items.map((item, i) => (
+                <Grid container spacing={2} key={i} sx={{ mb: 2, alignItems: 'center' }}>
+                  <Grid item xs={12} sm={4}>
+                    <TextField fullWidth label="Item Name" variant="outlined" size="small" value={item.name} onChange={(e) => updateItem(i, "name", e.target.value)} />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField fullWidth label="HSN" variant="outlined" size="small" value={item.hsn} onChange={(e) => updateItem(i, "hsn", e.target.value)} />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField fullWidth label="Qty" type="number" variant="outlined" size="small" value={item.qty} onChange={(e) => updateItem(i, "qty", Number(e.target.value))} />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <TextField fullWidth label="Price" type="number" variant="outlined" size="small" value={item.price} onChange={(e) => updateItem(i, "price", Number(e.target.value))} />
+                  </Grid>
+                  <Grid item xs={12} sm={2}>
+                    <IconButton color="error" onClick={() => removeItem(i)} disabled={data.items.length === 1}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button startIcon={<AddIcon />} onClick={addItem} variant="text" color="primary">
+                Add Another Item
+              </Button>
+            </Grid>
+          </Grid>
 
-            <input
-              style={styles.input}
-              type="number"
-              placeholder="SGST %"
-              value={data.sgst}
-              onChange={(e) => setData({ ...data, sgst: Number(e.target.value) })}
-            />
+          <Box mt={4} display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6" fontWeight="bold">Total Amount: ₹{totals.total}</Typography>
+            <Box display="flex" gap={2}>
+              <Button variant="outlined" color="info" onClick={() => setPreviewOpen(true)} startIcon={<VisibilityIcon />}>
+                Preview
+              </Button>
+              <Button variant="contained" color="success" onClick={handleSaveAndDownload} startIcon={<DownloadIcon />} sx={{ color: 'white' }}>
+                Save & Download PDF
+              </Button>
+            </Box>
+          </Box>
+        </Card>
 
-            <input
-              style={styles.input}
-              type="number"
-              placeholder="CGST %"
-              value={data.cgst}
-              onChange={(e) => setData({ ...data, cgst: Number(e.target.value) })}
-            />
-
-            <input
-              style={styles.input}
-              type="date"
-              onChange={(e) => setData({ ...data, date: e.target.value })}
-            />
-          </div>
-
-          <h4 style={{ marginTop: 20 }}>Items</h4>
-
-          {data.items.map((item, i) => (
-            <div key={i} style={styles.itemRow}>
-              <input
-                style={styles.input}
-                placeholder="Item"
-                onChange={(e) => updateItem(i, "name", e.target.value)}
+        {/* ================= SAVED INVOICES ================= */}
+        <Card sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
+            <Typography variant="h5" fontWeight="bold">
+              Saved Invoices
+            </Typography>
+            
+            {/* Search and Filters */}
+            <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+              <TextField
+                variant="outlined"
+                size="small"
+                placeholder="Search Billing Name or Inv No"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
+              
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Filter By</InputLabel>
+                <Select value={filter} label="Filter By" onChange={(e) => setFilter(e.target.value)}>
+                  <MenuItem value="all">All Time</MenuItem>
+                  <MenuItem value="day">Today</MenuItem>
+                  <MenuItem value="month">This Month</MenuItem>
+                  <MenuItem value="year">This Year</MenuItem>
+                  <MenuItem value="custom">Custom Date</MenuItem>
+                </Select>
+              </FormControl>
 
-              <input
-                style={styles.input}
-                placeholder="HSN"
-                onChange={(e) => updateItem(i, "hsn", e.target.value)}
-              />
+              {filter === "custom" && (
+                <>
+                  <TextField type="date" size="small" label="Start" InputLabelProps={{ shrink: true }} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  <TextField type="date" size="small" label="End" InputLabelProps={{ shrink: true }} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </>
+              )}
+            </Box>
+          </Box>
 
-              <input
-                style={styles.input}
-                type="number"
-                placeholder="Qty"
-                onChange={(e) => updateItem(i, "qty", Number(e.target.value))}
-              />
+          {loading ? (
+            <Box display="flex" justifyContent="center" p={4}><CircularProgress /></Box>
+          ) : (
+            <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #eee" }}>
+              <Table>
+                <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
+                  <TableRow>
+                    <TableCell><b>Invoice No</b></TableCell>
+                    <TableCell><b>Billing Name</b></TableCell>
+                    <TableCell><b>Date</b></TableCell>
+                    <TableCell><b>Total Amount</b></TableCell>
+                    <TableCell align="center"><b>Actions</b></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {invoices.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                        <Typography variant="body1" color="textSecondary">No invoices found</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    invoices.map((inv) => (
+                      <TableRow key={inv._id} hover>
+                        <TableCell>{inv.invoiceNo}</TableCell>
+                        <TableCell>{inv.invoiceName}</TableCell>
+                        <TableCell>{new Date(inv.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>₹{inv.total}</TableCell>
+                        <TableCell align="center">
+                          <IconButton color="info" onClick={() => {
+                            setData({ ...data, ...inv, billingName: inv.invoiceName, billingGstin: inv.clientGstin || inv.billingGstin, date: new Date(inv.date).toISOString().split('T')[0] });
+                            setPreviewOpen(true);
+                          }}>
+                            <VisibilityIcon />
+                          </IconButton>
+                          <IconButton color="success" onClick={() => handleDownloadExisting(inv)}>
+                            <DownloadIcon />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => setDeleteId(inv._id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Card>
 
-              <input
-                style={styles.input}
-                type="number"
-                placeholder="Price"
-                onChange={(e) => updateItem(i, "price", Number(e.target.value))}
-              />
-            </div>
-          ))}
-
-          <div style={styles.buttonBar}>
-            <button style={styles.btn} onClick={addItem}>
-              Add Item
-            </button>
-            <button style={styles.btnPrimary} onClick={() => setOpen(true)}>
-              Preview
-            </button>
-            <button
-              style={styles.btnSuccess}
-              onClick={() => {
-                const invoiceData = {
-                  data,
-                  totals,
-                  id: Date.now(),
-                  createdAt: new Date().toISOString(),
-                };
-
-                const updated = [...savedInvoices, invoiceData];
-
-                setSavedInvoices(updated);
-
-                // ✅ SAVE TO LOCAL STORAGE
-                localStorage.setItem("invoices", JSON.stringify(updated));
-
-                downloadPDF(pdfRef.current);
-              }}
-            >
-              Download
-            </button>
-          </div>
-        </div>
-
-        {open && (
-          <div style={styles.overlay} onClick={() => setOpen(false)}>
-            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <Invoice data={data} totals={totals} />
-            </div>
-          </div>
-        )}
-        <h3 style={{ marginTop: 20 }}>Saved Invoices</h3>
-        <div style={{ marginBottom: 10 }}>
-          <div style={styles.filterBar}>
-            <button
-              style={{
-                ...styles.filterBtn,
-                ...(filter === "all" ? styles.activeBtn : {}),
-              }}
-              onClick={() => setFilter("all")}
-            >
-              All
-            </button>
-
-            <button
-              style={{
-                ...styles.filterBtn,
-                ...(filter === "month" ? styles.activeBtn : {}),
-              }}
-              onClick={() => setFilter("month")}
-            >
-              Monthly
-            </button>
-
-            <button
-              style={{
-                ...styles.filterBtn,
-                ...(filter === "year" ? styles.activeBtn : {}),
-              }}
-              onClick={() => setFilter("year")}
-            >
-              Yearly
-            </button>
-          </div>
-        </div>
-        {filteredInvoices.length === 0 ? (
-          <p style={{ fontSize: 14 }}>No invoices yet</p>
-        ) : (
-          filteredInvoices.map((inv) => (
-            <div
-              key={inv.id}
-              style={{
-                border: "1px solid #ddd",
-                padding: 10,
-                marginBottom: 8,
-                borderRadius: 6,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              {/* LEFT */}
-              <div>
-                <b style={{ fontSize: 14 }}>{inv.data.clientName}</b>
-                <div style={{ fontSize: 12 }}>
-                  ₹{inv.totals.total} | Invoice: {inv.data.invoiceNo}
-                  <br />
-                  {new Date(inv.createdAt).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-              </div>
-
-              {/* RIGHT BUTTONS */}
-              <div style={{ display: "flex", gap: 5 }}>
-                {/* VIEW */}
-                <button
-                  style={{
-                    padding: "4px 8px",
-                    fontSize: 12,
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setData(inv.data);
-                    setOpen(true);
-                  }}
-                >
-                  View
-                </button>
-
-                {/* DOWNLOAD */}
-                <button
-                  style={{
-                    padding: "4px 8px",
-                    fontSize: 12,
-                    background: "#2e7d32",
-                    color: "#fff",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleDownload(inv)}
-                >
-                  Download
-                </button>
-
-                {/* DELETE */}
-                <button
-                  style={{
-                    padding: "4px 8px",
-                    fontSize: 12,
-                    background: "#d32f2f",
-                    color: "#fff",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setDeleteId(inv.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-
-        <div style={{ position: "absolute", left: "-9999px" }}>
+        {/* Hidden PDF Component */}
+        <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
           <Invoice ref={pdfRef} data={data} totals={totals} />
         </div>
-      </div>
-
+      </Box>
       <Footer />
-      {deleteDialog}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "16px", p: 1 } }}>
+        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold", fontSize: "18px", display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+          <WarningAmberIcon sx={{ color: "#f44336", fontSize: 40 }} />
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", fontSize: "14px", color: "#555" }}>
+          Are you sure you want to delete this invoice?<br />
+          <b style={{ color: "#f44336" }}>This action cannot be undone.</b>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 2, gap: 1 }}>
+          <Button onClick={() => setDeleteId(null)} sx={{ borderRadius: "8px", textTransform: "none", px: 3, border: "1px solid black", color: "#000" }}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="error" onClick={handleDelete} sx={{ borderRadius: "8px", textTransform: "none", px: 3, background: "#f44336", color: "#fff", "&:hover": { background: "#d32f2f" } }}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Invoice Preview</DialogTitle>
+        <DialogContent dividers sx={{ backgroundColor: "#f5f5f5", display: 'flex', justifyContent: 'center', p: 4 }}>
+          <Paper elevation={3}>
+            <Invoice data={data} totals={totals} />
+          </Paper>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPreviewOpen(false)} color="inherit">Close</Button>
+          <Button onClick={() => { downloadPDF(pdfRef.current); setPreviewOpen(false); }} variant="contained" color="success" sx={{ color: 'white' }} startIcon={<DownloadIcon />}>
+            Download PDF
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardLayout>
   );
 }
 
 /* ================= STYLES ================= */
 const styles = {
-  page: {
-    width: "210mm",
-    padding: 25,
-    background: "#fff",
-    fontFamily: "Arial",
-    color: "#000", // base color
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-    borderBottom: "2px solid #000",
-    paddingBottom: 10,
-    color: "#000",
-  },
-
+  page: { width: "210mm", padding: 25, background: "#fff", fontFamily: "Arial", color: "#000" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, borderBottom: "2px solid #000", paddingBottom: 10, color: "#000" },
   logo: { height: 60 },
-
   logoBox: { width: "20%" },
-
-  companyBox: {
-    width: "50%",
-    textAlign: "center",
-    color: "#000",
-  },
-
-  invoiceBox: {
-    width: "30%",
-    textAlign: "right",
-    color: "#000",
-  },
-
-  title: {
-    margin: 0,
-    color: "#000",
-    fontWeight: "bold",
-  },
-
-  billBox: {
-    marginBottom: 20,
-    padding: 10,
-    border: "1px solid #000",
-    color: "#000",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    color: "#000",
-  },
-
-  th: {
-    border: "1px solid #000",
-    padding: 8,
-    background: "#eee",
-    color: "#000",
-    fontWeight: "bold",
-  },
-
-  td: {
-    border: "1px solid #000",
-    padding: 8,
-    color: "#000",
-  },
-
-  totalBox: {
-    marginTop: 20,
-    textAlign: "right",
-    color: "#000",
-  },
-
-  words: {
-    marginTop: 20,
-    color: "#000",
-  },
-
-  /* FORM (optional — keep normal UI colors) */
-  card: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 10,
-  },
-
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4,1fr)",
-    gap: 10,
-  },
-
-  itemRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4,1fr)",
-    gap: 10,
-  },
-
-  input: {
-    padding: 10,
-    border: "1px solid #ccc",
-  },
-
-  buttonBar: {
-    display: "flex",
-    gap: 10,
-    marginTop: 20,
-    justifyContent: "flex-end",
-  },
-
-  btn: {
-    padding: "10px 15px",
-    background: "#666",
-    color: "#fff",
-    border: "none",
-  },
-
-  btnPrimary: {
-    padding: "10px 15px",
-    background: "#000",
-    color: "#fff",
-    border: "none",
-  },
-
-  btnSuccess: {
-    padding: "10px 15px",
-    background: "#2e7d32",
-    color: "#fff",    
-    border: "none",
-  },
-
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.6)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  modal: {
-    width: "800px",
-    maxHeight: "90vh",
-    overflowY: "auto",
-    background: "#fff",
-    padding: 20,
-  },
-  filterBar: {
-    display: "flex",
-    gap: 10,
-    marginBottom: 15,
-  },
-
-  filterBtn: {
-    padding: "8px 16px",
-    borderRadius: 20,
-    border: "1px solid #ccc",
-    background: "#f5f5f5",
-    cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 500,
-    transition: "all 0.2s ease",
-  },
-
-  activeBtn: {
-    background: "#000",
-    color: "#fff",
-    border: "1px solid #000",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-  },
+  companyBox: { width: "50%", textAlign: "center", color: "#000" },
+  invoiceBox: { width: "30%", textAlign: "right", color: "#000" },
+  title: { margin: 0, color: "#000", fontWeight: "bold" },
+  billBox: { marginBottom: 20, padding: 10, border: "1px solid #000", color: "#000" },
+  table: { width: "100%", borderCollapse: "collapse", color: "#000" },
+  th: { border: "1px solid #000", padding: 8, background: "#eee", color: "#000", fontWeight: "bold" },
+  td: { border: "1px solid #000", padding: 8, color: "#000" },
+  totalBox: { marginTop: 20, textAlign: "right", color: "#000" },
+  words: { marginTop: 20, color: "#000" },
 };
