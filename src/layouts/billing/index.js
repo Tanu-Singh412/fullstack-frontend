@@ -22,7 +22,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
-import { fetchInvoices, createInvoice, deleteInvoice as apiDeleteInvoice } from "./api/invoiceApi";
+import { fetchInvoices, createInvoice, updateInvoice, deleteInvoice as apiDeleteInvoice } from "./api/invoiceApi";
 
 /* ================= PDF ================= */
 const downloadPDF = async (el) => {
@@ -66,16 +66,17 @@ const numberToWords = (num) => {
 const Invoice = React.forwardRef(({ data, totals }, ref) => {
   return (
     <div ref={ref} style={styles.page}>
-      <div style={styles.headerCenter}>
-        {data.logo && <img src={data.logo} alt="logo" style={styles.logo} crossOrigin="anonymous" />}
-        <h1 style={styles.companyTitle}>{data.company || "YOUR COMPANY"}</h1>
-      </div>
-      
-      <div style={styles.invoiceTitle}>TAX INVOICE</div>
-
-      <div style={styles.invoiceMeta}>
-        <div style={styles.metaItem}><b>Invoice No:</b> {data.invoiceNo}</div>
-        <div style={styles.metaItem}><b>Date:</b> {data.date ? new Date(data.date).toLocaleDateString('en-IN') : ''}</div>
+      <div style={styles.headerRow}>
+        <div style={styles.headerLeft}>
+          {data.logo && <img src={data.logo} alt="logo" style={styles.logo} crossOrigin="anonymous" />}
+          <h1 style={styles.companyTitle}>{data.company || "YOUR COMPANY"}</h1>
+        </div>
+        
+        <div style={styles.headerRight}>
+          <div style={styles.invoiceTitle}>TAX INVOICE</div>
+          <div style={styles.metaText}><b>Invoice No:</b> {data.invoiceNo}</div>
+          <div style={styles.metaText}><b>Date:</b> {data.date ? new Date(data.date).toLocaleDateString('en-IN') : ''}</div>
+        </div>
       </div>
 
       <div style={styles.flexRow}>
@@ -175,6 +176,7 @@ export default function InvoicePage() {
 
   // Form State
   const [data, setData] = useState({
+    _id: null,
     logo: "",
     billingName: "",
     email: "",
@@ -182,7 +184,7 @@ export default function InvoicePage() {
     address: "",
     gstin: "",
     phone: "",
-    invoiceNo: "",
+    invoiceNo: `INV-${Date.now().toString().slice(-6)}`,
     date: new Date().toISOString().split('T')[0],
     billingGstin: "",
     sgst: 9,
@@ -251,15 +253,28 @@ export default function InvoicePage() {
         subtotal: Number(totals.subtotal),
         total: Number(totals.total),
       };
-      // Create invoice in backend
-      const res = await createInvoice(payload);
+
+      // Ensure we don't send immutable MongoDB fields when creating/updating
+      delete payload._id;
+      delete payload.createdAt;
+      delete payload.updatedAt;
+      delete payload.__v;
+
+      let res;
+      if (data._id) {
+        res = await updateInvoice(data._id, payload);
+      } else {
+        res = await createInvoice(payload);
+      }
+
       if (res.success) {
         loadInvoices(); // Refresh list
         downloadPDF(pdfRef.current);
         // Reset form
         setData({
           ...data,
-          billingName: "", email: "", invoiceNo: "", date: new Date().toISOString().split('T')[0],
+          _id: null,
+          billingName: "", email: "", invoiceNo: `INV-${Date.now().toString().slice(-6)}`, date: new Date().toISOString().split('T')[0],
           items: [{ name: "", hsn: "", qty: 1, price: 0 }]
         });
       } else {
@@ -305,9 +320,9 @@ export default function InvoicePage() {
         </Typography>
 
         {/* ================= INVOICE FORM ================= */}
-        <Card sx={{ p: 4, mb: 4, borderRadius: 3, boxShadow: 3 }}>
-          <Typography variant="h6" fontWeight="bold" mb={3}>
-            Create New Invoice
+        <Card sx={{ p: 4, mb: 4, borderRadius: 3, boxShadow: "0px 4px 20px rgba(0,0,0,0.05)" }}>
+          <Typography variant="h5" fontWeight="900" mb={4} sx={{ color: "#2c3e50" }}>
+            Create / Edit Invoice
           </Typography>
           <Grid container spacing={3}>
             {/* Company Info */}
@@ -324,7 +339,7 @@ export default function InvoicePage() {
               <TextField fullWidth label="Company Address" variant="outlined" value={data.address} onChange={(e) => handleInputChange("address", e.target.value)} />
             </Grid>
             <Grid item xs={12} sm={6}>
-               <Button variant="outlined" component="label" fullWidth sx={{ height: '100%' }}>
+               <Button variant="contained" component="label" fullWidth sx={{ height: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#fff', fontWeight: 'bold', '&:hover': { background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)' } }}>
                   Upload Logo
                   <input type="file" hidden accept="image/*" onChange={(e) => {
                     const file = e.target.files[0];
@@ -414,9 +429,9 @@ export default function InvoicePage() {
         </Card>
 
         {/* ================= SAVED INVOICES ================= */}
-        <Card sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" gap={2}>
-            <Typography variant="h5" fontWeight="bold">
+        <Card sx={{ p: 4, borderRadius: 3, boxShadow: "0px 4px 20px rgba(0,0,0,0.05)" }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
+            <Typography variant="h5" fontWeight="900" sx={{ color: "#2c3e50" }}>
               Saved Invoices
             </Typography>
             
@@ -462,13 +477,13 @@ export default function InvoicePage() {
           ) : (
             <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #eee" }}>
               <Table>
-                <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
+                <TableHead sx={{ backgroundColor: "#e9ecef" }}>
                   <TableRow>
-                    <TableCell><b>Invoice No</b></TableCell>
-                    <TableCell><b>Billing Name</b></TableCell>
-                    <TableCell><b>Date</b></TableCell>
-                    <TableCell><b>Total Amount</b></TableCell>
-                    <TableCell align="center"><b>Actions</b></TableCell>
+                    <TableCell sx={{ color: "#344767", fontWeight: "bold" }}>Invoice No</TableCell>
+                    <TableCell sx={{ color: "#344767", fontWeight: "bold" }}>Billing Name</TableCell>
+                    <TableCell sx={{ color: "#344767", fontWeight: "bold" }}>Date</TableCell>
+                    <TableCell sx={{ color: "#344767", fontWeight: "bold" }}>Total Amount</TableCell>
+                    <TableCell align="center" sx={{ color: "#344767", fontWeight: "bold" }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -481,13 +496,13 @@ export default function InvoicePage() {
                   ) : (
                     invoices.map((inv) => (
                       <TableRow key={inv._id} hover>
-                        <TableCell>{inv.invoiceNo}</TableCell>
-                        <TableCell>{inv.invoiceName}</TableCell>
-                        <TableCell>{new Date(inv.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell>₹{inv.total}</TableCell>
+                        <TableCell sx={{ color: "#555" }}>{inv.invoiceNo}</TableCell>
+                        <TableCell sx={{ color: "#555", fontWeight: 500 }}>{inv.invoiceName || inv.clientName}</TableCell>
+                        <TableCell sx={{ color: "#555" }}>{new Date(inv.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell sx={{ color: "#555", fontWeight: "bold" }}>₹{inv.total}</TableCell>
                         <TableCell align="center">
                           <IconButton color="info" onClick={() => {
-                            setData({ ...data, ...inv, billingName: inv.invoiceName, billingGstin: inv.clientGstin || inv.billingGstin, date: new Date(inv.date).toISOString().split('T')[0] });
+                            setData({ ...data, ...inv, billingName: inv.invoiceName || inv.clientName, billingGstin: inv.clientGstin || inv.billingGstin, date: new Date(inv.date).toISOString().split('T')[0] });
                             setPreviewOpen(true);
                           }}>
                             <VisibilityIcon />
@@ -556,23 +571,24 @@ export default function InvoicePage() {
 
 /* ================= STYLES ================= */
 const styles = {
-  page: { width: "210mm", minHeight: "297mm", padding: 40, background: "#fff", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: "#333" },
-  headerCenter: { textAlign: "center", marginBottom: 30 },
-  logo: { height: 80, marginBottom: 10 },
-  companyTitle: { margin: 0, fontSize: 24, fontWeight: "bold", color: "#111", textTransform: "uppercase" },
-  invoiceTitle: { fontSize: 28, fontWeight: "bold", color: "#2c3e50", margin: "10px 0 20px 0", textAlign: "center", textTransform: "uppercase", letterSpacing: 2 },
-  flexRow: { display: "flex", justifyContent: "space-between", marginBottom: 30 },
-  senderBox: { width: "45%" },
-  receiverBox: { width: "45%", textAlign: "right" },
-  sectionTitle: { fontSize: 14, fontWeight: "bold", color: "#7f8c8d", textTransform: "uppercase", marginBottom: 5, borderBottom: "2px solid #3498db", display: "inline-block", paddingBottom: 3 },
-  infoText: { fontSize: 13, lineHeight: 1.6, color: "#444" },
-  table: { width: "100%", borderCollapse: "collapse", marginBottom: 30 },
-  th: { borderBottom: "2px solid #bdc3c7", padding: "12px 8px", background: "#f8f9fa", color: "#2c3e50", fontWeight: "bold", textAlign: "left", fontSize: 14 },
-  td: { borderBottom: "1px solid #ecf0f1", padding: "12px 8px", color: "#333", fontSize: 13 },
-  totalBox: { width: "50%", marginLeft: "auto", background: "#f8f9fa", padding: 20, borderRadius: 5 },
-  totalRow: { display: "flex", justifyContent: "space-between", marginBottom: 10, fontSize: 14 },
-  finalTotal: { display: "flex", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTop: "2px solid #bdc3c7", fontSize: 18, fontWeight: "bold", color: "#2c3e50" },
-  words: { marginTop: 20, fontSize: 13, color: "#7f8c8d", fontStyle: "italic" },
-  invoiceMeta: { width: "100%", display: "flex", justifyContent: "space-between", background: "#f8f9fa", padding: 15, borderRadius: 5, marginBottom: 30 },
-  metaItem: { fontSize: 13 },
+  page: { width: "210mm", minHeight: "297mm", padding: "50px", background: "#fff", fontFamily: "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif", color: "#111" },
+  headerRow: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px", borderBottom: "3px solid #e0e0e0", paddingBottom: "25px" },
+  headerLeft: { display: "flex", flexDirection: "column", alignItems: "flex-start", maxWidth: "60%" },
+  logo: { height: "100px", marginBottom: "20px", objectFit: "contain" },
+  companyTitle: { margin: 0, fontSize: "32px", fontWeight: "900", color: "#000", textTransform: "uppercase", letterSpacing: "1px" },
+  headerRight: { textAlign: "right" },
+  invoiceTitle: { fontSize: "40px", fontWeight: "900", color: "#2c3e50", margin: "0 0 20px 0", textTransform: "uppercase", letterSpacing: "2px" },
+  metaText: { fontSize: "16px", marginBottom: "10px", color: "#333", fontWeight: "500" },
+  flexRow: { display: "flex", justifyContent: "space-between", marginBottom: "45px" },
+  senderBox: { width: "48%" },
+  receiverBox: { width: "48%", textAlign: "right" },
+  sectionTitle: { fontSize: "18px", fontWeight: "800", color: "#2c3e50", textTransform: "uppercase", marginBottom: "12px", borderBottom: "3px solid #3498db", display: "inline-block", paddingBottom: "4px" },
+  infoText: { fontSize: "16px", lineHeight: "1.8", color: "#222", fontWeight: "500" },
+  table: { width: "100%", borderCollapse: "collapse", marginBottom: "45px" },
+  th: { borderBottom: "3px solid #bdc3c7", padding: "16px 12px", background: "#f8f9fa", color: "#2c3e50", fontWeight: "900", textAlign: "left", fontSize: "16px", textTransform: "uppercase" },
+  td: { borderBottom: "1px solid #ecf0f1", padding: "16px 12px", color: "#111", fontSize: "16px", fontWeight: "600" },
+  totalBox: { width: "55%", marginLeft: "auto", background: "#f4f6f8", padding: "25px", borderRadius: "8px", border: "1px solid #e0e0e0" },
+  totalRow: { display: "flex", justifyContent: "space-between", marginBottom: "12px", fontSize: "16px", fontWeight: "700", color: "#333" },
+  finalTotal: { display: "flex", justifyContent: "space-between", marginTop: "15px", paddingTop: "15px", borderTop: "3px solid #bdc3c7", fontSize: "24px", fontWeight: "900", color: "#000" },
+  words: { marginTop: "30px", fontSize: "16px", color: "#444", fontStyle: "italic", fontWeight: "700", borderTop: "2px dashed #ccc", paddingTop: "20px" },
 };
