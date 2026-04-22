@@ -54,7 +54,7 @@ function VendorList() {
             boxShadow: 5,
           }}
         >
-          <Box>
+          <Box sx={{color:"#fff"}}>
             <Typography variant="h5" fontWeight="bold">
               {categoryId} Vendors
             </Typography>
