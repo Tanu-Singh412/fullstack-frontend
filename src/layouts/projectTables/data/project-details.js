@@ -209,6 +209,29 @@ const handleAddPayment = async () => {
   setLoading(false);
 };
 
+const sendWhatsAppSlip = (pay) => {
+  const amount = Number(pay?.amount ?? pay?.payment?.amount ?? pay?.data?.amount ?? 0);
+  const date = pay?.date || pay?.createdAt;
+  const formattedDate = date ? new Date(date).toLocaleDateString("en-IN") : new Date().toLocaleDateString("en-IN");
+  
+  // Use clientPhone from backend
+  const phone = project?.clientPhone || project?.phone;
+  
+  if (!phone) {
+    alert("Client phone number is missing in project data!");
+    return;
+  }
+  
+  let cleanPhone = phone.toString().replace(/\D/g, '');
+  if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone; // Ensure country code for India
+  
+  const text = `Hello ${project?.clientName || "Client"},\n\nWe have successfully received your payment of ₹${amount} on ${formattedDate} for the project "${project?.projectName}".\nThank you for your prompt payment!\n\n- ${project?.company || "Satya Group"}`;
+  
+  const encodedText = encodeURIComponent(text);
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
+  window.open(waUrl, "_blank");
+};
+
   // ================= DELETE IMAGE =================
 const handleDeleteImage = async (imgUrl) => {
   await fetch(`${Base_API}/projects/${project._id}/drawing/image`, {
@@ -646,10 +669,11 @@ const inputStyle = {
               }}
             >
               <thead>
-                <tr style={{ background: "#f8fafc" }}>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Date</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Amount</th>
-                  <th style={{ padding: "10px", textAlign: "center" }}>Note</th>
+                <tr style={{ background: "#e0e7ff", color: "#3730a3" }}>
+                  <th style={{ padding: "15px", textAlign: "center", fontWeight: "bold" }}>Date</th>
+                  <th style={{ padding: "15px", textAlign: "center", fontWeight: "bold" }}>Amount</th>
+                  <th style={{ padding: "15px", textAlign: "center", fontWeight: "bold" }}>Note</th>
+                  <th style={{ padding: "15px", textAlign: "center", fontWeight: "bold" }}>Action</th>
                 </tr>
               </thead>
 
@@ -688,8 +712,20 @@ const inputStyle = {
                         ₹ {amount}
                       </td>
 
-                      <td style={{ padding: "10px", textAlign: "center" }}>
+                      <td style={{ padding: "15px", textAlign: "center" }}>
                         {pay?.note || pay?.payment?.note || "-"}
+                      </td>
+                      
+                      <td style={{ padding: "15px", textAlign: "center" }}>
+                        <Button 
+                          size="small" 
+                          variant="contained" 
+                          color="success" 
+                          sx={{ color: "white", textTransform: "none", borderRadius: "20px", fontWeight: "bold", background: "#25D366", "&:hover": { background: "#128C7E" } }}
+                          onClick={() => sendWhatsAppSlip(pay)}
+                        >
+                          Send WA Slip
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -876,23 +912,23 @@ const inputStyle = {
             {/* ================= TABLE ================= */}
             <Card
               sx={{
-                p: 2,
-                borderRadius: "12px",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
-                overflowX: "auto",
+                p: 0,
+                borderRadius: "16px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                overflow: "hidden",
               }}
             >
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "#1976d2", color: "#fff" }}>
-                    <th style={{ padding: 10 }}>Project</th>
-                    <th>Work</th>
-                    <th>Area</th>
-                    <th>Floors</th>
-                    <th>Timeline</th>
-                    <th>Services</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
+                  <tr style={{ background: "linear-gradient(135deg, #1976d2, #42a5f5)", color: "#fff" }}>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Project</th>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Work</th>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Area</th>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Floors</th>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Timeline</th>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Services</th>
+                    <th style={{ padding: "15px 10px", textAlign: "left", fontWeight: "bold" }}>Notes</th>
+                    <th style={{ padding: "15px 10px", textAlign: "center", fontWeight: "bold" }}>Actions</th>
                   </tr>
                 </thead>
 
@@ -911,29 +947,32 @@ const inputStyle = {
                       <tr
                         key={i}
                         style={{
-                          borderBottom: "1px solid #eee",
-                          background: i % 2 === 0 ? "#fff" : "#f9f9f9",
-                          fontSize: 12,
+                          borderBottom: "1px solid #e2e8f0",
+                          background: i % 2 === 0 ? "#ffffff" : "#f8fafc",
+                          fontSize: "14px",
+                          color: "#334155"
                         }}
                       >
-                        <td style={{ padding: 10 }}>{s.projectType}</td>
-                        <td>{s.workType}</td>
-                        <td>{s.area}</td>
-                        <td>{s.floors}</td>
-                        <td>{s.timeline}</td>
+                        <td style={{ padding: "15px 10px", fontWeight: "600" }}>{s.projectType}</td>
+                        <td style={{ padding: "15px 10px" }}>{s.workType}</td>
+                        <td style={{ padding: "15px 10px" }}>{s.area} sqft</td>
+                        <td style={{ padding: "15px 10px" }}>{s.floors}</td>
+                        <td style={{ padding: "15px 10px" }}>{s.timeline}</td>
 
-                        <td style={{ fontSize: 12 }}>
+                        <td style={{ padding: "15px 10px", fontSize: "13px", color: "#1e293b", maxWidth: "200px" }}>
                           {Object.keys(s)
                             .filter((k) => s[k] === true)
                             .join(", ")}
                         </td>
 
-                        <td>{s.notes}</td>
+                        <td style={{ padding: "15px 10px", fontStyle: "italic", color: "#64748b" }}>{s.notes}</td>
 
                         {/* ACTIONS */}
-                        <td>
+                        <td style={{ padding: "15px 10px", textAlign: "center" }}>
                           <Button
                             size="small"
+                            variant="outlined"
+                            sx={{ mr: 1, color: "#1976d2", borderColor: "#1976d2", textTransform: "none", fontWeight: "bold" }}
                             onClick={() => {
                               setScopeData(s);
                               setEditScopeId(s._id);
@@ -944,7 +983,9 @@ const inputStyle = {
 
                           <Button
                             size="small"
+                            variant="contained"
                             color="error"
+                            sx={{ color: "white", textTransform: "none", fontWeight: "bold" }}
                             onClick={() => handleDeleteScope(s._id)}
                           >
                             Delete

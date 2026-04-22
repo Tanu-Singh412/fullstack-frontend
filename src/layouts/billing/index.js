@@ -69,7 +69,6 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
       <div style={styles.headerRow}>
         <div style={styles.headerLeft}>
           {data.logo && <img src={data.logo} alt="logo" style={styles.logo} crossOrigin="anonymous" />}
-          <h1 style={styles.companyTitle}>{data.company || "YOUR COMPANY"}</h1>
         </div>
         
         <div style={styles.headerCenter}>
@@ -505,18 +504,18 @@ export default function InvoicePage() {
                         <TableCell sx={{ color: "#555", fontWeight: "bold" }}>₹{inv.total}</TableCell>
                         <TableCell align="center">
                           <Box display="flex" justifyContent="center" gap={1}>
-                            <Button size="small" variant="outlined" color="info" startIcon={<VisibilityIcon />} onClick={() => {
+                            <IconButton color="info" onClick={() => {
                               setData({ ...data, ...inv, billingName: inv.invoiceName || inv.clientName, billingGstin: inv.clientGstin || inv.billingGstin, date: new Date(inv.date || inv.createdAt).toISOString().split('T')[0] });
                               setPreviewOpen(true);
                             }}>
-                              Preview
-                            </Button>
-                            <Button size="small" variant="contained" color="success" startIcon={<DownloadIcon />} sx={{ color: "white" }} onClick={() => handleDownloadExisting(inv)}>
-                              Download
-                            </Button>
-                            <Button size="small" variant="contained" color="error" startIcon={<DeleteIcon />} sx={{ color: "white" }} onClick={() => setDeleteId(inv._id)}>
-                              Delete
-                            </Button>
+                              <VisibilityIcon />
+                            </IconButton>
+                            <IconButton color="success" onClick={() => handleDownloadExisting(inv)}>
+                              <DownloadIcon />
+                            </IconButton>
+                            <IconButton color="error" onClick={() => setDeleteId(inv._id)}>
+                              <DeleteIcon />
+                            </IconButton>
                           </Box>
                         </TableCell>
                       </TableRow>
