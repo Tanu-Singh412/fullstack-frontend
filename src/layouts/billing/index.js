@@ -862,156 +862,142 @@ export default function InvoicePage() {
               <CircularProgress />
             </Box>
           ) : (
-            <TableContainer
-              component={Paper}
-              elevation={0}
-              sx={{
-                borderRadius: "16px",
-                border: "1px solid #e5e7eb",
-                overflow: "hidden",
-                maxWidth: "900px", // 👈 IMPORTANT (controls width like screenshot)
-              }}
-            >
-              <Table>
-                {/* HEADER */}
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      background: "linear-gradient(135deg, #2b6cb0, #4299e1)",
-                    }}
-                  >
-                    {[
-                      "Invoice No",
-                      "Billing Name",
-                      "Date",
-                      "Total Amount",
-                      "Actions",
-                    ].map((item) => (
-                      <TableCell
-                        key={item}
-                        align={item === "Actions" ? "center" : "left"}
-                        sx={{
-                          color: "#fff",
-                          fontWeight: 700,
-                          fontSize: "13px",
-                          py: 2,
-                          px: 3,
-                          borderBottom: "none",
-                        }}
-                      >
-                        {item}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
+<Box
+  sx={{
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    p: 3,
+    background: "#fff",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.05)",
+  }}
+>
+  {/* HEADER (LEFT SIDE ONLY) */}
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: "1.2fr 1.2fr 1fr 1fr 1fr",
+      background: "linear-gradient(135deg, #2b6cb0, #4299e1)",
+      color: "#fff",
+      px: 3,
+      py: 2,
+      borderRadius: "10px",
+      width: "55%",
+      fontWeight: 600,
+      fontSize: "13px",
+    }}
+  >
+    <span>Invoice No</span>
+    <span>Billing Name</span>
+    <span>Date</span>
+    <span>Total</span>
+    <span>Actions</span>
+  </Box>
 
-                {/* BODY */}
-                <TableBody>
-                  {invoices.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
-                        No invoices found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    invoices.map((inv, index) => (
-                      <TableRow
-                        key={inv._id}
-                        sx={{
-                          backgroundColor: index % 2 === 0 ? "#fff" : "#f9fafb",
-                          "&:hover": { backgroundColor: "#f1f5f9" },
-                        }}
-                      >
-                        <TableCell sx={{ px: 3, fontWeight: 600 }}>
-                          {inv.invoiceNo}
-                        </TableCell>
+  {/* LOADING */}
+  {loading ? (
+    <Box display="flex" justifyContent="center" p={4}>
+      <CircularProgress />
+    </Box>
+  ) : invoices.length === 0 ? (
+    <Box textAlign="center" py={4}>
+      No invoices found
+    </Box>
+  ) : (
+    invoices.map((inv) => (
+      <Box
+        key={inv._id}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1.2fr 1.2fr 1fr 1fr auto",
+          alignItems: "center",
+          px: 3,
+          py: 2.5,
+          mt: 2,
+          borderRadius: "12px",
+          background: "#f9fafb",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
+        }}
+      >
+        {/* Invoice No */}
+        <Typography fontWeight={700}>
+          {inv.invoiceNo}
+        </Typography>
 
-                        <TableCell>
-                          {inv.invoiceName || inv.clientName}
-                        </TableCell>
+        {/* Billing */}
+        <Typography color="#475569">
+          {inv.invoiceName || inv.clientName}
+        </Typography>
 
-                        <TableCell sx={{ color: "#64748b" }}>
-                          {new Date(
-                            inv.date || inv.createdAt,
-                          ).toLocaleDateString("en-IN")}
-                        </TableCell>
+        {/* Date */}
+        <Typography color="#64748b">
+          {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN")}
+        </Typography>
 
-                        <TableCell sx={{ color: "#16a34a", fontWeight: 700 }}>
-                          ₹{inv.total.toLocaleString("en-IN")}
-                        </TableCell>
+        {/* Amount */}
+        <Typography fontWeight={700} color="#16a34a">
+          ₹{inv.total.toLocaleString("en-IN")}
+        </Typography>
 
-                        {/* ACTIONS (NO WHATSAPP) */}
-                        <TableCell align="center">
-                          <Box display="flex" justifyContent="center" gap={1}>
-                            {/* Preview */}
-                            <IconButton
-                              size="small"
-                              sx={{
-                                bgcolor: "#e0f2fe",
-                                color: "#0284c7",
-                                "&:hover": {
-                                  bgcolor: "#0284c7",
-                                  color: "#fff",
-                                },
-                              }}
-                              onClick={() => {
-                                setData({
-                                  ...data,
-                                  ...inv,
-                                  billingName:
-                                    inv.invoiceName || inv.clientName,
-                                  billingGstin:
-                                    inv.clientGstin || inv.billingGstin,
-                                  date: new Date(inv.date || inv.createdAt)
-                                    .toISOString()
-                                    .split("T")[0],
-                                });
-                                setPreviewOpen(true);
-                              }}
-                            >
-                              <VisibilityIcon fontSize="small" />
-                            </IconButton>
+        {/* Actions */}
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          
+          {/* Preview */}
+          <IconButton
+            size="small"
+            sx={{
+              bgcolor: "#e0f2fe",
+              color: "#0284c7",
+              "&:hover": { bgcolor: "#0284c7", color: "#fff" },
+            }}
+            onClick={() => {
+              setData({
+                ...data,
+                ...inv,
+                billingName: inv.invoiceName || inv.clientName,
+                billingGstin: inv.clientGstin || inv.billingGstin,
+                date: new Date(inv.date || inv.createdAt)
+                  .toISOString()
+                  .split("T")[0],
+              });
+              setPreviewOpen(true);
+            }}
+          >
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
 
-                            {/* Download */}
-                            <IconButton
-                              size="small"
-                              sx={{
-                                bgcolor: "#dcfce7",
-                                color: "#16a34a",
-                                "&:hover": {
-                                  bgcolor: "#16a34a",
-                                  color: "#fff",
-                                },
-                              }}
-                              onClick={() => handleDownloadExisting(inv)}
-                            >
-                              <DownloadIcon fontSize="small" />
-                            </IconButton>
+          {/* Download */}
+          <IconButton
+            size="small"
+            sx={{
+              bgcolor: "#dcfce7",
+              color: "#16a34a",
+              "&:hover": { bgcolor: "#16a34a", color: "#fff" },
+            }}
+            onClick={() => handleDownloadExisting(inv)}
+          >
+            <DownloadIcon fontSize="small" />
+          </IconButton>
 
-                            {/* Delete */}
-                            <IconButton
-                              size="small"
-                              sx={{
-                                bgcolor: "#fee2e2",
-                                color: "#dc2626",
-                                "&:hover": {
-                                  bgcolor: "#dc2626",
-                                  color: "#fff",
-                                },
-                              }}
-                              onClick={() => setDeleteId(inv._id)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+          {/* Delete */}
+          <IconButton
+            size="small"
+            sx={{
+              bgcolor: "#fee2e2",
+              color: "#dc2626",
+              "&:hover": { bgcolor: "#dc2626", color: "#fff" },
+            }}
+            onClick={() => setDeleteId(inv._id)}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+
+        </Box>
+      </Box>
+    ))
+  )}
+</Box>
+
+)}
         </Card>
 
         {/* Hidden PDF Component */}
