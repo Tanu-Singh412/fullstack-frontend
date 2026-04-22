@@ -77,7 +77,7 @@ function VendorDetail() {
                 <Box>
                   {!editMode ? (
                     <>
-                      <Button variant="contained" sx={{ mr: 1 }} onClick={() => setEditMode(true)}>
+                      <Button variant="contained" sx={{ mr: 1, color :"#fff" }} onClick={() => setEditMode(true)}>
                         Edit
                       </Button>
                       <Button variant="contained" color="error" onClick={handleDelete}>

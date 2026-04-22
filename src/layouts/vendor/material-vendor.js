@@ -1,3 +1,14 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+
+// ================= PREMIUM VENDOR LIST UI =================
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -8,11 +19,12 @@ import Avatar from "@mui/material/Avatar";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import Chip from "@mui/material/Chip";
+
 function VendorList() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
@@ -39,21 +51,21 @@ function VendorList() {
           sx={{
             mb: 4,
             p: 3,
-            borderRadius: 3,
+            borderRadius: 4,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+            background: "linear-gradient(135deg, #1565c0, #42a5f5)",
             color: "white",
-            boxShadow: 4,
+            boxShadow: 5,
           }}
         >
           <Box>
             <Typography variant="h5" fontWeight="bold">
               {categoryId} Vendors
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              {vendors.length} vendors
+            <Typography variant="body2" sx={{ opacity: 0.85 }}>
+              {vendors.length} total vendors
             </Typography>
           </Box>
 
@@ -62,11 +74,11 @@ function VendorList() {
             onClick={() => navigate(`/add-vendor/${categoryId}`)}
             sx={{
               background: "#fff",
-              color: "#1976d2",
+              color: "#1565c0",
               fontWeight: "bold",
-              borderRadius: 2,
+              borderRadius: 3,
               px: 3,
-              "&:hover": { background: "#e3f2fd" },
+              '&:hover': { background: '#e3f2fd' },
             }}
           >
             + Add Vendor
@@ -76,7 +88,7 @@ function VendorList() {
         {/* GRID */}
         <Grid container spacing={3}>
           {vendors.length === 0 ? (
-            <Box sx={{ width: "100%", textAlign: "center", mt: 6 }}>
+            <Box sx={{ width: '100%', textAlign: 'center', mt: 8 }}>
               <Typography variant="h6" color="text.secondary">
                 No vendors found
               </Typography>
@@ -89,18 +101,24 @@ function VendorList() {
                   sx={{
                     cursor: "pointer",
                     borderRadius: 4,
-                    transition: "all 0.3s ease",
+                    transition: "all 0.35s ease",
                     boxShadow: 2,
                     overflow: "hidden",
                     position: "relative",
-                    "&:hover": {
-                      transform: "translateY(-8px) scale(1.02)",
-                      boxShadow: 8,
+                    background: '#fff',
+                    '&:hover': {
+                      transform: "translateY(-10px)",
+                      boxShadow: 10,
                     },
                   }}
                 >
-                  {/* Top Accent */}
-                  <Box sx={{ height: 5, background: "#1976d2" }} />
+                  {/* Accent Gradient */}
+                  <Box
+                    sx={{
+                      height: 6,
+                      background: "linear-gradient(90deg, #1565c0, #42a5f5)",
+                    }}
+                  />
 
                   <CardContent>
                     {/* HEADER */}
@@ -108,10 +126,11 @@ function VendorList() {
                       <Avatar
                         sx={{
                           mr: 2,
-                          bgcolor: "#1976d2",
-                          width: 48,
-                          height: 48,
+                          bgcolor: '#1565c0',
+                          width: 50,
+                          height: 50,
                           fontSize: 20,
+                          boxShadow: 2,
                         }}
                       >
                         {v.vendorName?.charAt(0).toUpperCase()}
@@ -121,14 +140,14 @@ function VendorList() {
                         <Typography variant="h6" fontWeight="bold">
                           {v.vendorName}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          ID: {v._id?.slice(-5)}
+                        <Typography variant="caption" color="#000 ">
+                          Vendor ID: {v._id?.slice(-5)}
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* DETAILS */}
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="#000">
                       📞 {v.phone}
                     </Typography>
 
@@ -145,7 +164,9 @@ function VendorList() {
                         sx={{ borderRadius: 2 }}
                       />
 
-                      <Button size="small">View →</Button>
+                      <Button size="small" sx={{ fontWeight: 'bold' }}>
+                        View →
+                      </Button>
                     </Box>
                   </CardContent>
                 </Card>
@@ -159,4 +180,5 @@ function VendorList() {
     </DashboardLayout>
   );
 }
+
 export default VendorList;

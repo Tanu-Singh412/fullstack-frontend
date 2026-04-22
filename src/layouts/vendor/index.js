@@ -65,7 +65,7 @@ function VendorHome() {
             boxShadow: 4,
           }}
         >
-          <Typography variant="h5" fontWeight="bold">
+          <Typography variant="h5" fontWeight="bold" color="#fff">
             Vendor Categories
           </Typography>
 
