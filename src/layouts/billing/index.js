@@ -582,11 +582,22 @@ Thank you.`;
 
               {/* Client Info */}
               <Grid item xs={12}>
-                <Divider>
-                  <Typography variant="body2" sx={{ color: "#000" }}>
+                <MDBox 
+                  sx={{ 
+                    bgcolor: "#1e293b", 
+                    py: 1, 
+                    px: 3, 
+                    borderRadius: "10px", 
+                    mb: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                  }}
+                >
+                  <MDTypography variant="button" fontWeight="bold" color="white" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
                     Billing Information
-                  </Typography>
-                </Divider>
+                  </MDTypography>
+                </MDBox>
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
@@ -623,11 +634,23 @@ Thank you.`;
 
               {/* Invoice Details */}
               <Grid item xs={12}>
-                <Divider>
-                  <Typography variant="body2" sx={{ color: "#000" }}>
+                <MDBox 
+                  sx={{ 
+                    bgcolor: "#1e293b", 
+                    py: 1, 
+                    px: 3, 
+                    borderRadius: "10px", 
+                    mt: 3,
+                    mb: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                  }}
+                >
+                  <MDTypography variant="button" fontWeight="bold" color="white" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
                     Invoice Details
-                  </Typography>
-                </Divider>
+                  </MDTypography>
+                </MDBox>
               </Grid>
               <Grid item xs={12} sm={3}>
                 <TextField

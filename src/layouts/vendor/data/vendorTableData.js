@@ -42,6 +42,16 @@ function useVendorTableData() {
               sx={{ borderRadius: 1.5, fontSize: "10px", height: "20px" }}
             />
           ),
+          date: (
+            <Box>
+              <Typography variant="caption" fontWeight="bold" display="block">
+                {new Date(v.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
+              </Typography>
+              <Typography variant="xxs" sx={{ fontSize: "10px", color: "text.secondary" }}>
+                {new Date(v.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+              </Typography>
+            </Box>
+          ),
           action: (
             <Button
               variant="contained"
@@ -64,11 +74,11 @@ function useVendorTableData() {
 
   const columns = [
     { Header: "S.No.", accessor: "serial", width: "5%" },
-    { Header: "Vendor", accessor: "vendorName", width: "30%" },
-    { Header: "Phone", accessor: "phone", width: "20%" },
-    { Header: "Email", accessor: "email", width: "20%" },
-    { Header: "Company", accessor: "company", width: "25%" },
-    { Header: "Action", accessor: "action", width: "10%" },
+    { Header: "Vendor", accessor: "vendorName", width: "25%" },
+    { Header: "Phone", accessor: "phone", width: "15%" },
+    { Header: "Company", accessor: "company", width: "20%" },
+    { Header: "Registration", accessor: "date", width: "20%" },
+    { Header: "Action", accessor: "action", width: "15%" },
   ];
 
   return {
