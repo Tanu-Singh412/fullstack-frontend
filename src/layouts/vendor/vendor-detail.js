@@ -24,7 +24,6 @@ import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
-
 function VendorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -121,11 +120,11 @@ function VendorDetail() {
                   <IconButton component="label" sx={{ position: "absolute", bottom: 0, right: 0, bgcolor: "#fff", boxShadow: 1 }}>
                     <CloudUploadIcon fontSize="small" color="primary" />
                     <input type="file" hidden accept="image/*" onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          setImage(file);
-                          setPreview(URL.createObjectURL(file));
-                        }
+                      const file = e.target.files[0];
+                      if (file) {
+                        setImage(file);
+                        setPreview(URL.createObjectURL(file));
+                      }
                     }} />
                   </IconButton>
                 )}
@@ -172,7 +171,7 @@ function VendorDetail() {
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
                 <Typography variant="h5" fontWeight="bold">Material & Client Breakdown</Typography>
                 {editMode && (
-                  <Button variant="outlined" size="small" onClick={() => setVendor({...vendor, materials: [...vendor.materials, {materialName: "", rate: 0, quantity: 0, clientId: "", clientName: ""}]})}>
+                  <Button variant="outlined" size="small" onClick={() => setVendor({ ...vendor, materials: [...vendor.materials, { materialName: "", rate: 0, quantity: 0, clientId: "", clientName: "" }] })}>
                     + Add Material Row
                   </Button>
                 )}

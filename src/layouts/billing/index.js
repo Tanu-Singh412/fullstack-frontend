@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-
+import Avatar from "@mui/material";
 // MUI Components
 import {
   Card,
@@ -541,11 +541,11 @@ Thank you.`;
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Box 
-                sx={{ 
-                  border: "2px dashed #e2e8f0", 
-                  borderRadius: 2, 
-                  p: 1.5, 
+              <Box
+                sx={{
+                  border: "2px dashed #e2e8f0",
+                  borderRadius: 2,
+                  p: 1.5,
                   textAlign: "center",
                   bgcolor: "#f8fafc",
                   '&:hover': { bgcolor: "#f1f5f9" }
@@ -809,10 +809,10 @@ Thank you.`;
             gap={2}
           >
             <Box>
-                <Typography variant="h5" fontWeight="900" sx={{ color: "#1e293b", letterSpacing: -0.5 }}>
+              <Typography variant="h5" fontWeight="900" sx={{ color: "#1e293b", letterSpacing: -0.5 }}>
                 Financial Archives
-                </Typography>
-                <Typography variant="caption" color="text">Manage and track your issued invoices</Typography>
+              </Typography>
+              <Typography variant="caption" color="text">Manage and track your issued invoices</Typography>
             </Box>
 
             {/* Search and Filters */}
@@ -823,11 +823,11 @@ Thank you.`;
                 placeholder="Quick search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ 
-                    bgcolor: "#f8fafc", 
-                    borderRadius: 2, 
-                    "& fieldset": { border: "none" },
-                    boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)"
+                sx={{
+                  bgcolor: "#f8fafc",
+                  borderRadius: 2,
+                  "& fieldset": { border: "none" },
+                  boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)"
                 }}
                 InputProps={{
                   startAdornment: (
@@ -842,7 +842,7 @@ Thank you.`;
                 <Select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  sx={{ borderRadius: 2, bgcolor: "#f1f5f9", fontWeight: "bold", fontSize: 13, "& fieldset": {border: "none"} }}
+                  sx={{ borderRadius: 2, bgcolor: "#f1f5f9", fontWeight: "bold", fontSize: 13, "& fieldset": { border: "none" } }}
                 >
                   <MenuItem value="all">All Records</MenuItem>
                   <MenuItem value="day">Today</MenuItem>
@@ -919,12 +919,12 @@ Thank you.`;
 
                     {/* Recipient */}
                     <Box display="flex" alignItems="center">
-                        <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6", width: 30, height: 30, fontSize: 13, mr: 1.5, fontWeight: "bold" }}>
-                            {(inv.invoiceName || inv.clientName || "?").charAt(0)}
-                        </Avatar>
-                        <Typography color="#334155" fontWeight="medium" fontSize={14}>
+                      <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6", width: 30, height: 30, fontSize: 13, mr: 1.5, fontWeight: "bold" }}>
+                        {(inv.invoiceName || inv.clientName || "?").charAt(0)}
+                      </Avatar>
+                      <Typography color="#334155" fontWeight="medium" fontSize={14}>
                         {inv.invoiceName || inv.clientName}
-                        </Typography>
+                      </Typography>
                     </Box>
 
                     {/* Date */}
