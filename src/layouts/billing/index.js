@@ -53,6 +53,15 @@ import {
   deleteInvoice as apiDeleteInvoice,
 } from "./api/invoiceApi";
 
+/* ================= CONSTANTS ================= */
+const FIXED_COMPANY_DETAILS = {
+  company: "Go2Web Solution",
+  address: "Sanjay Place",
+  gstin: "27AAACS1234A1Z1",
+  phone: "9876543210",
+  logo: "", // You can put a base64 string here if you want it hardcoded too
+};
+
 /* ================= PDF ================= */
 const downloadPDF = async (el) => {
   if (!el) return alert("Invoice not ready");
@@ -284,27 +293,23 @@ export default function InvoicePage() {
   const itemsPerPage = 5;
 
   // Form State
-  const [data, setData] = useState(() => {
-    const saved = localStorage.getItem("invoice_defaults");
-    const defaults = saved ? JSON.parse(saved) : {};
-    return {
-      _id: null,
-      logo: defaults.logo || "",
-      billingName: "",
-      email: "",
-      company: defaults.company || "Satya Group",
-      address: defaults.address || "Architectural & Interior Design",
-      gstin: defaults.gstin || "27AAACS1234A1Z1",
-      phone: defaults.phone || "9876543210",
-      invoiceNo: "",
-      date: new Date().toISOString().split("T")[0],
-      billingGstin: "",
-      sgst: 9,
-      cgst: 9,
-      items: [{ name: "", hsn: "", qty: 1, price: 0 }],
-      photo: null,
-      photoName: defaults.photoName || "",
-    };
+  const [data, setData] = useState({
+    _id: null,
+    logo: FIXED_COMPANY_DETAILS.logo,
+    billingName: "",
+    email: "",
+    company: FIXED_COMPANY_DETAILS.company,
+    address: FIXED_COMPANY_DETAILS.address,
+    gstin: FIXED_COMPANY_DETAILS.gstin,
+    phone: FIXED_COMPANY_DETAILS.phone,
+    invoiceNo: "",
+    date: new Date().toISOString().split("T")[0],
+    billingGstin: "",
+    sgst: 9,
+    cgst: 9,
+    items: [{ name: "", hsn: "", qty: 1, price: 0 }],
+    photo: null,
+    photoName: "",
   });
 
   // Calculate Totals
@@ -364,12 +369,6 @@ export default function InvoicePage() {
   }, [search, filter, startDate, endDate]);
 
   // Form Handlers
-  // Persist defaults to localStorage
-  useEffect(() => {
-    const { company, address, gstin, phone, logo, photoName } = data;
-    localStorage.setItem("invoice_defaults", JSON.stringify({ company, address, gstin, phone, logo, photoName }));
-  }, [data.company, data.address, data.gstin, data.phone, data.logo, data.photoName]);
-
   const handleInputChange = (field, value) => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
@@ -550,77 +549,32 @@ Thank you.`;
               Create / Edit Invoice
             </Typography>
             <Grid container spacing={3}>
-              {/* Company Info */}
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Your Company Name"
-                  variant="outlined"
-                  value={data.company}
-                  onChange={(e) => handleInputChange("company", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Company GSTIN"
-                  variant="outlined"
-                  value={data.gstin}
-                  onChange={(e) => handleInputChange("gstin", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Company Phone"
-                  variant="outlined"
-                  value={data.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Company Address"
-                  variant="outlined"
-                  value={data.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box
-                  sx={{
-                    border: "2px dashed #e2e8f0",
-                    borderRadius: 2,
-                    p: 1.5,
-                    textAlign: "center",
-                    bgcolor: "#f8fafc",
-                    '&:hover': { bgcolor: "#f1f5f9" }
-                  }}
+              {/* Branding Header */}
+              <Grid item xs={12}>
+                <MDBox
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  bgcolor="#f8fafc"
+                  p={2}
+                  borderRadius={2}
+                  border="1px solid #e2e8f0"
                 >
-                  <Button
-                    variant="text"
-                    component="label"
-                    fullWidth
-                    sx={{ textTransform: "none", color: "#334155", fontWeight: "bold" }}
-                  >
-                    {data.photoName ? `✅ ${data.photoName}` : "➕ Upload Logo Photo"}
-                    <input
-                      type="file"
-                      hidden
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          handleInputChange("photoName", file.name);
-                          const reader = new FileReader();
-                          reader.onloadend = () => handleInputChange("photo", reader.result);
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  </Button>
-                </Box>
+                  <MDBox display="flex" alignItems="center" gap={2}>
+                    {data.logo && <Avatar src={data.logo} variant="rounded" />}
+                    <Box>
+                      <MDTypography variant="h6" fontWeight="bold" color="dark">
+                        {FIXED_COMPANY_DETAILS.company}
+                      </MDTypography>
+                      <MDTypography variant="caption" color="text" fontWeight="bold">
+                        {FIXED_COMPANY_DETAILS.address} | Phone: {FIXED_COMPANY_DETAILS.phone}
+                      </MDTypography>
+                    </Box>
+                  </MDBox>
+                  <MDTypography variant="caption" sx={{ color: "#3498db", fontWeight: "900", textTransform: "uppercase" }}>
+                    Fixed Branding Enabled
+                  </MDTypography>
+                </MDBox>
               </Grid>
 
               {/* Client Info */}
@@ -874,36 +828,36 @@ Thank you.`;
                     bgcolor: "#fff",
                     borderRadius: 2,
                     "& .MuiOutlinedInput-root": {
-                      "& fieldset": { borderColor: "#10b981", borderWidth: "2px" },
-                      "&:hover fieldset": { borderColor: "#059669" },
-                      "&.Mui-focused fieldset": { borderColor: "#059669" },
+                      "& fieldset": { borderColor: "#3b82f6", borderWidth: "2px" },
+                      "&:hover fieldset": { borderColor: "#2563eb" },
+                      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
                     },
-                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.1)"
+                    boxShadow: "0 4px 12px rgba(59, 130, 246, 0.1)"
                   }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchIcon fontSize="small" sx={{ color: "#10b981" }} />
+                        <SearchIcon fontSize="small" sx={{ color: "#3b82f6" }} />
                       </InputAdornment>
                     ),
                   }}
                 />
 
-                <FormControl size="small" sx={{ minWidth: 140 }}>
+                <FormControl size="small" sx={{ minWidth: 160 }}>
                   <Select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     sx={{
                       borderRadius: 2,
-                      bgcolor: "#fef2f2",
+                      bgcolor: "#f8fafc",
                       fontWeight: "bold",
                       fontSize: 13,
-                      color: "#dc2626",
+                      color: "#1e293b",
                       px: 1.5,
                       py: 0.8,
-                      "& fieldset": { border: "2px solid #fecaca" },
-                      "&:hover fieldset": { borderColor: "#ef4444" },
-                      "& .MuiSelect-icon": { color: "#dc2626" }
+                      "& fieldset": { border: "2px solid #e2e8f0" },
+                      "&:hover fieldset": { borderColor: "#3b82f6" },
+                      "& .MuiSelect-icon": { color: "#3b82f6" }
                     }}
                   >
                     <MenuItem value="all">📁 All Records</MenuItem>
