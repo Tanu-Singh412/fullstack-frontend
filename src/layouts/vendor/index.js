@@ -204,7 +204,17 @@ function VendorHome() {
 
                 {/* Content */}
                 <Box sx={{ p: 3, textAlign: "center", position: "relative" }}>
-                  <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5, color: "#1e293b" }}>
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="bold" 
+                    onClick={() => navigate(`/vendor/category/${c.name}`)}
+                    sx={{ 
+                      mb: 0.5, 
+                      color: "#1e293b", 
+                      cursor: "pointer",
+                      "&:hover": { color: "#3b82f6" } 
+                    }}
+                  >
                     {c.name}
                   </Typography>
                   <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 1, color: "#64748b", fontWeight: "bold" }}>

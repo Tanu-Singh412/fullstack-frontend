@@ -211,7 +211,7 @@ function VendorDetail() {
                 ) : (
                   <Button fullWidth variant="contained" sx={{ bgcolor: "#10b981", color: "#fff" }} onClick={handleUpdate}>Save</Button>
                 )}
-                <Button variant="outlined" color="error" sx={{ bgcolor: "darkred", color: "#fff" }} onClick={handleDelete}>Delete</Button>
+                <Button variant="outlined" color="error" sx={{ bgcolor: "red", color: "#fff" }} onClick={handleDelete}>Delete</Button>
               </Box>
             </Card>
           </Grid>
