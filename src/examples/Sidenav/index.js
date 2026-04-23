@@ -110,14 +110,14 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     if (type === "collapse") {
       if (children) {
         returnValue = (
-          <MDBox key={key}>
-            <MDBox onClick={() => handleCollapseClick(key)} sx={{ cursor: "pointer" }}>
+          <MDBox key={key} sx={{ position: "relative" }}>
+            <MDBox onClick={() => handleCollapseClick(key)} sx={{ cursor: "pointer", position: "relative" }}>
               <SidenavCollapse
                 name={name}
                 icon={icon}
                 active={key === collapseName || children.some(child => child.key === collapseName)}
               />
-              <MDBox sx={{ position: "absolute", right: "1.5rem", top: "50%", transform: "translateY(-50%)", color: textColor }}>
+              <MDBox sx={{ position: "absolute", right: "1.5rem", top: "50%", transform: "translateY(-50%)", color: textColor, zIndex: 2 }}>
                 {openCollapse === key ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
               </MDBox>
             </MDBox>

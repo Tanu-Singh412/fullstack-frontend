@@ -74,20 +74,14 @@ const routes = [
       {
         name: "Drawing Records",
         key: "drawing-records",
-        route: "/projectTables?target=drawings",
+        route: "/projectTables",
         icon: <Icon fontSize="small">image</Icon>,
       },
       {
         name: "Scope of Work",
         key: "scope-catalog",
-        route: "/projectTables?target=scope",
+        route: "/projectTables",
         icon: <Icon fontSize="small">assignment</Icon>,
-      },
-      {
-        name: "Project Financials",
-        key: "project-financials",
-        route: "/projectTables?target=accounts",
-        icon: <Icon fontSize="small">payments</Icon>,
       },
       {
         name: "Add New Project",
@@ -106,7 +100,7 @@ const routes = [
     icon: <Icon fontSize="small">account_balance</Icon>,
     children: [
       {
-        name: "Invoices",
+        name: "Invoices (Billing)",
         key: "billing",
         route: "/billing",
         component: <Billing />,
