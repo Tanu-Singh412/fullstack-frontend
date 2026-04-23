@@ -45,6 +45,9 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
+import brandWhite from "assets/images/logo-ct.png";
+import brandDark from "assets/images/logo-ct-dark.png";
+import go2webLogo from "assets/images/logo.png";
 
 import {
   fetchInvoices,
@@ -59,7 +62,7 @@ const FIXED_COMPANY_DETAILS = {
   address: "Sanjay Place",
   gstin: "27AAACS1234A1Z1",
   phone: "9876543210",
-  logo: "", // You can put a base64 string here if you want it hardcoded too
+  logo: go2webLogo,
 };
 
 /* ================= PDF ================= */
@@ -163,7 +166,7 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
           </div>
           <div style={styles.metaText}>
             <b>Date:</b>{" "}
-            {data.date ? new Date(data.date).toLocaleDateString("en-IN") : ""}
+            {data.date ? new Date(data.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' }) : ""}
           </div>
         </div>
       </div>
@@ -947,7 +950,7 @@ Thank you.`;
 
                         {/* Date */}
                         <Typography color="#64748b" fontSize={12} fontWeight="bold">
-                          {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' })}
+                          {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })}
                           <span style={{ color: "#94a3b8", marginLeft: 6, fontWeight: "normal" }}>
                             {new Date(inv.date || inv.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
                           </span>

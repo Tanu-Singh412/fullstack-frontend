@@ -189,7 +189,7 @@ export default function useProjectData() {
         date: (
           <MDBox>
             <MDTypography variant="caption" fontWeight="bold" display="block">
-              {new Date(p.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
+              {new Date(p.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
             </MDTypography>
             <MDTypography variant="xxs" color="text">
               {new Date(p.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
