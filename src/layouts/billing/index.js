@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import Avatar from "@mui/material/Avatar";// MUI Components
+import { Avatar } from "@mui/material";
 import {
   Card,
   Grid,
