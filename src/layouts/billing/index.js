@@ -919,17 +919,17 @@ Thank you.`;
                           display: "grid",
                           gridTemplateColumns: "1.5fr 2fr 1fr 1fr 1fr",
                           alignItems: "center",
-                          px: 2,
-                          py: 1.2,
-                          mb: 0.8,
-                          borderRadius: 2,
+                          px: 1.5,
+                          py: 0.8,
+                          mb: 0.5,
+                          borderRadius: 1.5,
                           background: "#fff",
                           border: "1px solid #f1f5f9",
                           transition: "0.3s",
                           "&:hover": {
                             borderColor: "#3b82f6",
-                            transform: "scale(1.005)",
-                            boxShadow: "0 6px 12px rgba(0,0,0,0.03)"
+                            transform: "scale(1.002)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.02)"
                           },
                         }}
                       >
