@@ -115,6 +115,10 @@ export default function App() {
         return getRoutes(route.collapse);
       }
 
+      if (route.children) {
+        return getRoutes(route.children);
+      }
+
       if (route.route) {
         return <Route exact path={route.route} element={route.component} key={route.key} />;
       }
