@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { Avatar } from "@mui/material";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
@@ -22,7 +21,7 @@ function useVendorTableData() {
         const formattedRows = vendors.map((v) => ({
           vendorName: (
             <Box display="flex" alignItems="center">
-              <Avatar sx={{ mr: 1, bgcolor: '#1976d2', color:"#fff" }}>
+              <Avatar sx={{ mr: 1, bgcolor: '#1976d2', color: "#fff" }}>
                 {v.vendorName?.charAt(0)}
               </Avatar>
               <Typography fontWeight="medium">{v.vendorName}</Typography>

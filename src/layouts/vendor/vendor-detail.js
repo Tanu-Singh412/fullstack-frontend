@@ -24,6 +24,8 @@ import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MDBox from "components/MDBox";
+
 function VendorDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
