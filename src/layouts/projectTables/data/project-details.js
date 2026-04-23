@@ -970,22 +970,14 @@ function ProjectDetails() {
                 </Grid>
               </MDBox>
 
-              {/* ================= COMMERCIALS & NOTES ================= */}
+              {/* ================= NOTES ================= */}
               <Grid container spacing={3} mt={2}>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12}>
                   <TextField
-                    label="Lump Sum Amount (₹)"
-                    type="number"
-                    fullWidth
-                    value={scopeData.lumpSum}
-                    onChange={(e) => setScopeData({ ...scopeData, lumpSum: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} md={8}>
-                  <TextField
-                    label="Specific Project Notes"
+                    label="Specific Project Deliverable Notes"
                     multiline
-                    rows={1}
+                    rows={2}
+                    placeholder="Describe specific requirements, exclusions, or site conditions..."
                     fullWidth
                     value={scopeData.notes}
                     onChange={(e) => setScopeData({ ...scopeData, notes: e.target.value })}
@@ -997,8 +989,8 @@ function ProjectDetails() {
                 {editScopeId && (
                   <Button
                     variant="outlined"
-                    color="secondary"
-                    sx={{ borderRadius: "10px", textTransform: "none", px: 4 }}
+                    color="#fff"
+                    sx={{ borderRadius: "10px", textTransform: "none", px: 4, bgcolor: "red" }}
                     onClick={() => { setEditScopeId(null); resetScopeForm(); }}
                   >
                     Cancel
@@ -1074,9 +1066,8 @@ function ProjectDetails() {
                             </MDBox>
 
                             <MDBox mt={4}>
-                              <MDTypography variant="caption" fontWeight="bold" color="text" sx={{ display: "block", mb: 1, textTransform: "uppercase" }}>Financial Summary</MDTypography>
+                              <MDTypography variant="caption" fontWeight="bold" color="text" sx={{ display: "block", mb: 1, textTransform: "uppercase" }}>Project Metadata</MDTypography>
                               <MDBox sx={{ p: 2, bgcolor: "#fff", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 10px rgba(0,0,0,0.02)" }}>
-                                <MDTypography variant="h5" fontWeight="900" color="success">₹ {s.lumpSum?.toLocaleString("en-IN")}</MDTypography>
                                 <MDTypography variant="caption" color="textSecondary" sx={{ fontWeight: "bold" }}>Est. Timeline: {s.timeline}</MDTypography>
                               </MDBox>
                             </MDBox>
@@ -1093,7 +1084,7 @@ function ProjectDetails() {
                               </IconButton>
                             </MDBox>
 
-                            <MDTypography variant="button" fontWeight="bold" color="dark" sx={{ display: "block", mb: 3, textTransform: "uppercase" }}>Inclusions & Deliverables</MDTypography>
+                            <MDTypography variant="button" fontWeight="bold" color="dark" sx={{ display: "block", mb: 3, textTransform: "uppercase" }}>Defined Deliverables</MDTypography>
 
                             <Grid container spacing={2}>
                               {[
@@ -1106,17 +1097,16 @@ function ProjectDetails() {
                                 { label: "Electrical", val: s.electrical },
                                 { label: "Plumbing", val: s.plumbing },
                                 { label: "Supervision", val: s.supervision }
-                              ].map((item, idx) => (
+                              ].filter(item => item.val).map((item, idx) => (
                                 <Grid item xs={6} sm={4} key={idx}>
                                   <MDBox sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                     <MDBox sx={{
                                       width: 8, height: 8, borderRadius: "50%",
-                                      bgcolor: item.val ? "#4f46e5" : "#e2e8f0"
+                                      bgcolor: "#4f46e5"
                                     }} />
                                     <MDTypography variant="caption" sx={{
-                                      color: item.val ? "#1e293b" : "#94a3b8",
-                                      fontWeight: item.val ? "bold" : "medium",
-                                      textDecoration: item.val ? "none" : "line-through"
+                                      color: "#1e293b",
+                                      fontWeight: "bold",
                                     }}>
                                       {item.label}
                                     </MDTypography>
@@ -1304,6 +1294,7 @@ function ProjectDetails() {
                 textTransform: "none",
                 color: "#666",
                 fontWeight: 500,
+
               }}
             >
               Cancel

@@ -52,14 +52,28 @@ function VendorHome() {
     setOpen(true);
   };
 
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSave = async () => {
     if (!name) return alert("Enter category name");
 
-    const formData = new FormData();
-    formData.append("name", name);
+    let finalImage = preview;
+
     if (image) {
-      formData.append("image", image);
+      finalImage = await convertToBase64(image);
     }
+
+    const payload = {
+      name,
+      image: finalImage
+    };
 
     const url = editId
       ? `https://fullstack-project-1-n510.onrender.com/api/vendor-categories/${editId}`
@@ -69,7 +83,8 @@ function VendorHome() {
 
     const res = await fetch(url, {
       method,
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
     if (res.ok) {

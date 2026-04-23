@@ -67,23 +67,32 @@ function VendorDetail() {
     setVendor({ ...vendor, [e.target.name]: e.target.value });
   };
 
-  const handleUpdate = async () => {
-    const formData = new FormData();
-    Object.keys(vendor).forEach(key => {
-      if (key === "materials") {
-        formData.append(key, JSON.stringify(vendor[key]));
-      } else {
-        formData.append(key, vendor[key]);
-      }
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
     });
+  };
+
+  const handleUpdate = async () => {
+    let finalImage = vendor.image;
 
     if (image) {
-      formData.append("image", image);
+      finalImage = await convertToBase64(image);
     }
+
+    const payload = {
+      ...vendor,
+      image: finalImage,
+      materials: JSON.stringify(vendor.materials)
+    };
 
     await fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`, {
       method: "PUT",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
     setEditMode(false);
