@@ -92,9 +92,16 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     // Call the handleMiniSidenav function to set the state with the initial value.
     handleMiniSidenav();
 
+    // ✅ Auto-open collapse if a child route is active
+    routes.forEach((route) => {
+      if (route.children && route.children.some((child) => child.route.replace("/", "") === collapseName)) {
+        setOpenCollapse(route.key);
+      }
+    });
+
     // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleMiniSidenav);
-  }, [dispatch, location]);
+  }, [dispatch, location, collapseName]);
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
   const renderRoutes = routes.map(({ type, name, icon, title, noCollapse, key, href, route, children }) => {

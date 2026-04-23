@@ -4,7 +4,7 @@ import ProjectTables from "layouts/projectTables";
 import Projects from "layouts/project";
 import Add_clients from "layouts/Client/add_client";
 import Billing from "layouts/billing";
-import VendorHome  from "layouts/vendor";
+import VendorHome from "layouts/vendor";
 import AddVendor from "layouts/vendor/add-vendor";
 import VendorDetail from "layouts/vendor/vendor-detail";
 import SignIn from "layouts/authentication/sign-in";
@@ -59,60 +59,60 @@ const routes = [
   },
 
   {
-    type: "title",
-    title: "Project Tracking",
-    key: "project-tracking-title",
-  },
-  {
     type: "collapse",
-    name: "Projects List",
-    key: "projectTables",
-    route: "/projectTables",
-    component: <ProjectTables />,
-    icon: <Icon fontSize="small">list_alt</Icon>,
-  },
-  {
-    type: "collapse",
-    name: "Add New Project",
-    key: "add-new-project",
-    route: "/projects",
-    component: <Projects />,
-    icon: <Icon fontSize="small">add_circle</Icon>,
-  },
-  {
-    type: "collapse",
-    name: "Drawing Library",
-    key: "drawing-records",
-    route: "/projectTables",
-    icon: <Icon fontSize="small">image</Icon>,
-  },
-  {
-    type: "collapse",
-    name: "Scope Catalog",
-    key: "scope-of-work",
-    route: "/projectTables",
-    icon: <Icon fontSize="small">assignment</Icon>,
+    name: "Project Management",
+    key: "projectManagement",
+    icon: <Icon fontSize="small">business_center</Icon>,
+    children: [
+      {
+        name: "Projects Overview",
+        key: "projectTables",
+        route: "/projectTables",
+        component: <ProjectTables />,
+        icon: <Icon fontSize="small">table_view</Icon>,
+      },
+      {
+        name: "Drawing Records",
+        key: "drawing-records",
+        route: "/projectTables?target=drawings",
+        icon: <Icon fontSize="small">image</Icon>,
+      },
+      {
+        name: "Scope of Work",
+        key: "scope-catalog",
+        route: "/projectTables?target=scope",
+        icon: <Icon fontSize="small">assignment</Icon>,
+      },
+      {
+        name: "Project Financials",
+        key: "project-financials",
+        route: "/projectTables?target=accounts",
+        icon: <Icon fontSize="small">payments</Icon>,
+      },
+      {
+        name: "Add New Project",
+        key: "add-new-project",
+        route: "/projects",
+        component: <Projects />,
+        icon: <Icon fontSize="small">add_circle</Icon>,
+      },
+    ],
   },
 
   {
-    type: "title",
-    title: "Financials & Accounts",
-    key: "financials-title",
-  },
-  {
     type: "collapse",
-    name: "Invoices",
-    key: "billing",
-    route: "/billing",
-    component: <Billing />,
-    icon: <Icon fontSize="small">receipt</Icon>,
-  },
-  {
-    type: "collapse",
-    name: "Financial Overview",
-    key: "project-financials",
-    route: "/projectTables",
-    icon: <Icon fontSize="small">payments</Icon>,
+    name: "Accounts",
+    key: "accounts",
+    icon: <Icon fontSize="small">account_balance</Icon>,
+    children: [
+      {
+        name: "Invoices",
+        key: "billing",
+        route: "/billing",
+        component: <Billing />,
+        icon: <Icon fontSize="small">receipt</Icon>,
+      },
+    ],
   },
 
 
@@ -153,13 +153,13 @@ const routes = [
   },
 
   // ✅ ADD VENDOR
- {
-  type: "route",
-  name: "Add Vendor",
-  key: "add-vendor",
-  route: "/add-vendor/:category",
-  component: <AddVendor />,
-},
+  {
+    type: "route",
+    name: "Add Vendor",
+    key: "add-vendor",
+    route: "/add-vendor/:category",
+    component: <AddVendor />,
+  },
 
 ];
 

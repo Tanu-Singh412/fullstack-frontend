@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import MDTypography from "components/MDTypography";
 import MDBox from "components/MDBox";
@@ -27,6 +27,9 @@ export default function useProjectData() {
   const [rows, setRows] = useState([]);
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const target = params.get("target");
   const [viewClientProjects, setViewClientProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -228,7 +231,11 @@ export default function useProjectData() {
             <Button
               variant="contained"
               size="small"
-              onClick={() => navigate(`/project-details/${p._id}`, { state: p })}
+              onClick={() => {
+                const tabMap = { drawings: 1, accounts: 2, scope: 3 };
+                const tab = tabMap[target] || 0;
+                navigate(`/project-details/${p._id}?tab=${tab}`, { state: p });
+              }}
               sx={{
                 textTransform: "none",
                 fontSize: "10px",

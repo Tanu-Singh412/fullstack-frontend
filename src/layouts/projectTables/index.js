@@ -39,10 +39,16 @@ function Tables() {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                {/* LEFT SIDE - TITLE */}
-                <MDTypography variant="h6" color="white" fontWeight="bold">
-                  Project Management
-                </MDTypography>
+                <MDBox>
+                  <MDTypography variant="h6" color="white" fontWeight="bold">
+                    Project Management
+                  </MDTypography>
+                  {window.location.search.includes("target=") && (
+                    <MDTypography variant="caption" color="white" sx={{ opacity: 0.8, fontWeight: "bold" }}>
+                      Select a project below to view its {new URLSearchParams(window.location.search).get("target")}
+                    </MDTypography>
+                  )}
+                </MDBox>
 
                 {/* RIGHT SIDE - BUTTON */}
                 <Button

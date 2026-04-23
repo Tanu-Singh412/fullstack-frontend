@@ -294,7 +294,7 @@ function VendorHome() {
               fullWidth
               variant="outlined"
               onClick={() => setOpen(false)}
-              sx={{ py: 1.5, borderRadius: 2 }}
+              sx={{ py: 1.5, borderRadius: 2, bgcolor: "darkred", color: "#fff" }}
             >
               Cancel
             </Button>
