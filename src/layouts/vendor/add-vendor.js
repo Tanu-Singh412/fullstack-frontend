@@ -195,6 +195,9 @@ function AddVendor() {
                     <MDTypography variant="h4" fontWeight="bold">
                         Vendor Registration
                     </MDTypography>
+                    <MDTypography variant="caption" sx={{ color: "#64748b", fontWeight: "bold", display: "block", mt: 0.5 }}>
+                        Register a new verified supplier in the ecosystem
+                    </MDTypography>
                 </MDBox>
                 <MDBox display="flex" alignItems="center" gap={2}>
                     <MDTypography variant="button" fontWeight="medium" color="text">

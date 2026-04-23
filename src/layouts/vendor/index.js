@@ -173,14 +173,15 @@ function VendorHome() {
                     height: 180,
                     background: c.image 
                       ? `url(${c.image}) center/cover`
-                      : "linear-gradient(135deg, #e2e8f0, #cbd5e1)",
+                      : `linear-gradient(135deg, ${["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444"][categories.indexOf(c) % 5]}, ${["#2563eb", "#059669", "#7c3aed", "#d97706", "#dc2626"][categories.indexOf(c) % 5]})`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    color: "white"
                   }}
                 >
                   {!c.image && (
-                    <Typography variant="h1" sx={{ opacity: 0.1, fontWeight: 900 }}>
+                    <Typography variant="h1" sx={{ opacity: 0.3, fontWeight: 900, color: "#fff" }}>
                       {c.name?.charAt(0).toUpperCase()}
                     </Typography>
                   )}
@@ -188,11 +189,11 @@ function VendorHome() {
 
                 {/* Content */}
                 <Box sx={{ p: 3, textAlign: "center", position: "relative" }}>
-                  <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5 }}>
+                  <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5, color: "#1e293b" }}>
                     {c.name}
                   </Typography>
-                  <Typography variant="caption" color="textSecondary" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
-                    {c.name} Supplies
+                  <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 1, color: "#64748b", fontWeight: "bold" }}>
+                    Verified Category
                   </Typography>
 
                   {/* Actions Overlay */}

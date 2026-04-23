@@ -120,16 +120,13 @@ const routes = [
 
 
 
-{
-  type: "route",
-  name: "Project Details",
-  key: "project-details",
-  route: "/project-details",
-  component: <ProjectDetails />,
-},
-
-,
-
+  {
+    type: "route",
+    name: "Project Details",
+    key: "project-details",
+    route: "/project-details",
+    component: <ProjectDetails />,
+  },
 
   {
     type: "collapse",

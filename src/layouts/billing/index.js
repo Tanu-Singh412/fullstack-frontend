@@ -327,23 +327,23 @@ export default function InvoicePage() {
       );
       if (response.success) {
         setInvoices(response.data);
-        
+
         // AUTO-SERIES Logic: Generate next Invoice No
-        if (response.data.length > 0 && !data._id) {
+        if (response.data.length > 0 && !data._id && !data.invoiceNo) {
           const numbers = response.data
             .map(inv => parseInt(inv.invoiceNo?.replace(/[^0-9]/g, '')))
             .filter(n => !isNaN(n));
-          
+
           if (numbers.length > 0) {
             const nextNo = Math.max(...numbers) + 1;
-            setData(prev => ({ 
-              ...prev, 
-              invoiceNo: `INV-${String(nextNo).padStart(4, '0')}` 
+            setData(prev => ({
+              ...prev,
+              invoiceNo: prev.invoiceNo || `INV-${String(nextNo).padStart(4, '0')}`
             }));
           } else {
-             setData(prev => ({ ...prev, invoiceNo: `INV-1001` }));
+            setData(prev => ({ ...prev, invoiceNo: prev.invoiceNo || `INV-1001` }));
           }
-        } else if (!data._id) {
+        } else if (!data._id && !data.invoiceNo) {
           setData(prev => ({ ...prev, invoiceNo: `INV-1001` }));
         }
       }
@@ -355,6 +355,7 @@ export default function InvoicePage() {
   };
 
   useEffect(() => {
+    setCurrentPage(1); // Reset pagination on search/filter change
     loadInvoices();
   }, [search, filter, startDate, endDate]);
 
@@ -944,112 +945,115 @@ Thank you.`;
                   invoices
                     .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                     .map((inv) => (
-                    <Box
-                      key={inv._id}
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: "1.5fr 2fr 1fr 1fr 1fr",
-                        alignItems: "center",
-                        px: 3,
-                        py: 2.2,
-                        mb: 1.5,
-                        borderRadius: 3,
-                        background: "#fff",
-                        border: "1px solid #f1f5f9",
-                        transition: "0.3s",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          transform: "scale(1.01)",
-                          boxShadow: "0 10px 20px rgba(0,0,0,0.04)"
-                        },
-                      }}
-                    >
-                      {/* Invoice No */}
-                      <Typography fontWeight="bold" color="dark" fontSize={14}>
-                        {inv.invoiceNo}
-                      </Typography>
-
-                      {/* Recipient */}
-                      <Box display="flex" alignItems="center">
-                        <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6", width: 30, height: 30, fontSize: 13, mr: 1.5, fontWeight: "bold" }}>
-                          {(inv.invoiceName || inv.clientName || "?").charAt(0)}
-                        </Avatar>
-                        <Typography color="#334155" fontWeight="medium" fontSize={14}>
-                          {inv.invoiceName || inv.clientName}
+                      <Box
+                        key={inv._id}
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: "1.5fr 2fr 1fr 1fr 1fr",
+                          alignItems: "center",
+                          px: 3,
+                          py: 2.2,
+                          mb: 1.5,
+                          borderRadius: 3,
+                          background: "#fff",
+                          border: "1px solid #f1f5f9",
+                          transition: "0.3s",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            transform: "scale(1.01)",
+                            boxShadow: "0 10px 20px rgba(0,0,0,0.04)"
+                          },
+                        }}
+                      >
+                        {/* Invoice No */}
+                        <Typography fontWeight="bold" color="dark" fontSize={14}>
+                          {inv.invoiceNo}
                         </Typography>
+
+                        {/* Recipient */}
+                        <Box display="flex" alignItems="center">
+                          <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6", width: 30, height: 30, fontSize: 13, mr: 1.5, fontWeight: "bold" }}>
+                            {(inv.invoiceName || inv.clientName || "?").charAt(0)}
+                          </Avatar>
+                          <Typography color="#334155" fontWeight="medium" fontSize={14}>
+                            {inv.invoiceName || inv.clientName}
+                          </Typography>
+                        </Box>
+
+                        {/* Date */}
+                        <Typography color="#64748b" fontSize={12} fontWeight="bold">
+                          {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' })}
+                          <span style={{ color: "#94a3b8", marginLeft: 6, fontWeight: "normal" }}>
+                            {new Date(inv.date || inv.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </Typography>
+
+                        {/* Amount */}
+                        <Typography fontWeight="bold" color="#16a34a" fontSize={15}>
+                          ₹{inv.total.toLocaleString("en-IN")}
+                        </Typography>
+
+                        {/* Actions */}
+                        <Box display="flex" justifyContent="flex-end" gap={1.5}>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              bgcolor: "#f0f9ff",
+                              color: "#0284c7",
+                              borderRadius: 2,
+                              "&:hover": { bgcolor: "#0284c7", color: "#fff" },
+                            }}
+                            onClick={() => {
+                              setData({
+                                ...data,
+                                ...inv,
+                                billingName: inv.invoiceName || inv.clientName,
+                                billingGstin: inv.clientGstin || inv.billingGstin,
+                                date: new Date(inv.date || inv.createdAt)
+                                  .toISOString()
+                                  .split("T")[0],
+                              });
+                              setPreviewOpen(true);
+                            }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+
+                          <IconButton
+                            size="small"
+                            sx={{
+                              bgcolor: "#f0fdf4",
+                              color: "#16a34a",
+                              borderRadius: 2,
+                              "&:hover": { bgcolor: "#16a34a", color: "#fff" },
+                            }}
+                            onClick={() => handleDownloadExisting(inv)}
+                          >
+                            <DownloadIcon fontSize="small" />
+                          </IconButton>
+
+                          <IconButton
+                            size="small"
+                            sx={{
+                              bgcolor: "#fef2f2",
+                              color: "#dc2626",
+                              borderRadius: 2,
+                              "&:hover": { bgcolor: "#dc2626", color: "#fff" },
+                            }}
+                            onClick={() => setDeleteId(inv._id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Box>
-
-                      {/* Date */}
-                      <Typography color="#64748b" fontSize={12} fontWeight="bold">
-                        {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' })}
-                        <span style={{ color: "#94a3b8", marginLeft: 6, fontWeight: "normal" }}>
-                          {new Date(inv.date || inv.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </Typography>
-
-                      {/* Amount */}
-                      <Typography fontWeight="bold" color="#16a34a" fontSize={15}>
-                        ₹{inv.total.toLocaleString("en-IN")}
-                      </Typography>
-
-                      {/* Actions */}
-                      <Box display="flex" justifyContent="flex-end" gap={1.5}>
-                        <IconButton
-                          size="small"
-                          sx={{
-                            bgcolor: "#f0f9ff",
-                            color: "#0284c7",
-                            borderRadius: 2,
-                            "&:hover": { bgcolor: "#0284c7", color: "#fff" },
-                          }}
-                          onClick={() => {
-                            setData({
-                              ...data,
-                              ...inv,
-                              billingName: inv.invoiceName || inv.clientName,
-                              billingGstin: inv.clientGstin || inv.billingGstin,
-                              date: new Date(inv.date || inv.createdAt)
-                                .toISOString()
-                                .split("T")[0],
-                            });
-                            setPreviewOpen(true);
-                          }}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-
-                        <IconButton
-                          size="small"
-                          sx={{
-                            bgcolor: "#f0fdf4",
-                            color: "#16a34a",
-                            borderRadius: 2,
-                            "&:hover": { bgcolor: "#16a34a", color: "#fff" },
-                          }}
-                          onClick={() => handleDownloadExisting(inv)}
-                        >
-                          <DownloadIcon fontSize="small" />
-                        </IconButton>
-
-                        <IconButton
-                          size="small"
-                          sx={{
-                            bgcolor: "#fef2f2",
-                            color: "#dc2626",
-                            borderRadius: 2,
-                            "&:hover": { bgcolor: "#dc2626", color: "#fff" },
-                          }}
-                          onClick={() => setDeleteId(inv._id)}
-                        >
-                          <DeleteIcon fontSize="small" />
                     ))
                 )}
 
                 {/* PAGINATION CONTROLS */}
                 {invoices.length > itemsPerPage && (
                   <Box display="flex" justifyContent="center" alignItems="center" mt={4} gap={2}>
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="outlined"
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage(prev => prev - 1)}
                       sx={{ borderRadius: 2, textTransform: "none" }}
@@ -1059,8 +1063,8 @@ Thank you.`;
                     <Typography variant="button" fontWeight="bold">
                       Page {currentPage} of {Math.ceil(invoices.length / itemsPerPage)}
                     </Typography>
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="outlined"
                       disabled={currentPage === Math.ceil(invoices.length / itemsPerPage)}
                       onClick={() => setCurrentPage(prev => prev + 1)}
                       sx={{ borderRadius: 2, textTransform: "none" }}
