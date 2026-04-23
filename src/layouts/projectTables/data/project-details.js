@@ -16,6 +16,10 @@ import {
   Card,
   TextField,
   CircularProgress,
+  IconButton,
+  VisibilityIcon,
+  DeleteIcon,
+  Divider,
 } from "@mui/material";
 
 const Base_API = "https://fullstack-project-1-n510.onrender.com/api";
@@ -925,9 +929,9 @@ function ProjectDetails() {
                 <Grid container spacing={3}>
                   {scopeList.map((s, i) => (
                     <Grid item xs={12} key={i}>
-                      <Card sx={{ 
-                        p: 3, 
-                        borderRadius: "16px", 
+                      <Card sx={{
+                        p: 3,
+                        borderRadius: "16px",
                         boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
                         borderLeft: "6px solid #1976d2",
                         background: "#fff",
@@ -936,7 +940,7 @@ function ProjectDetails() {
                       }}>
                         {/* Background Decoration */}
                         <MDBox sx={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(25, 118, 210, 0.03)" }} />
-                        
+
                         <MDBox display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                           <MDBox>
                             <MDTypography variant="h5" fontWeight="bold" color="info" sx={{ letterSpacing: -0.5 }}>
@@ -968,19 +972,19 @@ function ProjectDetails() {
                             <MDTypography variant="button" fontWeight="bold" display="block" mb={1} color="dark">Services & Deliverables</MDTypography>
                             <MDBox display="flex" flexWrap="wrap" gap={1}>
                               {[
-                                {label: "Concept Design", val: s.conceptDesign},
-                                {label: "2D Drawings", val: s.drawings2D},
-                                {label: "3D Elevation", val: s.elevation3D},
-                                {label: "Working Drawings", val: s.workingDrawings},
-                                {label: "Interior Layout", val: s.interiorLayout},
-                                {label: "Civil", val: s.civil},
-                                {label: "Electrical", val: s.electrical},
-                                {label: "Plumbing", val: s.plumbing}
+                                { label: "Concept Design", val: s.conceptDesign },
+                                { label: "2D Drawings", val: s.drawings2D },
+                                { label: "3D Elevation", val: s.elevation3D },
+                                { label: "Working Drawings", val: s.workingDrawings },
+                                { label: "Interior Layout", val: s.interiorLayout },
+                                { label: "Civil", val: s.civil },
+                                { label: "Electrical", val: s.electrical },
+                                { label: "Plumbing", val: s.plumbing }
                               ].map((item, idx) => (
-                                <MDBox 
+                                <MDBox
                                   key={idx}
-                                  sx={{ 
-                                    px: 1.5, py: 0.5, borderRadius: "6px", 
+                                  sx={{
+                                    px: 1.5, py: 0.5, borderRadius: "6px",
                                     bgcolor: item.val ? "#eff6ff" : "#f1f5f9",
                                     color: item.val ? "#1d4ed8" : "#94a3b8",
                                     fontSize: "11px", fontWeight: "bold",
@@ -1003,12 +1007,12 @@ function ProjectDetails() {
                             </MDBox>
                           </Grid>
                         </Grid>
-                        
+
                         {s.notes && (
-                           <MDBox mt={2} p={1.5} sx={{ bgcolor: "#fffbeb", borderRadius: "8px", border: "1px solid #fef3c7" }}>
-                              <MDTypography variant="caption" sx={{ color: "#92400e", fontWeight: "bold" }}>Project Notes:</MDTypography>
-                              <MDTypography variant="body2" sx={{ color: "#b45309", fontSize: "13px" }}>{s.notes}</MDTypography>
-                           </MDBox>
+                          <MDBox mt={2} p={1.5} sx={{ bgcolor: "#fffbeb", borderRadius: "8px", border: "1px solid #fef3c7" }}>
+                            <MDTypography variant="caption" sx={{ color: "#92400e", fontWeight: "bold" }}>Project Notes:</MDTypography>
+                            <MDTypography variant="body2" sx={{ color: "#b45309", fontSize: "13px" }}>{s.notes}</MDTypography>
+                          </MDBox>
                         )}
                       </Card>
                     </Grid>
