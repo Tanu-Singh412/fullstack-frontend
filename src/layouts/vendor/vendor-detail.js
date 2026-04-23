@@ -24,7 +24,9 @@ import BusinessIcon from "@mui/icons-material/Business";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
 
 function VendorDetail() {
   const { id } = useParams();
@@ -109,7 +111,18 @@ function VendorDetail() {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <Box sx={{ p: 4 }}>
+      <MDBox p={4}>
+        <MDBox display="flex" alignItems="center" mb={4} gap={2}>
+            <Button 
+                variant="contained" 
+                startIcon={<ArrowBackIcon />} 
+                onClick={() => navigate(-1)}
+                sx={{ bgcolor: "#1e293b", color: "#fff", '&:hover': {bgcolor: "#000"} }}
+            >
+                Back
+            </Button>
+            <MDTypography variant="h4" fontWeight="bold">Vendor Profile</MDTypography>
+        </MDBox>
         <Grid container spacing={4}>
           {/* PROFILE SIDEBAR */}
           <Grid item xs={12} md={4}>
@@ -217,7 +230,7 @@ function VendorDetail() {
                         <Grid item xs={6} md={2}>
                           <TextField fullWidth type="number" label="Rate" value={m.rate} onChange={(e) => updateMaterial(i, "rate", e.target.value)} />
                         </Grid>
-                        <Grid item xs={5} md={1}>
+                        <Grid item xs={6} md={2}>
                           <TextField fullWidth type="number" label="Qty" value={m.quantity} onChange={(e) => updateMaterial(i, "quantity", e.target.value)} />
                         </Grid>
                         <Grid item xs={1} md={1}>
@@ -236,7 +249,7 @@ function VendorDetail() {
             </Card>
           </Grid>
         </Grid>
-      </Box>
+      </MDBox>
       <Footer />
     </DashboardLayout>
   );

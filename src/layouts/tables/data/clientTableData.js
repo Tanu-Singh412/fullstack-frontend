@@ -99,9 +99,9 @@ export default function useClientTableData() {
       .reverse()
       .map((c, i) => {
         const dateString = new Date(c.createdAt).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
+          day: "numeric",
+          month: "short",
+          year: "numeric"
         });
         const currentStatus = c.status || "Active";
 
@@ -111,10 +111,10 @@ export default function useClientTableData() {
               <MDTypography variant="caption" fontWeight="bold" color="dark">
                 {i + 1}
               </MDTypography>
-              <IconButton 
+              <IconButton
                 size="small"
                 onClick={() => setSelectedClient(c)}
-                sx={{ ml: 1, color: "#1976d2", "&:hover": {bgcolor: "#e3f2fd"} }}
+                sx={{ ml: 1, color: "#1976d2", "&:hover": { bgcolor: "#e3f2fd" } }}
               >
                 <AddCircleIcon fontSize="small" />
               </IconButton>
@@ -123,50 +123,64 @@ export default function useClientTableData() {
 
           client: (
             <MDBox display="flex" alignItems="center">
-                <Avatar sx={{ bgcolor: "#3b82f6", width: 30, height: 30, fontSize: 14, mr: 1.5 }}>
-                    {c.name?.charAt(0).toUpperCase()}
-                </Avatar>
-                <MDTypography variant="caption" fontWeight="bold" color="dark">
-                    {c.name}
-                </MDTypography>
+              <Avatar sx={{ bgcolor: "#3b82f6", width: 30, height: 30, fontSize: 14, mr: 1.5 }}>
+                {c.name?.charAt(0).toUpperCase()}
+              </Avatar>
+              <MDTypography variant="caption" fontWeight="bold" color="dark">
+                {c.name}
+              </MDTypography>
             </MDBox>
           ),
 
           clientId: (
-            <Chip 
-                label={c.clientId || c._id?.slice(-6)} 
-                size="small" 
-                sx={{ bgcolor: "#f1f5f9", fontWeight: "bold", color: "#64748b" }} 
+            <Chip
+              label={c.clientId || c._id?.slice(-6)}
+              size="small"
+              sx={{ bgcolor: "#f1f5f9", fontWeight: "bold", color: "#64748b" }}
             />
           ),
 
           date: (
             <MDTypography variant="caption" color="text">
-                {dateString}
+              {dateString}
             </MDTypography>
           ),
 
           status: (
             <Select
-                size="small"
-                value={currentStatus}
-                onChange={(e) => handleStatusChange(c._id, e.target.value)}
-                sx={{
+              size="small"
+              value={currentStatus}
+              onChange={(e) => handleStatusChange(c._id, e.target.value)}
+              sx={{
                 minWidth: 120,
                 borderRadius: 2,
                 fontSize: "0.75rem",
                 fontWeight: "700",
+                px: 1.5,              // 👈 horizontal padding
+                py: 0.5,              // 👈 vertical padding
                 bgcolor: currentStatus === "Active" ? "#f0fdf4" : "#fef2f2",
                 color: currentStatus === "Active" ? "#16a34a" : "#dc2626",
-                "& .MuiSelect-select": { py: 0.8 },
-                "& fieldset": { border: "1px solid", borderColor: currentStatus === "Active" ? "#dcfce7" : "#fee2e2" },
-                }}
+
+                "& .MuiSelect-select": {
+                  py: 1,              // 👈 inner text padding
+                  px: 1               // 👈 inner horizontal padding
+                },
+
+                "& fieldset": {
+                  border: "1px solid",
+                  borderColor:
+                    currentStatus === "Active" ? "#dcfce7" : "#fee2e2",
+                },
+              }}
             >
-                <MenuItem value="Active">🟢 Active</MenuItem>
-                <MenuItem value="Inactive">🔴 Inactive</MenuItem>
+              <MenuItem value="Active" sx={{ py: 1, px: 2 }}>
+                🟢 Active
+              </MenuItem>
+              <MenuItem value="Inactive" sx={{ py: 1, px: 2 }}>
+                🔴 Inactive
+              </MenuItem>
             </Select>
-          ),
-          actions: (
+          ), actions: (
             <MDBox display="flex" gap={1}>
               <IconButton
                 onClick={() => editClient(c)}
@@ -237,10 +251,10 @@ export default function useClientTableData() {
                       {selectedClient.name}
                     </MDTypography>
 
-                    <Chip 
-                        label={`ID: ${selectedClient.clientId || selectedClient._id}`} 
-                        size="small" 
-                        sx={{ mt: 0.5, bgcolor: "#f1f5f9", fontWeight: "bold" }} 
+                    <Chip
+                      label={`ID: ${selectedClient.clientId || selectedClient._id}`}
+                      size="small"
+                      sx={{ mt: 0.5, bgcolor: "#f1f5f9", fontWeight: "bold" }}
                     />
                   </MDBox>
                 </MDBox>
@@ -271,11 +285,11 @@ export default function useClientTableData() {
 
                   <MDBox display="flex" alignItems="center" gap={1.5}>
                     <MDTypography variant="button" fontWeight="bold" color="info">📊 Status:</MDTypography>
-                    <Chip 
-                        label={selectedClient.status || "Active"} 
-                        size="small" 
-                        color={selectedClient.status === "Inactive" ? "error" : "success"}
-                        sx={{ fontWeight: "bold", height: 24 }}
+                    <Chip
+                      label={selectedClient.status || "Active"}
+                      size="small"
+                      color={selectedClient.status === "Inactive" ? "error" : "success"}
+                      sx={{ fontWeight: "bold", height: 24 }}
                     />
                   </MDBox>
                 </MDBox>
@@ -289,23 +303,23 @@ export default function useClientTableData() {
 
         {/* Delete Confirmation */}
         <Dialog open={!!deleteId} onClose={() => setDeleteId(null)} PaperProps={{ sx: { borderRadius: 4 } }}>
-            <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <WarningAmberIcon color="error" /> Confirm Delete
-            </DialogTitle>
-            <DialogContent>
-                Are you sure you want to remove this client? This cannot be undone.
-            </DialogContent>
-            <DialogActions sx={{ p: 2 }}>
-                <Button onClick={() => setDeleteId(null)}>Cancel</Button>
-                <Button 
-                    variant="contained" 
-                    color="error" 
-                    onClick={() => { deleteClient(deleteId); setDeleteId(null); }}
-                    sx={{ borderRadius: 2, color: "#fff" }}
-                >
-                    Delete
-                </Button>
-            </DialogActions>
+          <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <WarningAmberIcon color="error" /> Confirm Delete
+          </DialogTitle>
+          <DialogContent>
+            Are you sure you want to remove this client? This cannot be undone.
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => { deleteClient(deleteId); setDeleteId(null); }}
+              sx={{ borderRadius: 2, color: "#fff" }}
+            >
+              Delete
+            </Button>
+          </DialogActions>
         </Dialog>
       </>
     ),

@@ -37,6 +37,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
 
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -480,9 +483,18 @@ Thank you.`;
     <DashboardLayout>
       <DashboardNavbar />
       <Box p={3}>
-        <Typography variant="h4" fontWeight="bold" mb={3} color="primary">
-          Billing & Invoicing
-        </Typography>
+        <MDBox pt={6} pb={3} px={3}>
+        <MDBox display="flex" alignItems="center" mb={3} gap={2}>
+            <Button 
+                variant="contained" 
+                startIcon={<ArrowBackIcon />} 
+                onClick={() => navigate(-1)}
+                sx={{ bgcolor: "#1e293b", color: "#fff", '&:hover': {bgcolor: "#000"} }}
+            >
+                Back
+            </Button>
+            <MDTypography variant="h4" fontWeight="bold">Invoice Management</MDTypography>
+        </MDBox>
 
         {/* ================= INVOICE FORM ================= */}
         <Card
@@ -556,7 +568,7 @@ Thank you.`;
                   fullWidth
                   sx={{ textTransform: "none", color: "#334155", fontWeight: "bold" }}
                 >
-                  {data.photoName ? `✅ ${data.photoName}` : "➕ Upload Bill Photo"}
+                  {data.photoName ? `✅ ${data.photoName}` : "➕ Upload Logo Photo"}
                   <input
                     type="file"
                     hidden
@@ -823,15 +835,19 @@ Thank you.`;
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{
-                  bgcolor: "#f8fafc",
+                  bgcolor: "#fff",
                   borderRadius: 2,
-                  "& fieldset": { border: "none" },
-                  boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)"
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "#10b981", borderWidth: "2px" },
+                    "&:hover fieldset": { borderColor: "#059669" },
+                    "&.Mui-focused fieldset": { borderColor: "#059669" },
+                  },
+                  boxShadow: "0 4px 12px rgba(16, 185, 129, 0.1)"
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon fontSize="small" color="disabled" />
+                      <SearchIcon fontSize="small" sx={{ color: "#10b981" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -841,13 +857,22 @@ Thank you.`;
                 <Select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  sx={{ borderRadius: 2, bgcolor: "#f1f5f9", fontWeight: "bold", fontSize: 13, "& fieldset": { border: "none" } }}
+                  sx={{ 
+                    borderRadius: 2, 
+                    bgcolor: "#fef2f2", 
+                    fontWeight: "bold", 
+                    fontSize: 13, 
+                    color: "#dc2626",
+                    "& fieldset": { border: "2px solid #fecaca" },
+                    "&:hover fieldset": { borderColor: "#ef4444" },
+                    "& .MuiSelect-icon": { color: "#dc2626" }
+                  }}
                 >
-                  <MenuItem value="all">All Records</MenuItem>
-                  <MenuItem value="day">Today</MenuItem>
-                  <MenuItem value="month">This Month</MenuItem>
-                  <MenuItem value="year">This Year</MenuItem>
-                  <MenuItem value="custom">Custom Range</MenuItem>
+                  <MenuItem value="all">📁 All Records</MenuItem>
+                  <MenuItem value="day">📅 Today</MenuItem>
+                  <MenuItem value="month">🗓️ This Month</MenuItem>
+                  <MenuItem value="year">📊 This Year</MenuItem>
+                  <MenuItem value="custom">🔍 Custom Range</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -927,8 +952,11 @@ Thank you.`;
                     </Box>
 
                     {/* Date */}
-                    <Typography color="#64748b" fontSize={13} fontWeight="medium">
-                      {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })}
+                    <Typography color="#64748b" fontSize={12} fontWeight="bold">
+                      {new Date(inv.date || inv.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' })}
+                      <span style={{ color: "#94a3b8", marginLeft: 6, fontWeight: "normal" }}>
+                        {new Date(inv.date || inv.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </Typography>
 
                     {/* Amount */}

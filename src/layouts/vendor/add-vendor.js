@@ -14,6 +14,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Box from "@mui/material/Box";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 // Dashboard
 import MDBox from "components/MDBox";
@@ -63,6 +64,7 @@ function AddVendor() {
   // =====================
   const [categories, setCategories] = useState([]);
   const [clients, setClients] = useState([]);
+  const [allVendors, setAllVendors] = useState([]);
 
   useEffect(() => {
     fetch("https://fullstack-project-1-n510.onrender.com/api/vendor-categories")
@@ -73,6 +75,11 @@ function AddVendor() {
     fetch("https://fullstack-project-1-n510.onrender.com/api/clients")
       .then((res) => res.json())
       .then((data) => setClients(data))
+      .catch((err) => console.log(err));
+
+    fetch("https://fullstack-project-1-n510.onrender.com/api/vendors")
+      .then((res) => res.json())
+      .then((data) => setAllVendors(data.data || data))
       .catch((err) => console.log(err));
   }, []);
 
@@ -98,8 +105,9 @@ function AddVendor() {
         updated[index][field] = value;
     }
 
-    // AUTO-CATEGORY LOGIC
+    // AUTO-CATEGORY & AUTO-FETCH LOGIC
     if (field === "materialName" && value) {
+      // 1. Auto-Category
       const matchedCat = categories.find(
         (cat) => cat.name.toLowerCase() === value.toLowerCase()
       );
@@ -107,9 +115,18 @@ function AddVendor() {
         setForm((prev) => ({
           ...prev,
           category: matchedCat.name.toLowerCase(),
-          materials: updated,
         }));
-        return;
+      }
+
+      // 2. Auto-Fetch previous data (rate/client)
+      const previousMat = allVendors
+        .flatMap(v => v.materials || [])
+        .find(m => m.materialName?.toLowerCase() === value.toLowerCase());
+
+      if (previousMat) {
+        updated[index].rate = previousMat.rate || "";
+        updated[index].clientId = previousMat.clientId || "";
+        updated[index].clientName = previousMat.clientName || "";
       }
     }
 
@@ -174,9 +191,19 @@ function AddVendor() {
             <Card sx={{ p: 4, borderRadius: 4, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
 
               <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <MDTypography variant="h4" fontWeight="bold">
-                  Vendor Registration
-                </MDTypography>
+                <MDBox display="flex" alignItems="center" gap={2}>
+                    <Button 
+                        variant="contained" 
+                        startIcon={<ArrowBackIcon />} 
+                        onClick={() => navigate(-1)}
+                        sx={{ bgcolor: "#1e293b", color: "#fff", '&:hover': {bgcolor: "#000"} }}
+                    >
+                        Back
+                    </Button>
+                    <MDTypography variant="h4" fontWeight="bold">
+                        Vendor Registration
+                    </MDTypography>
+                </MDBox>
                 <MDTypography variant="button" fontWeight="medium" color="text">
                   Section: <span style={{color: "#3b82f6", textTransform: "capitalize"}}>{category || form.category}</span>
                 </MDTypography>

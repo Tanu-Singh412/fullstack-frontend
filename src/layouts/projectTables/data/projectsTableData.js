@@ -135,7 +135,7 @@ export default function useProjectData() {
       };
 
       return {
-        serial: <MDTypography variant="caption" fontWeight="bold">{i + 1}</MDTypography>,
+        serial: <MDTypography variant="caption" fontWeight="bold" sx={{ color: "#3b82f6" }}>{i + 1}</MDTypography>,
         
         project: (
           <MDBox display="flex" alignItems="center">
@@ -143,21 +143,22 @@ export default function useProjectData() {
               sx={{
                 width: 36,
                 height: 36,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #1e293b, #334155)",
+                borderRadius: "10px",
+                background: "linear-gradient(135deg, #10b981, #3b82f6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#fff",
                 fontWeight: "bold",
                 mr: 1.5,
-                fontSize: 14
+                fontSize: 14,
+                boxShadow: "0 4px 10px rgba(16, 185, 129, 0.2)"
               }}
             >
               {p.projectName?.charAt(0).toUpperCase()}
             </MDBox>
             <MDBox>
-              <MDTypography variant="caption" fontWeight="bold" display="block">
+              <MDTypography variant="caption" fontWeight="bold" display="block" sx={{ color: "#1e293b" }}>
                 {p.projectName}
               </MDTypography>
               <MDTypography variant="xxs" color="text">ID: {p.projectId || p._id?.slice(-6)}</MDTypography>
@@ -167,7 +168,7 @@ export default function useProjectData() {
 
         client: (
           <MDBox>
-            <MDTypography variant="caption" fontWeight="medium" color="info" display="block">
+            <MDTypography variant="caption" fontWeight="bold" color="info" display="block">
               {p.clientName}
             </MDTypography>
             <MDTypography variant="xxs" color="text">{p.clientId}</MDTypography>
@@ -175,14 +176,23 @@ export default function useProjectData() {
         ),
 
         total: (
-          <MDBox>
+          <MDBox sx={{ px: 1, py: 0.5, borderRadius: 1.5, bgcolor: "#f0fdf4", border: "1px solid #dcfce7" }}>
             <MDTypography variant="caption" fontWeight="bold" color="success">
               ₹ {p.totalAmount?.toLocaleString("en-IN")}
             </MDTypography>
           </MDBox>
         ),
 
-        date: <MDTypography variant="caption" color="text">{date}</MDTypography>,
+        date: (
+            <MDBox>
+                <MDTypography variant="caption" fontWeight="bold" display="block">
+                    {new Date(p.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
+                </MDTypography>
+                <MDTypography variant="xxs" color="text">
+                    {new Date(p.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+                </MDTypography>
+            </MDBox>
+        ),
 
         status: (
           <Select

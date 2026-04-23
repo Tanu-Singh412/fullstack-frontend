@@ -7,8 +7,10 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import PhoneIcon from "@mui/icons-material/Phone";
 import BusinessIcon from "@mui/icons-material/Business";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -37,7 +39,18 @@ function VendorList() {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <Box sx={{ pt: 6, pb: 3, px: 3 }}>
+      <MDBox sx={{ pt: 6, pb: 3, px: 3 }}>
+        <MDBox display="flex" alignItems="center" mb={4} gap={2}>
+            <Button 
+                variant="contained" 
+                startIcon={<ArrowBackIcon />} 
+                onClick={() => navigate(-1)}
+                sx={{ bgcolor: "#1e293b", color: "#fff", '&:hover': {bgcolor: "#000"} }}
+            >
+                Back
+            </Button>
+            <MDTypography variant="h4" fontWeight="bold">Vendors Directory</MDTypography>
+        </MDBox>
         {/* HERO SECTION */}
         <Box
           sx={{
@@ -47,9 +60,9 @@ function VendorList() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            background: "linear-gradient(135deg, #0f172a, #1e293b)",
+            background: "linear-gradient(135deg, #1e293b, #3b82f6)",
             color: "white",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+            boxShadow: "0 20px 40px rgba(59, 130, 246, 0.2)",
             position: "relative",
             overflow: "hidden",
           }}
@@ -161,9 +174,14 @@ function VendorList() {
                       <Typography variant="h5" fontWeight="bold" sx={{ mb: 0.5 }}>
                         {v.vendorName}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#64748b", display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <BusinessIcon sx={{ fontSize: 14 }} /> ID: {v._id?.slice(-8).toUpperCase()}
-                      </Typography>
+                      <Box display="flex" gap={1} alignItems="center">
+                        <Typography variant="xxs" sx={{ color: "#64748b", display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <BusinessIcon sx={{ fontSize: 12 }} /> ID: {v._id?.slice(-8).toUpperCase()}
+                        </Typography>
+                        <Typography variant="xxs" sx={{ color: "#94a3b8", fontWeight: "bold" }}>
+                            • {new Date(v.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+                        </Typography>
+                      </Box>
                     </Box>
 
                     <Box sx={{ mb: 3 }}>
@@ -210,7 +228,7 @@ function VendorList() {
             ))
           )}
         </Grid>
-      </Box>
+      </MDBox>
 
       <Footer />
     </DashboardLayout>
