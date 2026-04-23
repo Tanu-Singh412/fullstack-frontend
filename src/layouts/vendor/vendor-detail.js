@@ -133,22 +133,22 @@ function VendorDetail() {
 
       <MDBox p={4}>
         <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-            <MDTypography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>Vendor Profile</MDTypography>
-            <Button 
-                variant="contained" 
-                startIcon={<ArrowBackIcon />} 
-                onClick={() => navigate(-1)}
-                sx={{ 
-                    bgcolor: "#3b82f6", 
-                    color: "#fff", 
-                    '&:hover': {bgcolor: "#2563eb"},
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: "bold"
-                }}
-            >
-                Back to Directory
-            </Button>
+          <MDTypography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>Vendor Profile</MDTypography>
+          <Button
+            variant="contained"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{
+              bgcolor: "#3b82f6",
+              color: "#fff",
+              '&:hover': { bgcolor: "#2563eb" },
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: "bold"
+            }}
+          >
+            Back to Directory
+          </Button>
         </MDBox>
         <Grid container spacing={4}>
           {/* PROFILE SIDEBAR */}
@@ -202,7 +202,7 @@ function VendorDetail() {
                 ) : (
                   <Button fullWidth variant="contained" sx={{ bgcolor: "#10b981", color: "#fff" }} onClick={handleUpdate}>Save</Button>
                 )}
-                <Button variant="outlined" color="error" onClick={handleDelete}>Delete</Button>
+                <Button variant="outlined" color="error" sx={{ bgcolor: "darkred", color: "#fff" }} onClick={handleDelete}>Delete</Button>
               </Box>
             </Card>
           </Grid>
@@ -213,7 +213,7 @@ function VendorDetail() {
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
                 <Typography variant="h5" fontWeight="bold">Material & Client Breakdown</Typography>
                 {editMode && (
-                  <Button variant="outlined" size="small" onClick={() => setVendor({ ...vendor, materials: [...vendor.materials, { materialName: "", rate: 0, quantity: 0, clientId: "", clientName: "" }] })}>
+                  <Button variant="outlined" size="small" sx={{ bgcolor: "darkgreen", color: "#fff", fontWeight: "bold" }} onClick={() => setVendor({ ...vendor, materials: [...vendor.materials, { materialName: "", rate: 0, quantity: 0, clientId: "", clientName: "" }] })}>
                     + Add Material Row
                   </Button>
                 )}
