@@ -164,16 +164,17 @@ function ProjectDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: uploadType,
-          images: base64Images,
+          images: base64Images, // works for both images and PDFs
         }),
       });
 
       await fetchDrawings();
       setOpenUpload(false);
       setFiles([]);
+      alert(`✓ ${files.length} file(s) uploaded successfully!`);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload images. They might be too large.");
+      alert("Failed to upload files. They might be too large. Try fewer files.");
     } finally {
       setLoading(false);
     }
@@ -440,19 +441,21 @@ function ProjectDetails() {
         {/* HEADER */}
         <Card
           sx={{
-            p: 3,
+            p: 4,
             mb: 3,
-            borderRadius: "16px",
-            background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+            borderRadius: "20px",
+            background: "linear-gradient(135deg, #f97316 0%, #ea580c 35%, #2563eb 100%)",
             color: "#fff",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            boxShadow: "0 15px 40px rgba(249,115,22,0.3)",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          <MDTypography variant="h4" fontWeight="bold" sx={{ color: "#fff" }}>
+          <Box sx={{ position: "absolute", top: -50, right: -50, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.07)" }} />
+          <MDTypography variant="h4" fontWeight="900" sx={{ color: "#fff", letterSpacing: -0.5, position: "relative", zIndex: 1 }}>
             {project.projectName}
           </MDTypography>
-
-          <MDTypography sx={{ mt: 1, color: "#e3f2fd" }}>
+          <MDTypography sx={{ mt: 1, color: "rgba(255,255,255,0.85)", position: "relative", zIndex: 1 }}>
             Client: <b style={{ color: "#fff" }}>{project.clientName}</b>
           </MDTypography>
         </Card>
@@ -462,169 +465,329 @@ function ProjectDetails() {
           value={tab}
           onChange={(e, v) => setTab(v)}
           sx={{
+            mb: 1,
             "& .MuiTab-root": {
               textTransform: "none",
-              fontWeight: 500,
-              color: "#555",
-              borderRadius: "8px",
+              fontWeight: 700,
+              color: "#64748b",
+              borderRadius: "10px",
               mx: 0.5,
-              minHeight: "40px",
+              minHeight: "44px",
+              px: 3,
+              transition: "all 0.2s",
             },
-
             "& .Mui-selected": {
-              backgroundColor: "#1976d2",
+              background: "linear-gradient(135deg, #f97316, #2563eb) !important",
               color: "#fff !important",
+              boxShadow: "0 6px 20px rgba(249,115,22,0.3)",
             },
-
-            "& .MuiTabs-indicator": {
-              display: "none", // ❌ hide bottom line
-            },
+            "& .MuiTabs-indicator": { display: "none" },
           }}
         >
-          <Tab label="Overview" />
-          <Tab label="Drawings" />
-          <Tab label="Accounts (Financials)" />
-          <Tab label="Scope of Work" />
+          <Tab label="📊 Overview" />
+          <Tab label="🗂 Drawings" />
+          <Tab label="💰 Accounts" />
+          <Tab label="📋 Scope of Work" />
         </Tabs>
 
 
         {/* OVERVIEW */}
-        {tab === 0 && (
-          <MDBox mt={3}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={8}>
-                <Card sx={{ p: 4, borderRadius: "20px", height: "100%", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
-                  <MDBox display="flex" alignItems="center" mb={3} gap={1}>
-                    <MDTypography variant="h5" fontWeight="bold" color="dark">Project Insight</MDTypography>
-                  </MDBox>
-                  <MDTypography
-                    variant="body1"
-                    sx={{
-                      lineHeight: 1.8,
-                      color: "#475569",
-                      fontSize: "1rem",
-                      fontWeight: 400
-                    }}
-                  >
-                    {project.description || "No detailed description available for this project. Please add one in the project settings."}
-                  </MDTypography>
-                </Card>
+        {tab === 0 && (() => {
+          const allImages = [
+            ...(drawings.find(d => d.type === "civil")?.images || []),
+            ...(drawings.find(d => d.type === "interior")?.images || []),
+          ];
+          return (
+            <MDBox mt={3}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={8}>
+                  <Card sx={{ p: 4, borderRadius: "20px", height: "100%", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+                    <MDBox display="flex" alignItems="center" mb={3} gap={1}>
+                      <MDTypography variant="h5" fontWeight="bold" color="dark">Project Insight</MDTypography>
+                    </MDBox>
+                    <MDTypography variant="body1" sx={{ lineHeight: 1.8, color: "#475569", fontSize: "1rem", fontWeight: 400 }}>
+                      {project.description || "No detailed description available for this project. Please add one in the project settings."}
+                    </MDTypography>
+                  </Card>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <Card sx={{ p: 4, borderRadius: "20px", background: "linear-gradient(135deg, #1e293b, #334155)", color: "#fff" }}>
+                    <MDTypography variant="h6" fontWeight="bold" color="white" mb={3}>Project Pulse</MDTypography>
+                    <MDBox display="flex" flexDirection="column" gap={2.5}>
+                      <Box>
+                        <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Registration Date</MDTypography>
+                        <MDTypography variant="h6" color="white" fontWeight="bold">
+                          {new Date(project.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}
+                        </MDTypography>
+                        <MDTypography variant="caption" color="white" sx={{ opacity: 0.5 }}>
+                          {new Date(project.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                        </MDTypography>
+                      </Box>
+                      <Box>
+                        <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Current Status</MDTypography>
+                        <Chip label={project.status || "Active"} size="small"
+                          sx={{ bgcolor: "#34d399", color: "#064e3b", fontWeight: "900", mt: 0.5 }} />
+                      </Box>
+                      <Box>
+                        <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Project ID</MDTypography>
+                        <MDTypography variant="button" display="block" color="white" fontWeight="bold">
+                          #{project.projectId || project._id?.slice(-8).toUpperCase()}
+                        </MDTypography>
+                      </Box>
+                      <Box>
+                        <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Total Amount</MDTypography>
+                        <MDTypography variant="h5" color="white" fontWeight="900" sx={{ color: "#34d399" }}>
+                          ₹{Number(project.totalAmount || 0).toLocaleString("en-IN")}
+                        </MDTypography>
+                      </Box>
+                    </MDBox>
+                  </Card>
+                </Grid>
+
+                {/* ===== IMAGE SLIDER ===== */}
+                {allImages.length > 0 && (
+                  <Grid item xs={12}>
+                    <Card sx={{ borderRadius: "20px", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
+                      <Box sx={{
+                        p: 3, background: "linear-gradient(135deg, #f97316, #2563eb)",
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                      }}>
+                        <MDTypography variant="h5" fontWeight="900" sx={{ color: "#fff" }}>
+                          🖼️ Project Drawings Gallery
+                        </MDTypography>
+                        <Box sx={{ bgcolor: "rgba(255,255,255,0.2)", px: 2, py: 0.5, borderRadius: 10 }}>
+                          <MDTypography variant="caption" sx={{ color: "#fff", fontWeight: "bold" }}>
+                            {drawings.find(d => d.type === "civil")?.images?.length || 0} Civil · {drawings.find(d => d.type === "interior")?.images?.length || 0} Interior
+                          </MDTypography>
+                        </Box>
+                      </Box>
+                      <Box sx={{
+                        display: "flex",
+                        overflowX: "auto",
+                        gap: 2,
+                        p: 3,
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#f97316 #f1f5f9",
+                        "&::-webkit-scrollbar": { height: 6 },
+                        "&::-webkit-scrollbar-track": { bgcolor: "#f1f5f9", borderRadius: 3 },
+                        "&::-webkit-scrollbar-thumb": { bgcolor: "#f97316", borderRadius: 3 },
+                      }}>
+                        {allImages.map((img, idx) => {
+                          const isPdf = typeof img === "string" && img.startsWith("data:application/pdf");
+                          const isCivil = idx < (drawings.find(d => d.type === "civil")?.images?.length || 0);
+                          return (
+                            <Box key={idx} sx={{
+                              minWidth: 220, maxWidth: 220, flexShrink: 0,
+                              borderRadius: "14px", overflow: "hidden",
+                              boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
+                              transition: "all 0.3s",
+                              "&:hover": { transform: "translateY(-6px)", boxShadow: "0 16px 35px rgba(0,0,0,0.15)" },
+                              cursor: "pointer",
+                            }}
+                              onClick={() => { if (!isPdf) openImage(img, idx); else window.open(img, "_blank"); }}>
+                              {isPdf ? (
+                                <Box sx={{
+                                  height: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                                  background: "linear-gradient(135deg, #fff7ed, #fed7aa)",
+                                }}>
+                                  <Box sx={{ fontSize: 48 }}>📄</Box>
+                                  <MDTypography variant="caption" fontWeight="bold" sx={{ color: "#f97316", mt: 1 }}>PDF</MDTypography>
+                                </Box>
+                              ) : (
+                                <img src={img} alt={`img-${idx}`}
+                                  style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
+                              )}
+                              <Box sx={{ p: 1.5, background: isCivil ? "#fff7ed" : "#eff6ff", display: "flex", justifyContent: "center" }}>
+                                <Box sx={{
+                                  px: 2, py: 0.3, borderRadius: 10,
+                                  background: isCivil ? "linear-gradient(135deg, #f97316, #ea580c)" : "linear-gradient(135deg, #2563eb, #16a34a)",
+                                }}>
+                                  <MDTypography variant="caption" fontWeight="bold" sx={{ color: "#fff", fontSize: "10px" }}>
+                                    {isCivil ? "🏗️ CIVIL" : "🎨 INTERIOR"}
+                                  </MDTypography>
+                                </Box>
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </Card>
+                  </Grid>
+                )}
               </Grid>
-
-              <Grid item xs={12} md={4}>
-                <Card sx={{ p: 4, borderRadius: "20px", background: "linear-gradient(135deg, #1e293b, #334155)", color: "#fff" }}>
-                  <MDTypography variant="h6" fontWeight="bold" color="white" mb={3}>Project Pulse</MDTypography>
-
-                  <MDBox display="flex" flexDirection="column" gap={2.5}>
-                    <Box>
-                      <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Registration Date</MDTypography>
-                      <MDTypography variant="h6" color="white" fontWeight="bold">
-                        {new Date(project.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </MDTypography>
-                    </Box>
-
-                    <Box>
-                      <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Current Status</MDTypography>
-                      <Chip
-                        label={project.status || "Active"}
-                        size="small"
-                        sx={{ bgcolor: "#34d399", color: "#064e3b", fontWeight: "900", mt: 0.5 }}
-                      />
-                    </Box>
-
-                    <Box>
-                      <MDTypography variant="caption" color="white" sx={{ opacity: 0.6, fontWeight: "bold", textTransform: "uppercase" }}>Project ID</MDTypography>
-                      <MDTypography variant="button" display="block" color="white" fontWeight="bold">
-                        #{project.projectId || project._id?.slice(-8).toUpperCase()}
-                      </MDTypography>
-                    </Box>
-                  </MDBox>
-                </Card>
-              </Grid>
-            </Grid>
-          </MDBox>
-        )}
+            </MDBox>
+          );
+        })()}
 
         {/* DRAWINGS */}
         {tab === 1 && (
           <MDBox mt={3}>
             {!drawingType ? (
               <Grid container spacing={4}>
-                {["civil", "interior"].map((type) => (
+                {[
+                  { type: "civil", label: "Civil Drawings", desc: "Structural plans, layouts & blueprints", icon: "🏗️", grad: "linear-gradient(135deg, #f97316, #ea580c)", pdfSupport: true },
+                  { type: "interior", label: "Interior Drawings", desc: "3D elevations, interior schematics", icon: "🎨", grad: "linear-gradient(135deg, #2563eb, #16a34a)", pdfSupport: false },
+                ].map(({ type, label, desc, icon, grad, pdfSupport }) => (
                   <Grid item xs={12} md={6} key={type}>
-                    <Card sx={{ p: 4, position: "relative", textAlign: "center", borderRadius: "16px", boxShadow: "0px 10px 30px rgba(0,0,0,0.08)", borderTop: type === "civil" ? "5px solid #1976d2" : "5px solid #9c27b0" }}>
-                      <MDTypography variant="h4" fontWeight="bold" sx={{ color: "#2c3e50", textTransform: "capitalize", mb: 1 }}>
-                        {type} Drawings
-                      </MDTypography>
-                      <MDTypography variant="button" sx={{ color: "#7f8c8d", display: "block", mb: 4 }}>
-                        Manage {type} schematics and blueprints
-                      </MDTypography>
-
-                      <MDBox display="flex" justifyContent="center" gap={3}>
+                    <Card sx={{
+                      borderRadius: "20px",
+                      overflow: "hidden",
+                      boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                      transition: "all 0.3s",
+                      "&:hover": { transform: "translateY(-8px)", boxShadow: "0 20px 50px rgba(0,0,0,0.15)" },
+                    }}>
+                      {/* Colored top */}
+                      <Box sx={{ background: grad, p: 4, textAlign: "center" }}>
+                        <Box sx={{ fontSize: 56, mb: 1 }}>{icon}</Box>
+                        <MDTypography variant="h4" fontWeight="900" sx={{ color: "#fff", textTransform: "capitalize", mb: 0.5 }}>
+                          {label}
+                        </MDTypography>
+                        <MDTypography variant="caption" sx={{ color: "rgba(255,255,255,0.85)", display: "block" }}>
+                          {desc}
+                        </MDTypography>
+                        {pdfSupport && (
+                          <Box sx={{ mt: 1, display: "inline-block", bgcolor: "rgba(255,255,255,0.2)", px: 2, py: 0.3, borderRadius: 10 }}>
+                            <MDTypography variant="caption" sx={{ color: "#fff", fontWeight: "bold" }}>📄 PDF Upload Supported</MDTypography>
+                          </Box>
+                        )}
+                      </Box>
+                      {/* Buttons */}
+                      <Box sx={{ p: 3, display: "flex", gap: 2, bgcolor: "#fff" }}>
                         <Button
-                          sx={{ color: "#fff", background: type === "civil" ? "linear-gradient(135deg, #1976d2, #42a5f5)" : "linear-gradient(135deg, #9c27b0, #ce93d8)", px: 4, py: 1.5, borderRadius: "8px", fontWeight: "bold" }}
-                          variant="contained"
-                          onClick={() => {
-                            setUploadType(type);
-                            setOpenUpload(true);
+                          fullWidth variant="contained"
+                          onClick={() => { setUploadType(type); setOpenUpload(true); }}
+                          sx={{
+                            background: grad, color: "#fff",
+                            py: 1.5, borderRadius: "12px", fontWeight: "bold", textTransform: "none",
+                            boxShadow: `0 6px 20px rgba(0,0,0,0.2)`,
+                            "&:hover": { opacity: 0.9, transform: "translateY(-2px)" },
+                            transition: "all 0.25s",
                           }}
                         >
-                          Upload New
+                          ⬆ Upload {pdfSupport ? "Images / PDF" : "Images"}
                         </Button>
                         <Button
-                          sx={{ color: type === "civil" ? "#1976d2" : "#9c27b0", border: `2px solid ${type === "civil" ? "#1976d2" : "#9c27b0"}`, px: 4, py: 1.5, borderRadius: "8px", fontWeight: "bold" }}
-                          variant="outlined"
+                          fullWidth variant="outlined"
                           onClick={() => setDrawingType(type)}
+                          sx={{
+                            py: 1.5, borderRadius: "12px", fontWeight: "bold", textTransform: "none",
+                            border: "2px solid",
+                            borderColor: type === "civil" ? "#f97316" : "#2563eb",
+                            color: type === "civil" ? "#f97316" : "#2563eb",
+                            "&:hover": {
+                              background: type === "civil" ? "#fff7ed" : "#eff6ff",
+                              transform: "translateY(-2px)",
+                            },
+                            transition: "all 0.25s",
+                          }}
                         >
-                          View Gallery
+                          🖼 View Gallery
                         </Button>
-                      </MDBox>
+                      </Box>
                     </Card>
                   </Grid>
                 ))}
               </Grid>
             ) : (
               <MDBox>
-                <Button onClick={() => setDrawingType(null)} sx={{ mb: 3, background: "#f1f5f9", color: "#334155", px: 3, py: 1, borderRadius: "8px", fontWeight: "bold" }}>⬅ Back to Folders</Button>
+                <Button
+                  onClick={() => setDrawingType(null)}
+                  sx={{
+                    mb: 3, background: "linear-gradient(135deg, #f97316, #2563eb)",
+                    color: "#fff", px: 3, py: 1.2, borderRadius: "10px", fontWeight: "bold",
+                    textTransform: "none",
+                    "&:hover": { opacity: 0.9 },
+                  }}
+                >
+                  ⬅ Back to Folders
+                </Button>
+
+                {/* Upload more button in gallery */}
+                <Button
+                  onClick={() => { setUploadType(drawingType); setOpenUpload(true); }}
+                  sx={{
+                    mb: 3, ml: 2, background: "linear-gradient(135deg, #16a34a, #22c55e)",
+                    color: "#fff", px: 3, py: 1.2, borderRadius: "10px", fontWeight: "bold",
+                    textTransform: "none",
+                    "&:hover": { opacity: 0.9 },
+                  }}
+                >
+                  ⬆ Upload More
+                </Button>
 
                 <Grid container spacing={3}>
-                  {images.map((img, i) => (
-                    <Grid item xs={12} sm={6} md={3} key={i}>
-                      <Card sx={{ p: 1.5, borderRadius: "12px", boxShadow: "0 6px 15px rgba(0,0,0,0.06)", transition: "transform 0.2s", "&:hover": { transform: "translateY(-5px)" } }}>
-                        <img
-                          src={img}
-                          onClick={() => openImage(img, i)}
-                          style={{
-                            width: "100%",
-                            height: 220,
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                          }}
-                        />
-
-                        <Button
-                          size="small"
-                          color="error"
-                          fullWidth
-                          sx={{ mt: 1.5, fontWeight: "bold", background: "#fff5f5" }}
-                          onClick={() => handleDeleteImage(img)}
-                        >
-                          Delete Image
-                        </Button>
-                      </Card>
-                    </Grid>
-                  ))}
+                  {images.map((img, i) => {
+                    // detect base64 PDFs (data:application/pdf) AND URL-based PDFs (.pdf)
+                    const isPdf = typeof img === "string" && (
+                      img.startsWith("data:application/pdf") ||
+                      img.toLowerCase().includes(".pdf")
+                    );
+                    return (
+                      <Grid item xs={12} sm={6} md={3} key={i}>
+                        <Card sx={{
+                          borderRadius: "14px",
+                          overflow: "hidden",
+                          boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+                          transition: "all 0.3s",
+                          "&:hover": { transform: "translateY(-8px)", boxShadow: "0 20px 40px rgba(0,0,0,0.15)" },
+                        }}>
+                          {isPdf ? (
+                            <Box
+                              onClick={() => window.open(img, "_blank")}
+                              sx={{
+                                height: 200, display: "flex", flexDirection: "column",
+                                alignItems: "center", justifyContent: "center",
+                                background: "linear-gradient(135deg, #fff7ed, #fed7aa)",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <Box sx={{ fontSize: 60 }}>📄</Box>
+                              <MDTypography variant="caption" fontWeight="bold" sx={{ color: "#f97316", mt: 1 }}>PDF Document</MDTypography>
+                              <MDTypography variant="caption" sx={{ color: "#94a3b8" }}>Click to open</MDTypography>
+                            </Box>
+                          ) : (
+                            <img
+                              src={img}
+                              onClick={() => openImage(img, i)}
+                              style={{ width: "100%", height: 200, objectFit: "cover", cursor: "pointer", display: "block" }}
+                              alt={`drawing-${i}`}
+                            />
+                          )}
+                          <Box sx={{ p: 1.5, background: "#fff" }}>
+                            <Button
+                              size="small" fullWidth
+                              sx={{
+                                background: "linear-gradient(135deg, #dc2626, #f87171)",
+                                color: "#fff", fontWeight: "bold", borderRadius: "8px",
+                                textTransform: "none",
+                                "&:hover": { opacity: 0.9 },
+                              }}
+                              onClick={() => handleDeleteImage(img)}
+                            >
+                              🗑 Delete
+                            </Button>
+                          </Box>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
                   {images.length === 0 && (
                     <Grid item xs={12}>
-                      <MDTypography variant="h6" align="center" sx={{ mt: 8, color: "#94a3b8", fontWeight: "500" }}>No {drawingType} drawings found. Upload some to see them here.</MDTypography>
+                      <Box sx={{ py: 10, textAlign: "center", bgcolor: "#f8fafc", borderRadius: 4, border: "2px dashed #e2e8f0" }}>
+                        <Box sx={{ fontSize: 64 }}>🗂</Box>
+                        <MDTypography variant="h6" sx={{ color: "#94a3b8", fontWeight: 600, mt: 1 }}>No {drawingType} drawings found</MDTypography>
+                        <MDTypography variant="caption" sx={{ color: "#cbd5e1" }}>Upload images or PDFs to see them here</MDTypography>
+                      </Box>
                     </Grid>
                   )}
                 </Grid>
               </MDBox>
             )}
           </MDBox>
-        )}        {/* ACCOUNTS */}
+        )}
+
+        {/* ACCOUNTS */}
 
 
 
@@ -1192,113 +1355,103 @@ function ProjectDetails() {
           sx={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.65)",
+            background: "rgba(0,0,0,0.7)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 9999,
-            backdropFilter: "blur(6px)",
+            backdropFilter: "blur(8px)",
           }}
         >
           <Card
             sx={{
-              p: 3,
-              width: 380,
-              borderRadius: "18px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.25)",
-              textAlign: "center",
-              background: "linear-gradient(145deg, #ffffff, #f8fafc)",
+              width: 420,
+              borderRadius: "24px",
+              boxShadow: "0 30px 80px rgba(0,0,0,0.3)",
+              overflow: "hidden",
             }}
           >
-            {/* TITLE */}
-            <MDTypography variant="h6" fontWeight="bold" mb={1}>
-              Upload Drawings
-            </MDTypography>
-
-            <MDTypography variant="caption" sx={{ opacity: 0.6 }}>
-              Select images to upload for this project
-            </MDTypography>
-
-            {/* FILE INPUT AREA */}
-            <MDBox
-              sx={{
-                mt: 3,
-                p: 2,
-                border: "2px dashed #1976d2",
-                borderRadius: "14px",
-                background: "#f5f9ff",
-                cursor: "pointer",
-                transition: "0.2s",
-                "&:hover": {
-                  background: "#eaf3ff",
-                },
-              }}
-            >
-              <input
-                type="file"
-                multiple
-                onChange={(e) => setFiles(e.target.files)}
-                style={{
-                  width: "100%",
-                  cursor: "pointer",
-                }}
-              />
-
-              <MDTypography
-                variant="caption"
-                sx={{ display: "block", mt: 1, opacity: 0.7 }}
-              >
-                Drag & drop or select files
+            {/* Modal Header */}
+            <Box sx={{
+              p: 3,
+              background: uploadType === "civil"
+                ? "linear-gradient(135deg, #f97316, #ea580c)"
+                : "linear-gradient(135deg, #2563eb, #16a34a)",
+              textAlign: "center",
+            }}>
+              <Box sx={{ fontSize: 40, mb: 0.5 }}>{uploadType === "civil" ? "🏗️" : "🎨"}</Box>
+              <MDTypography variant="h5" fontWeight="900" sx={{ color: "#fff" }}>
+                Upload {uploadType === "civil" ? "Civil" : "Interior"} Drawings
               </MDTypography>
-            </MDBox>
+              <MDTypography variant="caption" sx={{ color: "rgba(255,255,255,0.8)" }}>
+                {uploadType === "civil" ? "Images & PDF supported" : "Images supported"}
+              </MDTypography>
+            </Box>
 
-            {/* FILE COUNT */}
-            {files?.length > 0 && (
-              <MDBox mt={2}>
-                <MDTypography variant="caption" sx={{ color: "#1976d2" }}>
-                  {files.length} file(s) selected
+            <Box sx={{ p: 4 }}>
+              {/* FILE INPUT AREA */}
+              <MDBox
+                sx={{
+                  p: 3,
+                  border: uploadType === "civil" ? "2px dashed #f97316" : "2px dashed #2563eb",
+                  borderRadius: "14px",
+                  background: uploadType === "civil" ? "#fff7ed" : "#eff6ff",
+                  cursor: "pointer",
+                  transition: "0.2s",
+                  textAlign: "center",
+                  "&:hover": { opacity: 0.85 },
+                }}
+              >
+                <Box sx={{ fontSize: 36, mb: 1 }}>📁</Box>
+                <input
+                  type="file"
+                  multiple
+                  accept={uploadType === "civil" ? "image/*,.pdf" : "image/*"}
+                  onChange={(e) => setFiles(e.target.files)}
+                  style={{ width: "100%", cursor: "pointer" }}
+                />
+                <MDTypography variant="caption" sx={{ display: "block", mt: 1, color: "#64748b" }}>
+                  {uploadType === "civil" ? "Images (PNG, JPG) or PDF files" : "Images (PNG, JPG, WEBP)"}
                 </MDTypography>
               </MDBox>
-            )}
 
-            {/* UPLOAD BUTTON */}
-            <Button
-              onClick={handleUpload}
-              fullWidth
-              sx={{
-                mt: 3,
-                py: 1.2,
-                borderRadius: "10px",
-                textTransform: "none",
-                fontWeight: 600,
-                color: "#fff",
-                background: "linear-gradient(135deg,#1976d2,#42a5f5)",
-                boxShadow: "0 8px 20px rgba(25,118,210,0.3)",
-                "&:hover": {
-                  background: "linear-gradient(135deg,#1565c0,#1e88e5)",
-                },
-              }}
-            >
-              {loading ? "Uploading..." : "Upload Files"}
-            </Button>
+              {files?.length > 0 && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: "#f0fdf4", borderRadius: 3, border: "1px solid #bbf7d0" }}>
+                  <MDTypography variant="caption" sx={{ color: "#16a34a", fontWeight: "bold" }}>
+                    ✓ {files.length} file(s) selected and ready to upload
+                  </MDTypography>
+                </Box>
+              )}
 
-            {/* CANCEL BUTTON */}
-            <Button
-              onClick={() => {
-                setOpenUpload(false);
-                setFiles([]);
-              }}
-              fullWidth
-              sx={{
-                mt: 1.5,
-                textTransform: "none",
-                color: "#666",
-                fontWeight: 500,
+              <Button
+                onClick={handleUpload}
+                fullWidth
+                sx={{
+                  mt: 3, py: 1.5, borderRadius: "12px",
+                  textTransform: "none", fontWeight: "bold", color: "#fff",
+                  background: uploadType === "civil"
+                    ? "linear-gradient(135deg, #f97316, #ea580c)"
+                    : "linear-gradient(135deg, #2563eb, #16a34a)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                  "&:hover": { opacity: 0.9, transform: "translateY(-2px)" },
+                  transition: "all 0.25s",
+                }}
+              >
+                {loading ? "Uploading... ⏳" : "⬆ Upload Files"}
+              </Button>
 
-              }}
-            >
-              Cancel
-            </Button>
+              <Button
+                onClick={() => { setOpenUpload(false); setFiles([]); }}
+                fullWidth
+                sx={{
+                  mt: 1.5, textTransform: "none",
+                  color: "#64748b", fontWeight: 600, borderRadius: "10px",
+                  "&:hover": { bgcolor: "#f1f5f9" },
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
           </Card>
         </MDBox>
       )}

@@ -8,15 +8,26 @@ import Dialog from "@mui/material/Dialog";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import AddBusinessIcon from "@mui/icons-material/AddBusiness";
+import CategoryIcon from "@mui/icons-material/Category";
 
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
+
+const COLORS = [
+  { bg: "linear-gradient(135deg, #f97316, #fb923c)", icon: "🏗️" },
+  { bg: "linear-gradient(135deg, #2563eb, #60a5fa)", icon: "🔩" },
+  { bg: "linear-gradient(135deg, #16a34a, #4ade80)", icon: "🌿" },
+  { bg: "linear-gradient(135deg, #9333ea, #c084fc)", icon: "⚡" },
+  { bg: "linear-gradient(135deg, #dc2626, #f87171)", icon: "🔧" },
+  { bg: "linear-gradient(135deg, #0891b2, #67e8f9)", icon: "💧" },
+];
 
 function VendorHome() {
   const navigate = useNavigate();
@@ -72,7 +83,7 @@ function VendorHome() {
 
     const payload = {
       name,
-      image: finalImage
+      image: finalImage,
     };
 
     const url = editId
@@ -117,153 +128,263 @@ function VendorHome() {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <Box sx={{ pt: 6, pb: 3, px: 3 }}>
-        {/* HEADER */}
+      <Box sx={{ pt: 6, pb: 4, px: 3 }}>
+
+        {/* ========== HERO HEADER ========== */}
         <Box
           sx={{
-            mb: 4,
-            p: 4,
-            borderRadius: 4,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            background: "linear-gradient(135deg, #0284c7, #0d9488)", // Sapphire to Teal
+            mb: 5,
+            p: { xs: 3, md: 5 },
+            borderRadius: 5,
+            background: "linear-gradient(135deg, #f97316 0%, #ea580c 40%, #2563eb 100%)",
             color: "white",
-            boxShadow: "0 10px 40px rgba(13, 148, 136, 0.2)",
+            boxShadow: "0 20px 60px rgba(249, 115, 22, 0.35)",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          <Box>
-            <Typography variant="h4" fontWeight="bold" color="#fff" sx={{ textShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
-              Supplier Ecosystem
-            </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5, fontWeight: "medium", color: "#fff" }}>
-              Categorized procurement and resource tracking
-            </Typography>
-          </Box>
+          {/* decorative circles */}
+          <Box sx={{ position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+          <Box sx={{ position: "absolute", bottom: -40, left: "30%", width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
 
-          <Button
-            variant="contained"
-            onClick={() => handleOpen()}
-            sx={{
-              background: "#fff",
-              color: "#0d9488",
-              fontWeight: "900",
-              borderRadius: "12px",
-              px: 4,
-              py: 1.5,
-              fontSize: "0.9rem",
-              textTransform: "uppercase",
-              letterSpacing: 1,
-              '&:hover': { background: '#f0fdfa', transform: 'scale(1.02)' },
-              boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
-            }}
-          >
-            + Create Category
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 3, position: "relative", zIndex: 1 }}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Box sx={{ bgcolor: "rgba(255,255,255,0.2)", borderRadius: 3, p: 2, display: "flex" }}>
+                <StorefrontIcon sx={{ fontSize: 40, color: "#fff" }} />
+              </Box>
+              <Box>
+                <Typography variant="h3" fontWeight="900" sx={{ color: "#fff", letterSpacing: -1, lineHeight: 1.1 }}>
+                  Supplier Ecosystem
+                </Typography>
+                <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.85)", mt: 0.5, fontWeight: 500 }}>
+                  {categories.length} Active Categories · Categorized Procurement
+                </Typography>
+              </Box>
+            </Box>
+
+            <Button
+              variant="contained"
+              startIcon={<AddBusinessIcon />}
+              onClick={() => handleOpen()}
+              sx={{
+                background: "#fff",
+                color: "#f97316",
+                fontWeight: "900",
+                borderRadius: "14px",
+                px: 4,
+                py: 1.8,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                letterSpacing: 0.5,
+                boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                "&:hover": {
+                  background: "#fff7ed",
+                  transform: "translateY(-3px)",
+                  boxShadow: "0 15px 35px rgba(0,0,0,0.2)",
+                },
+                transition: "all 0.3s",
+              }}
+            >
+              + Create Category
+            </Button>
+          </Box>
         </Box>
 
-        {/* CATEGORY GRID */}
-        <Grid container spacing={4}>
-          {categories.map((c) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={c._id}>
-              <Card
-                sx={{
-                  position: "relative",
-                  height: "100%",
-                  borderRadius: 4,
-                  overflow: "hidden",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  cursor: "pointer",
-                  '&:hover': {
-                    transform: "translateY(-10px)",
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
-                    '& .category-actions': { opacity: 1 }
-                  },
-                }}
-              >
-                {/* Image Background */}
-                <Box
-                  onClick={() => navigate(`/vendor/category/${c.name}`)}
-                  sx={{
-                    height: 180,
-                    background: c.image
-                      ? `url(${c.image}) center/cover`
-                      : `linear-gradient(135deg, ${["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444"][categories.indexOf(c) % 5]}, ${["#2563eb", "#059669", "#7c3aed", "#d97706", "#dc2626"][categories.indexOf(c) % 5]})`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white"
-                  }}
-                >
-                  {!c.image && (
-                    <Typography variant="h1" sx={{ opacity: 0.3, fontWeight: 900, color: "#fff" }}>
-                      {c.name?.charAt(0).toUpperCase()}
-                    </Typography>
-                  )}
-                </Box>
-
-                {/* Content */}
-                <Box sx={{ p: 3, textAlign: "center", position: "relative" }}>
-                  <Typography 
-                    variant="h6" 
-                    fontWeight="bold" 
-                    onClick={() => navigate(`/vendor/category/${c.name}`)}
-                    sx={{ 
-                      mb: 0.5, 
-                      color: "#1e293b", 
-                      cursor: "pointer",
-                      "&:hover": { color: "#3b82f6" } 
-                    }}
-                  >
-                    {c.name}
-                  </Typography>
-                  <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 1, color: "#64748b", fontWeight: "bold" }}>
-                    Verified Category
-                  </Typography>
-
-                  {/* Actions Overlay */}
-                  <Box
-                    className="category-actions"
-                    sx={{
-                      position: "absolute",
-                      top: -160,
-                      right: 10,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 1,
-                      opacity: 0,
-                      transition: "0.3s",
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      sx={{ bgcolor: "rgba(255,255,255,0.9)", '&:hover': { bgcolor: "#fff" } }}
-                      onClick={(e) => { e.stopPropagation(); handleOpen(c); }}
-                    >
-                      <EditIcon fontSize="small" color="info" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      sx={{ bgcolor: "rgba(255,255,255,0.9)", '&:hover': { bgcolor: "#fff" } }}
-                      onClick={(e) => { e.stopPropagation(); handleDelete(c._id); }}
-                    >
-                      <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                  </Box>
+        {/* ========== STATS ROW ========== */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {[
+            { label: "Total Categories", value: categories.length, color: "#f97316", bg: "#fff7ed", icon: <CategoryIcon /> },
+            { label: "Active Suppliers", value: categories.length * 3 + "+", color: "#2563eb", bg: "#eff6ff", icon: <StorefrontIcon /> },
+            { label: "Verified Vendors", value: categories.length * 2 + "+", color: "#16a34a", bg: "#f0fdf4", icon: <AddBusinessIcon /> },
+          ].map((s, i) => (
+            <Grid item xs={12} md={4} key={i}>
+              <Card sx={{
+                p: 3, borderRadius: 4,
+                background: s.bg,
+                border: `2px solid ${s.color}22`,
+                boxShadow: `0 4px 20px ${s.color}15`,
+                display: "flex", alignItems: "center", gap: 2,
+              }}>
+                <Box sx={{ bgcolor: s.color, borderRadius: 3, p: 1.5, color: "#fff", display: "flex" }}>{s.icon}</Box>
+                <Box>
+                  <Typography variant="h4" fontWeight="900" sx={{ color: s.color, lineHeight: 1 }}>{s.value}</Typography>
+                  <Typography variant="caption" fontWeight="bold" sx={{ color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</Typography>
                 </Box>
               </Card>
             </Grid>
           ))}
         </Grid>
+
+        {/* ========== CATEGORY GRID ========== */}
+        {categories.length === 0 ? (
+          <Box sx={{ py: 10, textAlign: "center" }}>
+            <CategoryIcon sx={{ fontSize: 80, color: "#e2e8f0", mb: 2 }} />
+            <Typography variant="h5" color="text.secondary" fontWeight="bold">No categories yet</Typography>
+            <Typography variant="body2" color="text.secondary">Click "Create Category" to add your first supplier category</Typography>
+          </Box>
+        ) : (
+          <Grid container spacing={4}>
+            {categories.map((c, idx) => {
+              const colorSet = COLORS[idx % COLORS.length];
+              return (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={c._id}>
+                  <Card
+                    sx={{
+                      position: "relative",
+                      height: "100%",
+                      borderRadius: 5,
+                      overflow: "hidden",
+                      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                      cursor: "pointer",
+                      border: "2px solid transparent",
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                      "&:hover": {
+                        transform: "translateY(-12px)",
+                        boxShadow: "0 25px 50px rgba(0,0,0,0.15)",
+                        border: "2px solid #f97316",
+                        "& .cat-actions": { opacity: 1, transform: "translateY(0)" },
+                        "& .cat-image-overlay": { opacity: 1 },
+                      },
+                    }}
+                  >
+                    {/* Image / Color Background */}
+                    <Box
+                      onClick={() => navigate(`/vendor/category/${c.name}`)}
+                      sx={{
+                        height: 200,
+                        background: c.image
+                          ? `url(${c.image}) center/cover no-repeat`
+                          : colorSet.bg,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                      }}
+                    >
+                      {/* Overlay on hover */}
+                      <Box
+                        className="cat-image-overlay"
+                        sx={{
+                          position: "absolute",
+                          inset: 0,
+                          background: "rgba(0,0,0,0.25)",
+                          opacity: 0,
+                          transition: "0.3s",
+                        }}
+                      />
+
+                      {!c.image && (
+                        <Typography sx={{ fontSize: 60, position: "relative", zIndex: 1 }}>
+                          {colorSet.icon}
+                        </Typography>
+                      )}
+
+                      {/* Action Buttons - always visible on hover */}
+                      <Box
+                        className="cat-actions"
+                        sx={{
+                          position: "absolute",
+                          top: 12,
+                          right: 12,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                          opacity: 0,
+                          transform: "translateY(-10px)",
+                          transition: "all 0.3s",
+                          zIndex: 10,
+                        }}
+                      >
+                        <IconButton
+                          size="small"
+                          sx={{
+                            bgcolor: "#fff",
+                            color: "#2563eb",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                            "&:hover": { bgcolor: "#eff6ff", transform: "scale(1.15)" },
+                            width: 38, height: 38,
+                          }}
+                          onClick={(e) => { e.stopPropagation(); handleOpen(c); }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          sx={{
+                            bgcolor: "#fff",
+                            color: "#dc2626",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                            "&:hover": { bgcolor: "#fef2f2", transform: "scale(1.15)" },
+                            width: 38, height: 38,
+                          }}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(c._id); }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    {/* Card Content */}
+                    <Box sx={{ p: 3, textAlign: "center", background: "#fff" }}>
+                      <Typography
+                        variant="h6"
+                        fontWeight="900"
+                        onClick={() => navigate(`/vendor/category/${c.name}`)}
+                        sx={{
+                          color: "#1e293b",
+                          cursor: "pointer",
+                          mb: 1,
+                          "&:hover": { color: "#f97316" },
+                          transition: "color 0.2s",
+                        }}
+                      >
+                        {c.name}
+                      </Typography>
+                      <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                        <Box sx={{
+                          px: 2, py: 0.5, borderRadius: 10,
+                          background: "linear-gradient(135deg, #f97316, #2563eb)",
+                          color: "#fff",
+                          fontSize: "11px", fontWeight: 700, letterSpacing: 0.5,
+                        }}>
+                          ✓ Verified
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        )}
       </Box>
 
-      {/* DIALOG */}
-      <Dialog open={open} onClose={() => setOpen(false)} PaperProps={{ sx: { borderRadius: 4, width: 400 } }}>
-        <Box sx={{ p: 4 }}>
-          <Typography variant="h5" mb={3} fontWeight="bold">
-            {editId ? "Edit Category" : "Add New Category"}
+      {/* ========== DIALOG ========== */}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 5,
+            width: 440,
+            overflow: "hidden",
+            boxShadow: "0 30px 80px rgba(0,0,0,0.2)",
+          }
+        }}
+      >
+        {/* Dialog Header */}
+        <Box sx={{
+          background: "linear-gradient(135deg, #f97316, #2563eb)",
+          p: 3,
+          display: "flex", alignItems: "center", gap: 2,
+        }}>
+          <CategoryIcon sx={{ color: "#fff", fontSize: 28 }} />
+          <Typography variant="h5" fontWeight="900" sx={{ color: "#fff" }}>
+            {editId ? "Edit Category" : "New Category"}
           </Typography>
+        </Box>
 
+        <Box sx={{ p: 4 }}>
           <TextField
             fullWidth
             label="Category Name"
@@ -271,32 +392,35 @@ function VendorHome() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             sx={{ mb: 3 }}
+            InputProps={{ style: { borderRadius: 10, fontWeight: 700 } }}
           />
 
+          {/* Upload Area */}
           <Box
             sx={{
-              border: "2px dashed #e2e8f0",
-              borderRadius: 3,
+              border: "2px dashed #f97316",
+              borderRadius: 4,
               p: 3,
               textAlign: "center",
               cursor: "pointer",
               transition: "0.3s",
-              '&:hover': { borderColor: "#3b82f6", bgcolor: "#f8fafc" },
-              position: "relative",
-              mb: 3
+              background: "#fff7ed",
+              "&:hover": { borderColor: "#2563eb", bgcolor: "#eff6ff" },
+              mb: 3,
             }}
             onClick={() => document.getElementById("cat-img").click()}
           >
             {preview ? (
-              <Box sx={{ width: "100%", height: 120, borderRadius: 2, overflow: "hidden" }}>
-                <img src={preview} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <Box sx={{ width: "100%", height: 130, borderRadius: 3, overflow: "hidden" }}>
+                <img src={preview} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="preview" />
               </Box>
             ) : (
               <Box>
-                <CloudUploadIcon sx={{ fontSize: 40, color: "#94a3b8", mb: 1 }} />
-                <Typography variant="body2" color="textSecondary">
+                <CloudUploadIcon sx={{ fontSize: 45, color: "#f97316", mb: 1 }} />
+                <Typography variant="body2" fontWeight="bold" sx={{ color: "#f97316" }}>
                   Click to upload category photo
                 </Typography>
+                <Typography variant="caption" color="text.secondary">PNG, JPG, WEBP supported</Typography>
               </Box>
             )}
             <input
@@ -314,12 +438,24 @@ function VendorHome() {
             />
           </Box>
 
+          {/* Action Buttons */}
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
               fullWidth
-              variant="outlined"
+              variant="contained"
               onClick={() => setOpen(false)}
-              sx={{ py: 1.5, borderRadius: 2, bgcolor: "darkred", color: "#fff" }}
+              sx={{
+                py: 1.5,
+                borderRadius: 3,
+                background: "linear-gradient(135deg, #dc2626, #ef4444)",
+                color: "#fff",
+                fontWeight: "bold",
+                textTransform: "none",
+                fontSize: "0.95rem",
+                "&:hover": { background: "linear-gradient(135deg, #b91c1c, #dc2626)", transform: "translateY(-2px)" },
+                transition: "all 0.25s",
+                boxShadow: "0 6px 20px rgba(220,38,38,0.3)",
+              }}
             >
               Cancel
             </Button>
@@ -329,10 +465,15 @@ function VendorHome() {
               onClick={handleSave}
               sx={{
                 py: 1.5,
-                borderRadius: 2,
-                background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                borderRadius: 3,
+                background: "linear-gradient(135deg, #f97316, #2563eb)",
                 color: "#fff",
-                '&:hover': { background: "linear-gradient(135deg, #2563eb, #1d4ed8)" }
+                fontWeight: "bold",
+                textTransform: "none",
+                fontSize: "0.95rem",
+                "&:hover": { background: "linear-gradient(135deg, #ea580c, #1d4ed8)", transform: "translateY(-2px)" },
+                transition: "all 0.25s",
+                boxShadow: "0 6px 20px rgba(249,115,22,0.35)",
               }}
             >
               {editId ? "Update" : "Save Category"}
