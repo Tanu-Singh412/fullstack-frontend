@@ -327,60 +327,52 @@ export default function EstimatePage() {
             </MDTypography>
           </MDBox>
           <MDBox p={3}>
-
-          <Grid container spacing={3}>
-            {/* INTRO FIRST */}
-            <Grid item xs={12}>
-              <TextField
-                label="Overall Project Detail / Introduction"
-                fullWidth
-                multiline
-                rows={3}
-                placeholder="Briefly describe the project scope or introduction..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Overall Project Detail / Introduction"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  placeholder="Briefly describe the project scope or introduction..."
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField label="Project Title" fullWidth
+                  value={form.projectTitle}
+                  onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField label="Owner" fullWidth
+                  value={form.ownerName}
+                  onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField label="Location" fullWidth
+                  value={form.location}
+                  onChange={(e) => setForm({ ...form, location: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField label="Plot Area" fullWidth
+                  value={form.plotArea}
+                  onChange={(e) => setForm({ ...form, plotArea: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={12} md={3}>
+                <TextField
+                  label="Estimated Amount (Auto)"
+                  fullWidth
+                  value={`₹ ${total.toLocaleString("en-IN")}`}
+                  InputProps={{ readOnly: true }}
+                  sx={{ bgcolor: "#f0f2f5" }}
+                />
+              </Grid>
             </Grid>
-
-            {/* DETAILS SECOND */}
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField label="Project Title" fullWidth
-                value={form.projectTitle}
-                onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField label="Owner" fullWidth
-                value={form.ownerName}
-                onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField label="Location" fullWidth
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField label="Plot Area" fullWidth
-                value={form.plotArea}
-                onChange={(e) => setForm({ ...form, plotArea: e.target.value })}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={3}>
-              <TextField
-                label="Estimated Amount (Auto)"
-                fullWidth
-                value={`₹ ${total.toLocaleString("en-IN")}`}
-                InputProps={{ readOnly: true }}
-                sx={{ bgcolor: "#f0f2f5" }}
-              />
-            </Grid>
-          </Grid>
           </MDBox>
         </Card>
 
@@ -418,116 +410,109 @@ export default function EstimatePage() {
             </Button>
           </MDBox>
           <MDBox p={3}>
-
-          {/* TABLE HEADER (HIDDEN ON MOBILE) */}
-          <Box sx={{ display: { xs: "none", md: "block" }, mb: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={1}><MDTypography variant="caption" fontWeight="bold">S.No</MDTypography></Grid>
-              <Grid item xs={4}><MDTypography variant="caption" fontWeight="bold">Description</MDTypography></Grid>
-              <Grid item xs={1}><MDTypography variant="caption" fontWeight="bold">Qty</MDTypography></Grid>
-              <Grid item xs={1.5}><MDTypography variant="caption" fontWeight="bold">Unit</MDTypography></Grid>
-              <Grid item xs={1.5}><MDTypography variant="caption" fontWeight="bold">Rate</MDTypography></Grid>
-              <Grid item xs={2}><MDTypography variant="caption" fontWeight="bold">Amount</MDTypography></Grid>
-              <Grid item xs={1}></Grid>
-            </Grid>
-          </Box>
-
-          {items.map((row, i) => (
-            <MDBox
-              key={i}
-              mb={2}
-              p={2}
-              sx={{
-                border: "1px solid #f0f2f5",
-                borderRadius: "10px",
-                background: i % 2 === 0 ? "#ffffff" : "#f8f9fa",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                  borderColor: (theme) => theme.palette.info.main,
-                  transform: "translateY(-2px)"
-                }
-              }}
-            >
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={2} md={1}>
-                  <TextField label="S.No" value={row.sno} size="small" disabled fullWidth />
-                </Grid>
-
-                <Grid item xs={10} md={4}>
-                  <TextField label="Description" fullWidth size="small"
-                    value={row.desc}
-                    onChange={(e) => handleChange(i, "desc", e.target.value)}
-                  />
-                </Grid>
-
-                <Grid item xs={6} md={1}>
-                  <TextField label="Qty" type="number" size="small" fullWidth
-                    value={row.qty}
-                    onChange={(e) => handleChange(i, "qty", e.target.value)}
-                  />
-                </Grid>
-
-                <Grid item xs={6} md={1.5}>
-                  <TextField label="Unit" size="small" fullWidth
-                    value={row.unit}
-                    onChange={(e) => handleChange(i, "unit", e.target.value)}
-                  />
-                </Grid>
-
-                <Grid item xs={6} md={1.5}>
-                  <TextField label="Rate" type="number" size="small" fullWidth
-                    value={row.rate}
-                    onChange={(e) => handleChange(i, "rate", e.target.value)}
-                  />
-                </Grid>
-
-                <Grid item xs={6} md={2}>
-                  <TextField label="Amount" value={(row.qty * row.rate || 0).toLocaleString("en-IN")} size="small" disabled fullWidth />
-                </Grid>
-
-                <Grid item xs={12} md={1} textAlign="right">
-                  <IconButton color="error" onClick={() => deleteRow(i)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Grid>
+            <Box sx={{ display: { xs: "none", md: "block" }, mb: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={1}><MDTypography variant="caption" fontWeight="bold">S.No</MDTypography></Grid>
+                <Grid item xs={4}><MDTypography variant="caption" fontWeight="bold">Description</MDTypography></Grid>
+                <Grid item xs={1}><MDTypography variant="caption" fontWeight="bold">Qty</MDTypography></Grid>
+                <Grid item xs={1.5}><MDTypography variant="caption" fontWeight="bold">Unit</MDTypography></Grid>
+                <Grid item xs={1.5}><MDTypography variant="caption" fontWeight="bold">Rate</MDTypography></Grid>
+                <Grid item xs={2}><MDTypography variant="caption" fontWeight="bold">Amount</MDTypography></Grid>
+                <Grid item xs={1}></Grid>
               </Grid>
+            </Box>
+
+            {items.map((row, i) => (
+              <MDBox
+                key={i}
+                mb={2}
+                p={2}
+                sx={{
+                  border: "1px solid #f0f2f5",
+                  borderRadius: "10px",
+                  background: i % 2 === 0 ? "#ffffff" : "#f8f9fa",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    borderColor: (theme) => theme.palette.info.main,
+                    transform: "translateY(-2px)"
+                  }
+                }}
+              >
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={2} md={1}>
+                    <TextField label="S.No" value={row.sno} size="small" disabled fullWidth />
+                  </Grid>
+                  <Grid item xs={10} md={4}>
+                    <TextField label="Description" fullWidth size="small"
+                      value={row.desc}
+                      onChange={(e) => handleChange(i, "desc", e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={1}>
+                    <TextField label="Qty" type="number" size="small" fullWidth
+                      value={row.qty}
+                      onChange={(e) => handleChange(i, "qty", e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={1.5}>
+                    <TextField label="Unit" size="small" fullWidth
+                      value={row.unit}
+                      onChange={(e) => handleChange(i, "unit", e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={1.5}>
+                    <TextField label="Rate" type="number" size="small" fullWidth
+                      value={row.rate}
+                      onChange={(e) => handleChange(i, "rate", e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={2}>
+                    <TextField label="Amount" value={(row.qty * row.rate || 0).toLocaleString("en-IN")} size="small" disabled fullWidth />
+                  </Grid>
+                  <Grid item xs={12} md={1} textAlign="right">
+                    <IconButton color="error" onClick={() => deleteRow(i)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </MDBox>
+            ))}
+
+            <MDBox mt={2} display="flex" justifyContent="space-between" alignItems="center">
+              <MDTypography variant="button" color="text" fontWeight="regular">
+                Total items: {items.length}
+              </MDTypography>
+              <Button variant="gradient" color="success" startIcon={<AddIcon />} onClick={addRow}>
+                Add Item
+              </Button>
             </MDBox>
-          ))}
 
-          <MDBox mt={2} display="flex" justifyContent="space-between" alignItems="center">
-            <MDTypography variant="button" color="text" fontWeight="regular">
-              Total items: {items.length}
-            </MDTypography>
-            <Button variant="gradient" color="success" startIcon={<AddIcon />} onClick={addRow}>
-              Add Item
-            </Button>
-          </MDBox>
-
-          <MDBox textAlign="right" mt={3} p={2} variant="gradient" bgcolor="light" borderRadius="lg">
-            <MDTypography variant="h4" fontWeight="bold" color="dark">
-              Grand Total: <span style={{ color: "#2e7d32" }}>₹ {total.toLocaleString("en-IN")}</span>
-            </MDTypography>
-          </MDBox>
+            <MDBox textAlign="right" mt={3} p={2} variant="gradient" bgcolor="light" borderRadius="lg">
+              <MDTypography variant="h4" fontWeight="bold" color="dark">
+                Grand Total: <span style={{ color: "#2e7d32" }}>₹ {total.toLocaleString("en-IN")}</span>
+              </MDTypography>
+            </MDBox>
           </MDBox>
         </Card>
 
         {/* ================= NOTES ================= */}
         <Card sx={{ mt: 3 }}>
           <MDBox p={3}>
-          <MDTypography variant="h6" fontWeight="bold">Notes / Terms & Conditions</MDTypography>
-          <Divider sx={{ my: 1 }} />
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            placeholder="Enter additional terms, conditions or notes here..."
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
+            <MDTypography variant="h6" fontWeight="bold">Notes / Terms & Conditions</MDTypography>
+            <Divider sx={{ my: 1 }} />
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              placeholder="Enter additional terms, conditions or notes here..."
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
           </MDBox>
         </Card>
 
+        {/* ================= ACTIONS ================= */}
         <MDBox mt={4} display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
           <Button
             variant="gradient"
@@ -568,23 +553,6 @@ export default function EstimatePage() {
               sx={{ borderRadius: "12px" }}
             >
               Cancel
-            </Button>
-          )}
-        </MDBox>
-
-          {editId && (
-            <Button
-              variant="outlined"
-              color="error"
-              size="large"
-              onClick={() => {
-                setEditId(null);
-                setForm({ projectTitle: "", ownerName: "", location: "", plotArea: "", notes: "", description: "" });
-                setItems([{ sno: 1, desc: "", qty: "", unit: "", rate: "" }]);
-              }}
-              fullWidth
-            >
-              Cancel Edit
             </Button>
           )}
         </MDBox>
