@@ -269,7 +269,7 @@ export default function EstimatePage() {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <MDBox pt={4} pb={3} px={3} sx={{ backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
+      <MDBox pt={6} pb={3} px={3} sx={{ backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
         <Grid container spacing={3}>
           
           {/* ================= QUICK STATS (COLORFUL) ================= */}
@@ -371,41 +371,45 @@ export default function EstimatePage() {
               <MDBox p={0}>
                 <TableContainer>
                   <Table>
-                    <TableHead>
+                    <TableHead sx={{ display: "table-header-group" }}>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9" }}>S.No</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", width: "40%" }}>Description</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "center" }}>Qty</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "center" }}>Unit</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "right" }}>Rate</TableCell>
-                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "right" }}>Amount</TableCell>
-                        <TableCell sx={{ bgcolor: "#f1f5f9" }}></TableCell>
+                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", border: "1px solid #cbd5e1" }}>S.No</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", width: "40%", border: "1px solid #cbd5e1" }}>Description</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "center", border: "1px solid #cbd5e1" }}>Qty</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "center", border: "1px solid #cbd5e1" }}>Unit</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "right", border: "1px solid #cbd5e1" }}>Rate (Rs)</TableCell>
+                        <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", textAlign: "right", border: "1px solid #cbd5e1" }}>Amount (Rs)</TableCell>
+                        <TableCell sx={{ bgcolor: "#f1f5f9", border: "1px solid #cbd5e1" }}></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {items.map((row, i) => (
                         <TableRow key={i}>
-                          <TableCell sx={{ fontWeight: "bold", color: "#000" }}>{row.sno}</TableCell>
-                          <TableCell sx={{ p: 1 }}>
-                            <TextField fullWidth size="small" value={row.desc} onChange={(e) => handleChange(i, "desc", e.target.value)}
-                              inputProps={{ style: { color: '#000', fontSize: '13px' } }} />
+                          <TableCell sx={{ fontWeight: "bold", color: "#000", border: "1px solid #e2e8f0", textAlign: "center" }}>{row.sno}</TableCell>
+                          <TableCell sx={{ p: 1, border: "1px solid #e2e8f0" }}>
+                            <TextField fullWidth size="small" variant="standard" value={row.desc} onChange={(e) => handleChange(i, "desc", e.target.value)}
+                              InputProps={{ disableUnderline: true }}
+                              inputProps={{ style: { color: '#000', fontSize: '13px', padding: '8px' } }} />
                           </TableCell>
-                          <TableCell sx={{ p: 1 }}>
-                            <TextField type="number" size="small" value={row.qty} onChange={(e) => handleChange(i, "qty", e.target.value)}
-                              inputProps={{ style: { color: '#000', fontSize: '13px', textAlign: 'center' } }} />
+                          <TableCell sx={{ p: 1, border: "1px solid #e2e8f0" }}>
+                            <TextField type="number" size="small" variant="standard" value={row.qty} onChange={(e) => handleChange(i, "qty", e.target.value)}
+                              InputProps={{ disableUnderline: true }}
+                              inputProps={{ style: { color: '#000', fontSize: '13px', textAlign: 'center', padding: '8px' } }} />
                           </TableCell>
-                          <TableCell sx={{ p: 1 }}>
-                            <TextField size="small" value={row.unit} onChange={(e) => handleChange(i, "unit", e.target.value)}
-                              inputProps={{ style: { color: '#000', fontSize: '13px', textAlign: 'center' } }} />
+                          <TableCell sx={{ p: 1, border: "1px solid #e2e8f0" }}>
+                            <TextField size="small" variant="standard" value={row.unit} onChange={(e) => handleChange(i, "unit", e.target.value)}
+                              InputProps={{ disableUnderline: true }}
+                              inputProps={{ style: { color: '#000', fontSize: '13px', textAlign: 'center', padding: '8px' } }} />
                           </TableCell>
-                          <TableCell sx={{ p: 1 }}>
-                            <TextField type="number" size="small" value={row.rate} onChange={(e) => handleChange(i, "rate", e.target.value)}
-                              inputProps={{ style: { color: '#000', fontSize: '13px', textAlign: 'right' } }} />
+                          <TableCell sx={{ p: 1, border: "1px solid #e2e8f0" }}>
+                            <TextField type="number" size="small" variant="standard" value={row.rate} onChange={(e) => handleChange(i, "rate", e.target.value)}
+                              InputProps={{ disableUnderline: true }}
+                              inputProps={{ style: { color: '#000', fontSize: '13px', textAlign: 'right', padding: '8px' } }} />
                           </TableCell>
-                          <TableCell sx={{ textAlign: "right", color: "#000", fontWeight: "bold" }}>
+                          <TableCell sx={{ textAlign: "right", color: "#000", fontWeight: "bold", border: "1px solid #e2e8f0", pr: 2 }}>
                             {(row.qty * row.rate || 0).toLocaleString("en-IN")}
                           </TableCell>
-                          <TableCell sx={{ textAlign: "center" }}>
+                          <TableCell sx={{ textAlign: "center", border: "1px solid #e2e8f0" }}>
                             <IconButton color="error" onClick={() => deleteRow(i)} size="small"><DeleteIcon fontSize="small" /></IconButton>
                           </TableCell>
                         </TableRow>
