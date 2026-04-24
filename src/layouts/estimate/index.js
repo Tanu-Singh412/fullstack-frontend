@@ -11,7 +11,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -21,6 +21,7 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
+import DataTable from "examples/Tables/DataTable";
 
 const API = "https://fullstack-project-1-n510.onrender.com/api/estimate";
 
@@ -38,25 +39,26 @@ export default function EstimatePage() {
     { sno: 1, desc: "", qty: "", unit: "", rate: "" },
   ]);
 
-  /* ================= FETCH (AUTO LOAD FROM BACKEND) ================= */
+  const [estimates, setEstimates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editId, setEditId] = useState(null);
+
+  /* ================= FETCH ALL ================= */
+  const loadEstimates = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(API);
+      const data = await res.json();
+      setEstimates(data);
+    } catch (err) {
+      console.error("Error fetching estimates:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch(API)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.length > 0) {
-          const latest = data[0];
-          setForm({
-            projectTitle: latest.projectTitle || "",
-            ownerName: latest.ownerName || "",
-            location: latest.location || "",
-            plotArea: latest.plotArea || "",
-            notes: latest.notes || "",
-            description: latest.description || "",
-          });
-          setItems(latest.items || [{ sno: 1, desc: "", qty: "", unit: "", rate: "" }]);
-        }
-      })
-      .catch(err => console.error("Error fetching estimates:", err));
+    loadEstimates();
   }, []);
 
   /* ================= HANDLE CHANGE ================= */
@@ -89,18 +91,24 @@ export default function EstimatePage() {
     0
   );
 
-  /* ================= SAVE ================= */
+  /* ================= SAVE / UPDATE ================= */
   const saveEstimate = async () => {
     try {
-      const res = await fetch(API, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const method = editId ? "PUT" : "POST";
+      const url = editId ? `${API}/${editId}` : API;
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, items, totalEstimate: total }),
       });
+
       if (res.ok) {
-        alert("Saved Successfully");
+        alert(editId ? "Updated Successfully" : "Saved Successfully");
+        setEditId(null);
+        setForm({ projectTitle: "", ownerName: "", location: "", plotArea: "", notes: "", description: "" });
+        setItems([{ sno: 1, desc: "", qty: "", unit: "", rate: "" }]);
+        loadEstimates();
       } else {
         alert("Failed to save estimate");
       }
@@ -108,6 +116,34 @@ export default function EstimatePage() {
       console.error("Save error:", err);
       alert("Error saving estimate");
     }
+  };
+
+  /* ================= DELETE ================= */
+  const deleteEstimate = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this estimate?")) return;
+    try {
+      const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        loadEstimates();
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
+  /* ================= EDIT ================= */
+  const handleEdit = (est) => {
+    setEditId(est._id);
+    setForm({
+      projectTitle: est.projectTitle || "",
+      ownerName: est.ownerName || "",
+      location: est.location || "",
+      plotArea: est.plotArea || "",
+      notes: est.notes || "",
+      description: est.description || "",
+    });
+    setItems(est.items || [{ sno: 1, desc: "", qty: "", unit: "", rate: "" }]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   /* ================= PDF ================= */
@@ -142,7 +178,7 @@ export default function EstimatePage() {
       // Architect Block (Right Side)
       doc.setFillColor(52, 73, 94);
       doc.rect(pageWidth - 65, 0, 65, 40, "F");
-      
+
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
       doc.setTextColor(255, 255, 255);
@@ -164,7 +200,7 @@ export default function EstimatePage() {
     doc.line(pageWidth / 2 - 30, 54, pageWidth / 2 + 30, 54);
 
     // --- PROJECT DETAILS TABLE ---
-    doc.autoTable({
+    autoTable(doc, {
       startY: 62,
       theme: "grid",
       head: [[{ content: "Project Summary & Details", colSpan: 4, styles: { halign: "left", fillColor: [44, 62, 80], fontSize: 11 } }]],
@@ -191,7 +227,7 @@ export default function EstimatePage() {
       doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
       doc.text("Project Description:", 15, currentY);
-      
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       const splitDesc = doc.splitTextToSize(form.description, pageWidth - 30);
@@ -209,7 +245,7 @@ export default function EstimatePage() {
       (Number(row.qty) * Number(row.rate)).toLocaleString("en-IN"),
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY,
       theme: "striped",
       head: [["S.No", "Description", "Qty", "Unit", "Rate (₹)", "Amount (₹)"]],
@@ -246,7 +282,7 @@ export default function EstimatePage() {
       doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
       doc.text("Notes / Terms & Conditions:", 15, finalY + 30);
-      
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       const splitNotes = doc.splitTextToSize(form.notes, pageWidth - 30);
@@ -269,7 +305,7 @@ export default function EstimatePage() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      
+
       <MDBox pt={6} pb={3}>
         <MDBox mb={3}>
           <MDTypography variant="h4" fontWeight="bold">
@@ -280,11 +316,25 @@ export default function EstimatePage() {
         {/* ================= PROJECT DETAILS ================= */}
         <Card sx={{ p: 3, mb: 3 }}>
           <MDTypography variant="h6" fontWeight="bold" mb={2}>
-            Project Details
+            Estimate Configuration
           </MDTypography>
           <Divider sx={{ my: 2 }} />
 
           <Grid container spacing={3}>
+            {/* INTRO FIRST */}
+            <Grid item xs={12}>
+              <TextField
+                label="Overall Project Detail / Introduction"
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Briefly describe the project scope or introduction..."
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </Grid>
+
+            {/* DETAILS SECOND */}
             <Grid item xs={12} sm={6} md={3}>
               <TextField label="Project Title" fullWidth
                 value={form.projectTitle}
@@ -292,36 +342,34 @@ export default function EstimatePage() {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField label="Owner" fullWidth
                 value={form.ownerName}
                 onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField label="Location" fullWidth
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField label="Plot Area" fullWidth
                 value={form.plotArea}
                 onChange={(e) => setForm({ ...form, plotArea: e.target.value })}
               />
             </Grid>
 
-            <Grid item xs={12}>
-              <TextField 
-                label="Overall Project Detail / Introduction" 
-                fullWidth 
-                multiline 
-                rows={2}
-                placeholder="Briefly describe the project scope or introduction..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+            <Grid item xs={12} sm={12} md={3}>
+              <TextField
+                label="Estimated Amount (Auto)"
+                fullWidth
+                value={`₹ ${total.toLocaleString("en-IN")}`}
+                InputProps={{ readOnly: true }}
+                sx={{ bgcolor: "#f0f2f5" }}
               />
             </Grid>
           </Grid>
@@ -347,12 +395,12 @@ export default function EstimatePage() {
           </Box>
 
           {items.map((row, i) => (
-            <MDBox 
-              key={i} 
-              mb={2} 
-              p={2} 
-              sx={{ 
-                border: { xs: "1px solid #eee", md: "none" }, 
+            <MDBox
+              key={i}
+              mb={2}
+              p={2}
+              sx={{
+                border: { xs: "1px solid #eee", md: "none" },
                 borderRadius: 2,
                 background: { xs: "#fafafa", md: "transparent" }
               }}
@@ -432,27 +480,79 @@ export default function EstimatePage() {
 
         {/* ================= ACTIONS ================= */}
         <MDBox mt={4} display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2}>
-          <Button 
-            variant="gradient" 
-            color="success" 
-            size="large" 
-            onClick={saveEstimate} 
+          <Button
+            variant="gradient"
+            color={editId ? "warning" : "success"}
+            size="large"
+            onClick={saveEstimate}
             fullWidth
             sx={{ borderRadius: 2, py: 1.5, fontSize: "1rem" }}
           >
-            Save Estimate
+            {editId ? "Update Estimate" : "Save Estimate"}
           </Button>
 
-          <Button 
-            variant="gradient" 
-            color="info" 
-            size="large" 
-            onClick={generatePDF} 
+          <Button
+            variant="gradient"
+            color="info"
+            size="large"
+            onClick={generatePDF}
             fullWidth
             sx={{ borderRadius: 2, py: 1.5, fontSize: "1rem" }}
           >
             Generate PDF
           </Button>
+
+          {editId && (
+            <Button
+              variant="outlined"
+              color="error"
+              size="large"
+              onClick={() => {
+                setEditId(null);
+                setForm({ projectTitle: "", ownerName: "", location: "", plotArea: "", notes: "", description: "" });
+                setItems([{ sno: 1, desc: "", qty: "", unit: "", rate: "" }]);
+              }}
+              fullWidth
+            >
+              Cancel Edit
+            </Button>
+          )}
+        </MDBox>
+
+        {/* ================= SAVED ESTIMATES ================= */}
+        <MDBox mt={6}>
+          <Card>
+            <MDBox p={3} display="flex" justifyContent="space-between" alignItems="center">
+              <MDTypography variant="h5" fontWeight="bold">Saved Estimates</MDTypography>
+            </MDBox>
+            <MDBox pb={3}>
+              <DataTable
+                table={{
+                  columns: [
+                    { Header: "Project Title", accessor: "projectTitle", width: "30%" },
+                    { Header: "Owner", accessor: "ownerName", width: "20%" },
+                    { Header: "Amount", accessor: "totalEstimate", width: "15%", Cell: ({ value }) => `₹${value?.toLocaleString("en-IN")}` },
+                    { Header: "Date", accessor: "createdAt", width: "15%", Cell: ({ value }) => new Date(value).toLocaleDateString() },
+                    {
+                      Header: "Actions",
+                      accessor: "actions",
+                      Cell: ({ row }) => (
+                        <MDBox display="flex" gap={1}>
+                          <Button variant="text" color="info" size="small" onClick={() => handleEdit(row.original)}>Edit</Button>
+                          <Button variant="text" color="error" size="small" onClick={() => deleteEstimate(row.original._id)}>Delete</Button>
+                        </MDBox>
+                      ),
+                    },
+                  ],
+                  rows: estimates,
+                }}
+                isSorted={false}
+                entriesPerPage={{ defaultValue: 5, entries: [5, 10, 15, 20, 25] }}
+                showTotalEntries={true}
+                noEndBorder
+              />
+            </MDBox>
+          </Card>
         </MDBox>
       </MDBox>
       <Footer />

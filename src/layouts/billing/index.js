@@ -582,12 +582,12 @@ Thank you.`;
 
               {/* Client Info */}
               <Grid item xs={12}>
-                <MDBox 
-                  sx={{ 
-                    bgcolor: "#1e293b", 
-                    py: 1, 
-                    px: 3, 
-                    borderRadius: "10px", 
+                <MDBox
+                  sx={{
+                    bgcolor: "#1e293b",
+                    py: 1,
+                    px: 3,
+                    borderRadius: "10px",
                     mb: 2,
                     display: "flex",
                     alignItems: "center",
@@ -634,12 +634,12 @@ Thank you.`;
 
               {/* Invoice Details */}
               <Grid item xs={12}>
-                <MDBox 
-                  sx={{ 
-                    bgcolor: "#1e293b", 
-                    py: 1, 
-                    px: 3, 
-                    borderRadius: "10px", 
+                <MDBox
+                  sx={{
+                    bgcolor: "#1e293b",
+                    py: 1,
+                    px: 3,
+                    borderRadius: "10px",
                     mt: 3,
                     mb: 2,
                     display: "flex",
