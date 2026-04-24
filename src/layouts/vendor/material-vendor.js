@@ -6,10 +6,12 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import IconButton from "@mui/material/IconButton";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PhoneIcon from "@mui/icons-material/Phone";
 import BusinessIcon from "@mui/icons-material/Business";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import DeleteIcon from "@mui/icons-material/Delete";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
@@ -27,14 +29,33 @@ function VendorList() {
 
   const cleanCategory = categoryId?.trim().toLowerCase();
 
-  useEffect(() => {
+  const fetchVendors = () => {
     if (!cleanCategory) return;
-
     fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors?category=${cleanCategory}`)
       .then((res) => res.json())
       .then((res) => setVendors(res.data || []))
       .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    fetchVendors();
   }, [cleanCategory]);
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation(); // Prevent navigating to detail page
+    if (!window.confirm("Are you sure you want to delete this vendor?")) return;
+    
+    try {
+      const res = await fetch(`https://fullstack-project-1-n510.onrender.com/api/vendors/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchVendors();
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -81,15 +102,8 @@ function VendorList() {
             overflow: "hidden",
           }}
         >
-          {/* Decorative Elements */}
-          <Box sx={{ 
-            position: "absolute", top: -80, right: -80, width: 250, height: 250, 
-            borderRadius: "50%", background: "rgba(255, 255, 255, 0.1)", zIndex: 0 
-          }} />
-          <Box sx={{ 
-            position: "absolute", bottom: -40, left: "20%", width: 120, height: 120, 
-            borderRadius: "50%", background: "rgba(255, 255, 255, 0.05)", zIndex: 0 
-          }} />
+          <Box sx={{ position: "absolute", top: -80, right: -80, width: 250, height: 250, borderRadius: "50%", background: "rgba(255, 255, 255, 0.1)", zIndex: 0 }} />
+          <Box sx={{ position: "absolute", bottom: -40, left: "20%", width: 120, height: 120, borderRadius: "50%", background: "rgba(255, 255, 255, 0.05)", zIndex: 0 }} />
 
           <Box sx={{ position: "relative", zIndex: 1, color: "#fff" }}>
             <Typography variant="h2" fontWeight="900" sx={{ mb: 1, textTransform: "capitalize", letterSpacing: -2, color: "#fff" }}>
@@ -127,12 +141,7 @@ function VendorList() {
           {vendors.length === 0 ? (
             <Box sx={{ width: '100%', textAlign: 'center', py: 10 }}>
               <BusinessIcon sx={{ fontSize: 80, color: "#e2e8f0", mb: 2 }} />
-              <Typography variant="h5" color="text.secondary" fontWeight="bold">
-                No vendors found for this category
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Start by adding your first vendor using the button above.
-              </Typography>
+              <Typography variant="h5" color="text.secondary" fontWeight="bold">No vendors found</Typography>
             </Box>
           ) : (
             vendors.map((v) => (
@@ -143,116 +152,53 @@ function VendorList() {
                     height: "100%",
                     cursor: "pointer",
                     borderRadius: 5,
-                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    transition: "all 0.4s",
                     border: "1px solid #f1f5f9",
-                    '&:hover': {
-                      transform: "translateY(-12px)",
-                      boxShadow: "0 30px 60px rgba(15, 23, 42, 0.15)",
-                      borderColor: "#3b82f6",
-                    },
+                    position: "relative",
+                    '&:hover': { transform: "translateY(-12px)", boxShadow: "0 30px 60px rgba(15, 23, 42, 0.15)", borderColor: "#3b82f6" },
                   }}
                 >
-                  {/* Vendor Image / Header */}
+                  {/* Delete Button */}
+                  <IconButton 
+                    onClick={(e) => handleDelete(e, v._id)}
+                    sx={{ position: "absolute", top: 10, right: 10, zIndex: 10, bgcolor: "rgba(255,255,255,0.8)", color: "#ef4444", "&:hover": { bgcolor: "#fee2e2" } }}
+                    size="small"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+
                   <Box
                     sx={{
                       height: 160,
-                      background: v.image
-                        ? `url(${v.image}) center/cover`
-                        : "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
+                      background: v.image ? `url(${v.image}) center/cover` : "linear-gradient(135deg, #f1f5f9, #e2e8f0)",
                       position: "relative",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center"
+                      display: "flex", alignItems: "center", justifyContent: "center"
                     }}
                   >
-                    {!v.image && (
-                      <BusinessIcon sx={{ fontSize: 60, color: "#cbd5e1", opacity: 0.5 }} />
-                    )}
-
-                    {/* Floating Avatar */}
-                    <Avatar
-                      sx={{
-                        position: "absolute",
-                        bottom: -30,
-                        left: 24,
-                        width: 70,
-                        height: 70,
-                        bgcolor: '#3b82f6',
-                        border: "4px solid #fff",
-                        boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-                        fontSize: "1.8rem",
-                        fontWeight: "bold",
-                        color: "#fff"
-                      }}
-                    >
+                    {!v.image && <BusinessIcon sx={{ fontSize: 60, color: "#cbd5e1", opacity: 0.5 }} />}
+                    <Avatar sx={{ position: "absolute", bottom: -30, left: 24, width: 70, height: 70, bgcolor: '#3b82f6', border: "4px solid #fff", boxShadow: "0 8px 16px rgba(0,0,0,0.1)", fontSize: "1.8rem", fontWeight: "bold" }}>
                       {v.vendorName?.charAt(0).toUpperCase()}
                     </Avatar>
                   </Box>
 
                   <CardContent sx={{ pt: 5, pb: 3, px: 3 }}>
                     <Box sx={{ mb: 3 }}>
-                      <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5, color: "#1e293b" }}>
-                        {v.vendorName}
-                      </Typography>
-                      <Box display="flex" gap={1} alignItems="center">
-                        <Typography variant="caption" sx={{ color: "#64748b", display: "flex", alignItems: "center", gap: 0.5, fontWeight: "bold" }}>
-                          <BusinessIcon sx={{ fontSize: 14 }} /> ID: {v._id?.slice(-8).toUpperCase()}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: "bold" }}>
-                          • {v.createdAt && !isNaN(new Date(v.createdAt)) 
-                              ? new Date(v.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) 
-                              : "Recently Added"}
-                          {" • "}
-                          {v.createdAt && !isNaN(new Date(v.createdAt)) 
-                              ? new Date(v.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' }) 
-                              : ""}
-                        </Typography>
-                      </Box>
+                      <Typography variant="h4" fontWeight="bold" sx={{ color: "#1e293b" }}>{v.vendorName}</Typography>
+                      <Typography variant="caption" sx={{ color: "#64748b", fontWeight: "bold" }}>ID: {v._id?.slice(-8).toUpperCase()}</Typography>
                     </Box>
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="h6" sx={{ color: "#334155", display: "flex", alignItems: "center", mb: 1.5, gap: 1.5 }}>
-                        <PhoneIcon sx={{ fontSize: 20, color: "#3b82f6" }} />
-                        <span style={{ fontWeight: 700 }}>{v.phone}</span>
+                        <PhoneIcon sx={{ fontSize: 20, color: "#3b82f6" }} /> {v.phone}
                       </Typography>
-                      <Typography variant="body1" sx={{ color: "#64748b", display: "flex", alignItems: "center", gap: 1.5, fontWeight: "medium" }}>
-                        <BusinessIcon sx={{ fontSize: 20, color: "#3b82f6" }} />
-                        {v.company || "No company specified"}
+                      <Typography variant="body1" sx={{ color: "#64748b", display: "flex", alignItems: "center", gap: 1.5 }}>
+                        <BusinessIcon sx={{ fontSize: 20, color: "#3b82f6" }} /> {v.company || "N/A"}
                       </Typography>
                     </Box>
 
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      sx={{ pt: 2, borderTop: "1px solid #f1f5f9" }}
-                    >
-                      <Chip
-                        label="Verified Premium"
-                        size="small"
-                        sx={{
-                          bgcolor: "#dcfce7",
-                          color: "#166534",
-                          fontWeight: "900",
-                          borderRadius: "6px",
-                          fontSize: "0.65rem",
-                          textTransform: "uppercase",
-                          letterSpacing: 0.5,
-                          px: 1
-                        }}
-                      />
-
-                      <Typography
-                        variant="button"
-                        sx={{
-                          fontWeight: '900',
-                          color: "#3b82f6",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          fontSize: "0.75rem"
-                        }}
-                      >
+                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ pt: 2, borderTop: "1px solid #f1f5f9" }}>
+                      <Chip label="Verified" size="small" sx={{ bgcolor: "#dcfce7", color: "#166534", fontWeight: "900", borderRadius: "6px" }} />
+                      <Typography variant="button" sx={{ fontWeight: '900', color: "#3b82f6", display: "flex", alignItems: "center", gap: 0.5 }}>
                         VIEW PROFILE <ArrowForwardIcon sx={{ fontSize: 16 }} />
                       </Typography>
                     </Box>
@@ -263,7 +209,6 @@ function VendorList() {
           )}
         </Grid>
       </MDBox>
-
       <Footer />
     </DashboardLayout>
   );

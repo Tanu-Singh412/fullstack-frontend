@@ -22,12 +22,6 @@ import {
   FormControl,
   CircularProgress,
   InputAdornment,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -39,7 +33,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
@@ -180,7 +173,7 @@ export default function InvoicePage() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox pt={6} pb={3} px={3} sx={{ backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
+      <MDBox pt={4} pb={3} px={3} sx={{ backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
         <Grid container spacing={3}>
           {/* ================= STATS ================= */}
           <Grid item xs={12} md={4}>
@@ -233,56 +226,23 @@ export default function InvoicePage() {
                   <Grid item xs={12} sm={3}><TextField fullWidth label="CGST %" type="number" value={data.cgst} onChange={(e) => setData({ ...data, cgst: Number(e.target.value) })} /></Grid>
                   
                   <Grid item xs={12}>
-                    <MDBox mt={4} mb={2} display="flex" justifyContent="space-between" alignItems="center">
-                       <MDTypography variant="h6" fontWeight="bold" color="dark">Itemized Details</MDTypography>
-                    </MDBox>
-                    <TableContainer sx={{ border: "1px solid #e2e8f0", borderRadius: "12px", overflow: "hidden" }}>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", border: "1px solid #cbd5e1" }}>Description</TableCell>
-                            <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", border: "1px solid #cbd5e1", textAlign: "center" }}>HSN</TableCell>
-                            <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", border: "1px solid #cbd5e1", textAlign: "center" }}>Qty</TableCell>
-                            <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", border: "1px solid #cbd5e1", textAlign: "right" }}>Rate</TableCell>
-                            <TableCell sx={{ fontWeight: "bold", color: "#1e293b", bgcolor: "#f1f5f9", border: "1px solid #cbd5e1", textAlign: "right" }}>Amount</TableCell>
-                            <TableCell sx={{ bgcolor: "#f1f5f9", border: "1px solid #cbd5e1", width: "50px" }}></TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {data.items.map((item, i) => (
-                            <TableRow key={i}>
-                              <TableCell sx={{ border: "1px solid #e2e8f0", p: 1 }}>
-                                <TextField fullWidth size="small" variant="standard" value={item.name} onChange={(e) => { const items = [...data.items]; items[i].name = e.target.value; setData({ ...data, items }); }} InputProps={{ disableUnderline: true }} inputProps={{ style: { color: '#000', padding: '8px' } }} />
-                              </TableCell>
-                              <TableCell sx={{ border: "1px solid #e2e8f0", p: 1 }}>
-                                <TextField fullWidth size="small" variant="standard" value={item.hsn} onChange={(e) => { const items = [...data.items]; items[i].hsn = e.target.value; setData({ ...data, items }); }} InputProps={{ disableUnderline: true }} inputProps={{ style: { color: '#000', textAlign: 'center', padding: '8px' } }} />
-                              </TableCell>
-                              <TableCell sx={{ border: "1px solid #e2e8f0", p: 1 }}>
-                                <TextField fullWidth size="small" variant="standard" type="number" value={item.qty} onChange={(e) => { const items = [...data.items]; items[i].qty = Number(e.target.value); setData({ ...data, items }); }} InputProps={{ disableUnderline: true }} inputProps={{ style: { color: '#000', textAlign: 'center', padding: '8px' } }} />
-                              </TableCell>
-                              <TableCell sx={{ border: "1px solid #e2e8f0", p: 1 }}>
-                                <TextField fullWidth size="small" variant="standard" type="number" value={item.price} onChange={(e) => { const items = [...data.items]; items[i].price = Number(e.target.value); setData({ ...data, items }); }} InputProps={{ disableUnderline: true }} inputProps={{ style: { color: '#000', textAlign: 'right', padding: '8px' } }} />
-                              </TableCell>
-                              <TableCell sx={{ border: "1px solid #e2e8f0", textAlign: "right", fontWeight: "bold", color: "#000", pr: 2 }}>
-                                ₹{(item.qty * item.price).toLocaleString("en-IN")}
-                              </TableCell>
-                              <TableCell sx={{ border: "1px solid #e2e8f0", textAlign: "center" }}>
-                                <IconButton color="error" onClick={() => { const items = data.items.filter((_, idx) => idx !== i); setData({ ...data, items }); }} disabled={data.items.length === 1}><DeleteIcon fontSize="small" /></IconButton>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                    <MDBox p={2} display="flex" justifyContent="center">
-                      <Button startIcon={<AddCircleIcon />} onClick={() => setData({ ...data, items: [...data.items, { name: "", hsn: "", qty: 1, price: 0 }] })} color="info">Add Row</Button>
-                    </MDBox>
+                    <MDTypography variant="h6" fontWeight="bold" mt={2} mb={2}>Item Details</MDTypography>
+                    {data.items.map((item, i) => (
+                      <Grid container spacing={2} key={i} sx={{ mb: 2, alignItems: "center" }}>
+                        <Grid item xs={12} sm={4}><TextField fullWidth label="Name" size="small" value={item.name} onChange={(e) => { const items = [...data.items]; items[i].name = e.target.value; setData({ ...data, items }); }} /></Grid>
+                        <Grid item xs={12} sm={2}><TextField fullWidth label="HSN" size="small" value={item.hsn} onChange={(e) => { const items = [...data.items]; items[i].hsn = e.target.value; setData({ ...data, items }); }} /></Grid>
+                        <Grid item xs={12} sm={2}><TextField fullWidth label="Qty" type="number" size="small" value={item.qty} onChange={(e) => { const items = [...data.items]; items[i].qty = Number(e.target.value); setData({ ...data, items }); }} /></Grid>
+                        <Grid item xs={12} sm={2}><TextField fullWidth label="Price" type="number" size="small" value={item.price} onChange={(e) => { const items = [...data.items]; items[i].price = Number(e.target.value); setData({ ...data, items }); }} /></Grid>
+                        <Grid item xs={12} sm={2}><IconButton color="error" onClick={() => { const items = data.items.filter((_, idx) => idx !== i); setData({ ...data, items }); }} disabled={data.items.length === 1}><DeleteIcon /></IconButton></Grid>
+                      </Grid>
+                    ))}
+                    <Button startIcon={<AddIcon />} onClick={() => setData({ ...data, items: [...data.items, { name: "", hsn: "", qty: 1, price: 0 }] })}>Add Item</Button>
                   </Grid>
                 </Grid>
-                <Box mt={4} display="flex" justifyContent="space-between" alignItems="center" p={3} sx={{ bgcolor: "#f8f9fa", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                  <MDTypography variant="h5" fontWeight="bold" color="dark">Total Payable: ₹{totals.total}</MDTypography>
+                <Box mt={4} display="flex" justifyContent="space-between" alignItems="center" p={3} sx={{ bgcolor: "#f8f9fa", borderRadius: "12px" }}>
+                  <MDTypography variant="h5" fontWeight="bold" color="dark">Total Amount: ₹{totals.total}</MDTypography>
                   <Box display="flex" gap={2}>
-                    <Button variant="outlined" onClick={() => setPreviewOpen(true)} startIcon={<VisibilityIcon />} sx={{ color: "#000", borderColor: "#000", fontWeight: "bold", "&:hover": { borderColor: "#000" } }}>Preview</Button>
+                    <Button variant="outlined" onClick={() => setPreviewOpen(true)} startIcon={<VisibilityIcon />} sx={{ color: "#000", borderColor: "#000", fontWeight: "bold" }}>Preview</Button>
                     <MDButton variant="gradient" color="success" onClick={handleSaveAndDownload} startIcon={<DownloadIcon />}>Save & Download</MDButton>
                   </Box>
                 </Box>
@@ -294,13 +254,13 @@ export default function InvoicePage() {
           <Grid item xs={12}>
             <Card sx={{ borderRadius: "16px", overflow: "hidden" }}>
               <MDBox p={3} sx={{ background: "linear-gradient(90deg, #1e293b, #334155)" }} display="flex" justifyContent="space-between" alignItems="center">
-                <MDTypography variant="h5" fontWeight="bold" color="white">Invoice Records</MDTypography>
+                <MDTypography variant="h5" fontWeight="bold" color="white">Saved Invoices</MDTypography>
                 <Box display="flex" gap={2}>
-                  <TextField size="small" placeholder="Search invoices..." value={search} onChange={(e) => setSearch(e.target.value)} sx={{ bgcolor: "#fff", borderRadius: 1 }} />
+                  <TextField size="small" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} sx={{ bgcolor: "#fff", borderRadius: 1 }} />
                   <Select size="small" value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ bgcolor: "#fff", borderRadius: 1, minWidth: 120 }}>
-                    <MenuItem value="all">All Records</MenuItem>
+                    <MenuItem value="all">All</MenuItem>
                     <MenuItem value="day">Today</MenuItem>
-                    <MenuItem value="month">This Month</MenuItem>
+                    <MenuItem value="month">Month</MenuItem>
                   </Select>
                 </Box>
               </MDBox>
@@ -320,7 +280,7 @@ export default function InvoicePage() {
                     )}
                   ],
                   rows: invoices
-                }} entriesPerPage={{ defaultValue: 5 }} isSorted={true} noEndBorder />
+                }} entriesPerPage={{ defaultValue: 5 }} isSorted={true} />
               </MDBox>
             </Card>
           </Grid>
@@ -328,8 +288,8 @@ export default function InvoicePage() {
       </MDBox>
       <Footer />
       {/* Dialogs */}
-      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}><DialogTitle>Confirm Delete</DialogTitle><DialogContent>Are you sure you want to remove this invoice? This action is permanent.</DialogContent><DialogActions><Button onClick={() => setDeleteId(null)}>Cancel</Button><Button variant="contained" color="error" onClick={handleDelete} sx={{ color: "white" }}>Delete</Button></DialogActions></Dialog>
-      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth><DialogTitle>Invoice Preview</DialogTitle><DialogContent dividers sx={{ bgcolor: "#f5f5f5", display: "flex", justifyContent: "center", p: 4 }}><Paper elevation={3}><Invoice data={data} totals={totals} /></Paper></DialogContent><DialogActions><Button onClick={() => setPreviewOpen(false)}>Close</Button><MDButton variant="gradient" color="success" onClick={() => { handleSaveAndDownload(); setPreviewOpen(false); }}>Save & Download</MDButton></DialogActions></Dialog>
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}><DialogTitle>Confirm Delete</DialogTitle><DialogContent>Are you sure?</DialogContent><DialogActions><Button onClick={() => setDeleteId(null)}>Cancel</Button><Button variant="contained" color="error" onClick={handleDelete}>Delete</Button></DialogActions></Dialog>
+      <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth><DialogTitle>Preview</DialogTitle><DialogContent dividers sx={{ bgcolor: "#f5f5f5", display: "flex", justifyContent: "center", p: 4 }}><Paper elevation={3}><Invoice data={data} totals={totals} /></Paper></DialogContent><DialogActions><Button onClick={() => setPreviewOpen(false)}>Close</Button><MDButton variant="gradient" color="success" onClick={() => { handleSaveAndDownload(); setPreviewOpen(false); }}>Save & Download</MDButton></DialogActions></Dialog>
       <div style={{ position: "absolute", left: "-9999px", top: 0 }}><Invoice ref={pdfRef} data={data} totals={totals} /></div>
     </DashboardLayout>
   );
