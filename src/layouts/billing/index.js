@@ -161,6 +161,15 @@ export default function InvoicePage() {
     if (res.success) { loadInvoices(); downloadPDF(pdfRef.current); setData(prev => ({ ...prev, _id: null, billingName: "", invoiceNo: "" })); }
   };
 
+  const handleDelete = async () => {
+    try { await apiDeleteInvoice(deleteId); setDeleteId(null); loadInvoices(); } catch (err) { console.error(err); }
+  };
+
+  const handleDownloadExisting = async (inv) => {
+    setData({ ...data, ...inv, billingName: inv.invoiceName, billingGstin: inv.clientGstin || inv.billingGstin });
+    setTimeout(() => downloadPDF(pdfRef.current), 500);
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -279,7 +288,7 @@ export default function InvoicePage() {
       </MDBox>
       <Footer />
       {/* Dialogs */}
-      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}><DialogTitle>Confirm Delete</DialogTitle><DialogContent>Are you sure?</DialogContent><DialogActions><Button onClick={() => setDeleteId(null)}>Cancel</Button><Button variant="contained" color="error" onClick={async () => { await apiDeleteInvoice(deleteId); setDeleteId(null); loadInvoices(); }}>Delete</Button></DialogActions></Dialog>
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}><DialogTitle>Confirm Delete</DialogTitle><DialogContent>Are you sure?</DialogContent><DialogActions><Button onClick={() => setDeleteId(null)}>Cancel</Button><Button variant="contained" color="error" onClick={handleDelete}>Delete</Button></DialogActions></Dialog>
       <Dialog open={previewOpen} onClose={() => setPreviewOpen(false)} maxWidth="md" fullWidth><DialogTitle>Preview</DialogTitle><DialogContent dividers sx={{ bgcolor: "#f5f5f5", display: "flex", justifyContent: "center", p: 4 }}><Paper elevation={3}><Invoice data={data} totals={totals} /></Paper></DialogContent><DialogActions><Button onClick={() => setPreviewOpen(false)}>Close</Button><MDButton variant="gradient" color="success" onClick={() => { handleSaveAndDownload(); setPreviewOpen(false); }}>Save & Download</MDButton></DialogActions></Dialog>
       <div style={{ position: "absolute", left: "-9999px", top: 0 }}><Invoice ref={pdfRef} data={data} totals={totals} /></div>
     </DashboardLayout>
