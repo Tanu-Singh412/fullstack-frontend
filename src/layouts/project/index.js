@@ -304,7 +304,7 @@ function AddProject() {
 
                   {/* Upload */}
 
-                  <Grid item xs={12}>
+                  {/* <Grid item xs={12}>
                     <Button variant="contained" component="label" sx={{ color: "#fff" }}>
                       Upload Images
                       <input hidden multiple type="file" onChange={handleImageUpload} />
@@ -327,7 +327,7 @@ function AddProject() {
                         />
                       </label>
                     </div>
-                  </Grid>
+                  </Grid> */}
                   {/* Preview */}
 
                   <Grid item xs={12}>

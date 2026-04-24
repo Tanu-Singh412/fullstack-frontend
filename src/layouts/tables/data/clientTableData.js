@@ -142,12 +142,12 @@ export default function useClientTableData() {
 
           date: (
             <MDBox>
-                <MDTypography variant="caption" fontWeight="bold" display="block">
-                    {new Date(c.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
-                </MDTypography>
-                <MDTypography variant="xxs" color="text">
-                    {new Date(c.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
-                </MDTypography>
+              <MDTypography variant="caption" fontWeight="bold" display="block">
+                {new Date(c.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
+              </MDTypography>
+              <MDTypography variant="xxs" color="text">
+                {new Date(c.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+              </MDTypography>
             </MDBox>
           ),
 
@@ -286,9 +286,9 @@ export default function useClientTableData() {
                   <MDBox display="flex" alignItems="center" gap={1.5}>
                     <MDTypography variant="button" fontWeight="bold" color="info">📅 Joined:</MDTypography>
                     <MDTypography variant="body2">
-                        {new Date(selectedClient.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })} 
-                        {" • "}
-                        {new Date(selectedClient.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(selectedClient.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {" • "}
+                      {new Date(selectedClient.createdAt).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
                     </MDTypography>
                   </MDBox>
 
@@ -306,7 +306,7 @@ export default function useClientTableData() {
             )}
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
-            <Button onClick={() => setSelectedClient(null)} variant="outlined" sx={{ bgcolor: "darkred", color: "#fff", borderRadius: 2 }}>Close</Button>
+            <Button onClick={() => setSelectedClient(null)} variant="outlined" sx={{ bgcolor: "red", color: "#fff", borderRadius: 2 }}>Close</Button>
           </DialogActions>
         </Dialog>
 
