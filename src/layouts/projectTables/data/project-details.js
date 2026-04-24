@@ -249,7 +249,7 @@ function ProjectDetails() {
     let cleanPhone = phone.toString().replace(/\D/g, '');
     if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone; // Ensure country code for India
 
-    const text = `Hello ${project?.clientName || "Client"},\n\nWe have successfully received your payment of ₹${amount} on ${formattedDate} for the project "${project?.projectName}".\nThank you for your prompt payment!\n\n- ${project?.company || "Satya Group"}`;
+    const text = `Hello ${project?.clientName || "Client"},\n\nWe have successfully received your payment of ₹${amount} on ${formattedDate} for the project "${project?.projectName}".\nThank you for your prompt payment!\n\n- ${project?.company}`;
 
     const encodedText = encodeURIComponent(text);
     const waUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
