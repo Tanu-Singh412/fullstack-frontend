@@ -148,15 +148,27 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
       <div style={styles.headerRow}>
         <div style={styles.headerLeft}>
           {data.logo && (
-            <img src={data.logo} alt="Company Logo" style={styles.logo} />
+            <img
+              src={data.logo}
+              alt="logo"
+              style={styles.logo}
+              crossOrigin="anonymous"
+            />
           )}
-          <h1 style={styles.companyTitle}>{data.company}</h1>
         </div>
-        <div style={styles.headerCenter}></div>
+
+        <div style={styles.headerCenter}>
+          <div style={styles.invoiceTitle}>TAX INVOICE</div>
+        </div>
+
         <div style={styles.headerRight}>
-          <h2 style={styles.invoiceTitle}>TAX INVOICE</h2>
-          <p style={styles.metaText}>Invoice #: {data.invoiceNo}</p>
-          <p style={styles.metaText}>Date: {data.date}</p>
+          <div style={styles.metaText}>
+            <b>Invoice No:</b> {data.invoiceNo}
+          </div>
+          <div style={styles.metaText}>
+            <b>Date:</b>{" "}
+            {data.date ? new Date(data.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' }) : ""}
+          </div>
         </div>
       </div>
 
@@ -166,13 +178,22 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
           <div style={styles.infoText}>
             <b>{data.company}</b>
             <br />
-            {data.address}
-            <br />
-            Phone: {data.phone}
-            <br />
-            GSTIN: {data.gstin}
+            {data.address && (
+              <>
+                {data.address}
+                <br />
+              </>
+            )}
+            {data.phone && (
+              <>
+                Phone: {data.phone}
+                <br />
+              </>
+            )}
+            {data.gstin && <>GSTIN: {data.gstin}</>}
           </div>
         </div>
+
         <div style={styles.receiverBox}>
           <div style={styles.sectionTitle}>Bill To</div>
           <div style={styles.infoText}>
@@ -210,10 +231,10 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
               )}
               <td style={{ ...styles.td, textAlign: "center" }}>{item.qty}</td>
               <td style={{ ...styles.td, textAlign: "right" }}>
-                ₹{item.price}
+                Rs. {item.price}
               </td>
               <td style={{ ...styles.td, textAlign: "right" }}>
-                ₹{item.qty * item.price}
+                Rs. {item.qty * item.price}
               </td>
             </tr>
           ))}
@@ -223,23 +244,23 @@ const Invoice = React.forwardRef(({ data, totals }, ref) => {
       <div style={styles.totalBox}>
         <div style={styles.totalRow}>
           <span>Subtotal:</span>
-          <span>₹{totals.subtotal}</span>
+          <span>Rs. {totals.subtotal}</span>
         </div>
         {data.sgst > 0 && (
           <div style={styles.totalRow}>
             <span>SGST ({data.sgst}%):</span>
-            <span>₹{totals.sgst}</span>
+            <span>Rs. {totals.sgst}</span>
           </div>
         )}
         {data.cgst > 0 && (
           <div style={styles.totalRow}>
             <span>CGST ({data.cgst}%):</span>
-            <span>₹{totals.cgst}</span>
+            <span>Rs. {totals.cgst}</span>
           </div>
         )}
         <div style={styles.finalTotal}>
           <span>Total:</span>
-          <span>₹{totals.total}</span>
+          <span>Rs. {totals.total}</span>
         </div>
       </div>
 
@@ -382,7 +403,7 @@ export default function InvoicePage() {
       );
 
       if (matchedClient?.phone) {
-        const message = `Hello ${matchedClient.clientName}, your invoice ${inv.invoiceNo} for ₹${inv.total} is ready. View it here: [Invoice Link]`;
+        const message = `Hello ${matchedClient.clientName}, your invoice ${inv.invoiceNo} for Rs. ${inv.total} is ready. View it here: [Invoice Link]`;
         const whatsappUrl = `https://wa.me/${matchedClient.phone}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
       } else {
@@ -507,31 +528,10 @@ export default function InvoicePage() {
                       </MDTypography>
                     </Box>
                   </MDBox>
-                  <MDTypography variant="caption" sx={{ color: "#3498db", fontWeight: "900", textTransform: "uppercase" }}>
-                    Fixed Branding Enabled
-                  </MDTypography>
                 </MDBox>
               </Grid>
 
               {/* Client Info */}
-              <Grid item xs={12}>
-                <MDBox
-                  sx={{
-                    bgcolor: "#1e293b",
-                    py: 1,
-                    px: 3,
-                    borderRadius: "10px",
-                    mb: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                  }}
-                >
-                  <MDTypography variant="button" fontWeight="bold" color="white" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
-                    Billing Information
-                  </MDTypography>
-                </MDBox>
-              </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
@@ -561,24 +561,6 @@ export default function InvoicePage() {
               </Grid>
 
               {/* Invoice Details */}
-              <Grid item xs={12}>
-                <MDBox
-                  sx={{
-                    bgcolor: "#1e293b",
-                    py: 1,
-                    px: 3,
-                    borderRadius: "10px",
-                    mb: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                  }}
-                >
-                  <MDTypography variant="button" fontWeight="bold" color="white" sx={{ letterSpacing: 1, textTransform: "uppercase" }}>
-                    Invoice Details
-                  </MDTypography>
-                </MDBox>
-              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -633,7 +615,7 @@ export default function InvoicePage() {
                           <TableCell>
                             <TextField fullWidth size="small" type="number" value={item.price} onChange={(e) => updateItem(i, "price", e.target.value)} />
                           </TableCell>
-                          <TableCell>₹{item.qty * item.price}</TableCell>
+                          <TableCell>Rs. {item.qty * item.price}</TableCell>
                           <TableCell>
                             <IconButton color="error" size="small" onClick={() => removeItem(i)}><DeleteIcon /></IconButton>
                           </TableCell>
@@ -650,7 +632,7 @@ export default function InvoicePage() {
                 <Box bgcolor="#f8fafc" p={3} borderRadius={2} border="1px solid #e2e8f0">
                   <Box display="flex" justifyContent="space-between" mb={1}>
                     <Typography variant="body2" color="textSecondary">Subtotal:</Typography>
-                    <Typography variant="body2" fontWeight="bold">₹{totals.subtotal}</Typography>
+                    <Typography variant="body2" fontWeight="bold">Rs. {totals.subtotal}</Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between" mb={1} gap={2}>
                     <Box display="flex" alignItems="center" gap={1}>
@@ -658,7 +640,7 @@ export default function InvoicePage() {
                       <TextField size="small" sx={{ width: 60 }} type="number" value={data.sgst} onChange={(e) => handleInputChange("sgst", e.target.value)} />
                       <Typography variant="caption">%</Typography>
                     </Box>
-                    <Typography variant="body2" fontWeight="bold">₹{totals.sgst}</Typography>
+                    <Typography variant="body2" fontWeight="bold">Rs. {totals.sgst}</Typography>
                   </Box>
                   <Box display="flex" justifyContent="space-between" mb={2} gap={2}>
                     <Box display="flex" alignItems="center" gap={1}>
@@ -666,12 +648,12 @@ export default function InvoicePage() {
                       <TextField size="small" sx={{ width: 60 }} type="number" value={data.cgst} onChange={(e) => handleInputChange("cgst", e.target.value)} />
                       <Typography variant="caption">%</Typography>
                     </Box>
-                    <Typography variant="body2" fontWeight="bold">₹{totals.cgst}</Typography>
+                    <Typography variant="body2" fontWeight="bold">Rs. {totals.cgst}</Typography>
                   </Box>
                   <Divider />
                   <Box display="flex" justifyContent="space-between" mt={2}>
                     <Typography variant="h5" fontWeight="bold" color="dark">Grand Total:</Typography>
-                    <Typography variant="h5" fontWeight="bold" color="success">₹{totals.total}</Typography>
+                    <Typography variant="h5" fontWeight="bold" color="success">Rs. {totals.total}</Typography>
                   </Box>
                 </Box>
               </Grid>
@@ -689,54 +671,28 @@ export default function InvoicePage() {
           {/* ================= SAVED INVOICES ================= */}
           <Card
             sx={{
-              mt: 8,
-              borderRadius: 4,
-              boxShadow: "0px 10px 40px rgba(0,0,0,0.08)",
-              border: "1px solid #f1f5f9",
-              overflow: "visible"
+              mt: 4,
+              p: 4,
+              borderRadius: 3,
+              boxShadow: "0px 4px 20px rgba(0,0,0,0.05)",
             }}
           >
-            <MDBox
-              variant="gradient"
-              bgcolor="dark"
-              borderRadius="lg"
-              coloredShadow="dark"
-              mx={2}
-              mt={-3}
-              p={3}
-              mb={1}
-              textAlign="center"
-            >
-              <MDTypography variant="h5" fontWeight="medium" color="white">
-                Saved Invoices Records
-              </MDTypography>
-              <MDTypography display="block" variant="button" color="white" my={1}>
-                Manage and track your issued invoices
-              </MDTypography>
+            <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+              <MDTypography variant="h5" fontWeight="bold">Saved Invoices Records</MDTypography>
             </MDBox>
-            <Box p={3}>
+            <Box p={0}>
               {/* Search and Filters */}
               <Box display="flex" gap={2} flexWrap="wrap" alignItems="center" mb={4}>
                 <TextField
                   variant="outlined"
                   size="small"
-                  placeholder="Quick search..."
+                  placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  sx={{
-                    bgcolor: "#fff",
-                    borderRadius: 2,
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": { borderColor: "#3b82f6", borderWidth: "2px" },
-                      "&:hover fieldset": { borderColor: "#2563eb" },
-                      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
-                    },
-                    boxShadow: "0 4px 12px rgba(59, 130, 246, 0.1)"
-                  }}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchIcon fontSize="small" sx={{ color: "#3b82f6" }} />
+                        <SearchIcon fontSize="small" />
                       </InputAdornment>
                     ),
                   }}
@@ -746,24 +702,12 @@ export default function InvoicePage() {
                   <Select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    sx={{
-                      borderRadius: 2,
-                      bgcolor: "#f8fafc",
-                      fontWeight: "bold",
-                      fontSize: 13,
-                      color: "#1e293b",
-                      px: 1.5,
-                      py: 0.8,
-                      "& fieldset": { border: "2px solid #e2e8f0" },
-                      "&:hover fieldset": { borderColor: "#3b82f6" },
-                      "& .MuiSelect-icon": { color: "#3b82f6" }
-                    }}
                   >
-                    <MenuItem value="all">📁 All Records</MenuItem>
-                    <MenuItem value="day">📅 Today</MenuItem>
-                    <MenuItem value="month">🗓️ This Month</MenuItem>
-                    <MenuItem value="year">📊 This Year</MenuItem>
-                    <MenuItem value="custom">🔍 Custom Range</MenuItem>
+                    <MenuItem value="all">All Records</MenuItem>
+                    <MenuItem value="day">Today</MenuItem>
+                    <MenuItem value="month">This Month</MenuItem>
+                    <MenuItem value="year">This Year</MenuItem>
+                    <MenuItem value="custom">Custom Range</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -775,9 +719,9 @@ export default function InvoicePage() {
               ) : (
                 <Box>
                   {invoices.length === 0 ? (
-                    <Box textAlign="center" py={10} sx={{ bgcolor: "#f8fafc", borderRadius: 3, border: "1px dashed #e2e8f0" }}>
+                    <Box textAlign="center" py={10}>
                       <MDTypography variant="body2" color="textSecondary" fontWeight="medium">
-                        No matching invoices found in your records.
+                        No matching invoices found.
                       </MDTypography>
                     </Box>
                   ) : (
@@ -789,24 +733,14 @@ export default function InvoicePage() {
                             Header: "Recipient", 
                             accessor: "invoiceName", 
                             width: "30%",
-                            Cell: ({ row }) => (
-                              <Box display="flex" alignItems="center">
-                                <Avatar sx={{ bgcolor: "#eff6ff", color: "#3b82f6", width: 24, height: 24, fontSize: 11, mr: 1, fontWeight: "bold" }}>
-                                  {(row.original.invoiceName || row.original.clientName || "?").charAt(0)}
-                                </Avatar>
-                                <Typography color="#334155" fontWeight="bold" fontSize={13}>
-                                  {row.original.invoiceName || row.original.clientName}
-                                </Typography>
-                              </Box>
-                            )
                           },
                           { 
                             Header: "Date", 
                             accessor: "date", 
                             width: "15%",
                             Cell: ({ value, row }) => (
-                              <Typography color="#64748b" fontSize={11} fontWeight="bold">
-                                {new Date(value || row.original.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })}
+                              <Typography fontSize={13}>
+                                {new Date(value || row.original.createdAt).toLocaleDateString()}
                               </Typography>
                             )
                           },
@@ -815,8 +749,8 @@ export default function InvoicePage() {
                             accessor: "total", 
                             width: "15%",
                             Cell: ({ value }) => (
-                              <Typography fontWeight="bold" color="#16a34a" fontSize={15}>
-                                ₹{value.toLocaleString("en-IN")}
+                              <Typography fontWeight="bold" fontSize={14}>
+                                Rs. {value?.toLocaleString("en-IN")}
                               </Typography>
                             )
                           },
@@ -828,12 +762,7 @@ export default function InvoicePage() {
                               <Box display="flex" gap={1}>
                                 <IconButton
                                   size="small"
-                                  sx={{
-                                    bgcolor: "#f0f9ff",
-                                    color: "#0284c7",
-                                    borderRadius: 2,
-                                    "&:hover": { bgcolor: "#0284c7", color: "#fff" },
-                                  }}
+                                  color="info"
                                   onClick={() => {
                                     const inv = row.original;
                                     setData({
@@ -852,24 +781,14 @@ export default function InvoicePage() {
                                 </IconButton>
                                 <IconButton
                                   size="small"
-                                  sx={{
-                                    bgcolor: "#f0fdf4",
-                                    color: "#16a34a",
-                                    borderRadius: 2,
-                                    "&:hover": { bgcolor: "#16a34a", color: "#fff" },
-                                  }}
+                                  color="success"
                                   onClick={() => handleDownloadExisting(row.original)}
                                 >
                                   <DownloadIcon fontSize="small" />
                                 </IconButton>
                                 <IconButton
                                   size="small"
-                                  sx={{
-                                    bgcolor: "#fef2f2",
-                                    color: "#dc2626",
-                                    borderRadius: 2,
-                                    "&:hover": { bgcolor: "#dc2626", color: "#fff" },
-                                  }}
+                                  color="error"
                                   onClick={() => setDeleteId(row.original._id)}
                                 >
                                   <DeleteIcon fontSize="small" />
