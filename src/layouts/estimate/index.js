@@ -437,55 +437,89 @@ const filteredEstimates = estimates.filter((est) =>
           </Grid>
 
           {/* ================= HISTORY ================= */}
-          <Grid item xs={12}>
-            <Card sx={{ mt: 4, borderRadius: "16px", overflow: "hidden" }}>
-              <MDBox p={3} sx={{ background: "linear-gradient(90deg, #1e293b, #334155)" }}>
-                <MDTypography variant="h5" fontWeight="bold" color="white">Saved Estimates</MDTypography>
-              </MDBox>
-              <MDBox pb={3}>
-                <DataTable
-                  table={{
-                    columns: [
-                      { Header: "Project", accessor: "projectTitle", width: "40%" },
-                      { Header: "Client", accessor: "ownerName", width: "20%" },
-                      { Header: "Amount", accessor: "totalEstimate", width: "20%", Cell: ({ value }) => <MDTypography variant="button" fontWeight="bold" color="dark">Rs. {value?.toLocaleString("en-IN")}</MDTypography> },
-                      {
-                        Header: "Actions",
-                        accessor: "actions",
-                        Cell: ({ row }) => (
-                          <MDBox display="flex" gap={1}>
-                            <IconButton color="info" onClick={() => handleEdit(row.original)} size="small"><EditIcon fontSize="small" /></IconButton>
-                            <IconButton color="error" onClick={() => deleteEstimate(row.original._id)} size="small"><DeleteIcon fontSize="small" /></IconButton>
-                          </MDBox>
-                        ),
-                      },
-                    ],
-                    rows: filteredEstimates,
-                  }}
-                  isSorted={true}
-                  entriesPerPage={{ defaultValue: 5, entries: [5, 10, 15, 20, 25] }}
-                  showTotalEntries={true}
-                  noEndBorder
-                />
-              </MDBox>
-              <MDBox p={2} display="flex" justifyContent="flex-end">
- <TextField
-  placeholder="Search by project, client, amount..."
-  size="small"
-  value={search}
-  onChange={(e) => setSearch(e.target.value)}
-  sx={{ width: 320 }}
-  InputProps={{
-    startAdornment: (
-      <InputAdornment position="start">
-        🔍
-      </InputAdornment>
-    ),
-  }}
-/>
-</MDBox>
-            </Card>
-          </Grid>
+{/* ================= HISTORY ================= */}
+<Grid item xs={12}>
+  <Card sx={{ mt: 4, borderRadius: "16px", overflow: "hidden" }}>
+    
+    {/* HEADER */}
+    <MDBox
+      p={3}
+      sx={{
+        background: "linear-gradient(90deg, #1e293b, #334155)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 2
+      }}
+    >
+      <MDTypography variant="h5" fontWeight="bold" color="white">
+        Saved Estimates
+      </MDTypography>
+
+      {/* ✅ SEARCH BAR */}
+      <TextField
+        placeholder="Search..."
+        size="small"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        sx={{
+          bgcolor: "#fff",
+          borderRadius: "8px",
+          width: { xs: "100%", sm: 250 }
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              🔍
+            </InputAdornment>
+          ),
+        }}
+      />
+    </MDBox>
+
+    {/* TABLE */}
+    <MDBox pb={3}>
+      <DataTable
+        table={{
+          columns: [
+            { Header: "Project", accessor: "projectTitle", width: "40%" },
+            { Header: "Client", accessor: "ownerName", width: "20%" },
+            {
+              Header: "Amount",
+              accessor: "totalEstimate",
+              width: "20%",
+              Cell: ({ value }) => (
+                <MDTypography variant="button" fontWeight="bold" color="dark">
+                  Rs. {value?.toLocaleString("en-IN")}
+                </MDTypography>
+              ),
+            },
+            {
+              Header: "Actions",
+              accessor: "actions",
+              Cell: ({ row }) => (
+                <MDBox display="flex" gap={1}>
+                  <IconButton color="info" onClick={() => handleEdit(row.original)} size="small">
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => deleteEstimate(row.original._id)} size="small">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </MDBox>
+              ),
+            },
+          ],
+          rows: filteredEstimates,
+        }}
+        isSorted={true}
+        entriesPerPage={{ defaultValue: 5, entries: [5, 10, 15, 20, 25] }}
+        showTotalEntries={true}
+        noEndBorder
+      />
+    </MDBox>
+  </Card>
+</Grid>
         </Grid>
       </MDBox>
       <Footer />
