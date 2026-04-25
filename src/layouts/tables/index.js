@@ -29,7 +29,7 @@ function Tables() {
 
               {/* Colored Header */}
               <Box sx={{
-                mx: 2, mt: -3, py: 3, px: 4,
+                mx: 2, py: 3, px: 4,
                 background: "linear-gradient(135deg, #f97316 0%, #ea580c 40%, #16a34a 100%)",
                 borderRadius: "16px",
                 boxShadow: "0 10px 30px rgba(249,115,22,0.35)",
