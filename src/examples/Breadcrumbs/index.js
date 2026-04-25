@@ -31,7 +31,7 @@ function Breadcrumbs({ icon, title, route, light }) {
   const routes = route.slice(0, -1);
 
   return (
-    <MDBox mr={{ xs: 0, xl: 8 }}>
+    <MDBox mr={{ xs: 0, xl: 8 , mt: 5}}>
       <MuiBreadcrumbs
         sx={{
           "& .MuiBreadcrumbs-separator": {
