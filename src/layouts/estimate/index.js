@@ -62,7 +62,7 @@ export default function EstimatePage() {
   const [estimates, setEstimates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editId, setEditId] = useState(null);
-
+const [search, setSearch] = useState("");
   /* ================= FETCH ALL ================= */
   const loadEstimates = async () => {
     setLoading(true);
@@ -165,7 +165,11 @@ export default function EstimatePage() {
     setItems(est.items || [{ sno: 1, desc: "", qty: "", unit: "", rate: "" }]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
+const filteredEstimates = estimates.filter((est) =>
+  `${est.projectTitle} ${est.ownerName} ${est.totalEstimate}`
+    .toLowerCase()
+    .includes(search.toLowerCase())
+);
   /* ================= PDF ================= */
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -456,7 +460,7 @@ export default function EstimatePage() {
                         ),
                       },
                     ],
-                    rows: estimates,
+                    rows: filteredEstimates,
                   }}
                   isSorted={true}
                   entriesPerPage={{ defaultValue: 5, entries: [5, 10, 15, 20, 25] }}
@@ -464,6 +468,22 @@ export default function EstimatePage() {
                   noEndBorder
                 />
               </MDBox>
+              <MDBox p={2} display="flex" justifyContent="flex-end">
+ <TextField
+  placeholder="Search by project, client, amount..."
+  size="small"
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  sx={{ width: 320 }}
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        🔍
+      </InputAdornment>
+    ),
+  }}
+/>
+</MDBox>
             </Card>
           </Grid>
         </Grid>
