@@ -35,7 +35,7 @@ function ProjectTables() {
 
               {/* Colored Header */}
               <Box sx={{
-                mx: 2, mt: 2, py: 3, px: 4,
+                mx: 2, mt: 0, py: 3, px: 4,
                 background: "linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #f97316 100%)",
                 borderRadius: "16px",
                 boxShadow: "0 10px 30px rgba(37,99,235,0.35)",
