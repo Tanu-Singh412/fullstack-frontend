@@ -72,13 +72,7 @@ const routes = [
         icon: <Icon fontSize="small">table_view</Icon>,
       },
 
-      {
-        name: "Add New Project",
-        key: "add-new-project",
-        route: "/projects",
-        component: <Projects />,
-        icon: <Icon fontSize="small">add_circle</Icon>,
-      },
+  
     ],
   },
 
