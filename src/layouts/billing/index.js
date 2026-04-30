@@ -171,7 +171,7 @@ export default function InvoicePage() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox pt={4} pb={3} px={3} sx={{ backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
+      <MDBox pt={4} pb={3} px={3} sx={{ backgroundColor: "#f0f2f6", minHeight: "100vh" }}>
         <Grid container spacing={3}>
           {/* ================= STATS ================= */}
           <Grid item xs={12} md={4}>
